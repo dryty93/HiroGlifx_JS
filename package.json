@@ -1,0 +1,21 @@
+{
+  "name": "hiroglifx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dryty93",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.14.8",
+    "@babel/core": "^7.15.0",
+    "@babel/node": "^7.14.9",
+    "@babel/preset-env": "^7.15.0"
+  },
+  "dependencies": {
+    "FileReader": "^0.10.2",
+    "xmlhttprequest": "^1.8.0"
+  }
+}

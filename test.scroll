@@ -1,0 +1,24 @@
+.Add(){
+    new # a = 2;
+    new # b = 8;
+    write("F");
+    new fn addUp:a,b =
+
+    {
+       new # amt = 2+3;
+       echo amt;
+     };
+       };
+
+.Sub(){
+     new # q = 2-0;
+     new # l = 1; };,
+     .Main()" +
+     {
+        new # m = 3;
+     },
+     .Mul(){
+        new # y = 2*1;
+        new x = 3;
+        };
+
