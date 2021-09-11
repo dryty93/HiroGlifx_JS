@@ -1,6 +1,6 @@
 
 
-//const file = require("File").FileReader;
+
 class Tokenizer {
     constructor(stream) {
 //        this.file = new File()
@@ -67,8 +67,10 @@ class Tokenizer {
                 less_than: "<",
             }
 
-        }
+        };
     };
+
+
 
 
     getSymbols() {
@@ -80,54 +82,7 @@ class Tokenizer {
         return this.total_chars;
     }
 
-    readScroll(){
 
-
-      //  const XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-
-   //     const scroll = new FileReader();
-
-
-      //  let init_stream = scroll.readAsText("test.scroll").files[0];
-    //    console.log(init_stream);
-
-    };
-
-    getChars() {
-        //Converts stream into single chars or keywords
-        let position = 0;
-        const total_chars = this.getAllChars();
-  //      console.log(total_chars)
-        const stream = this.stream;
-        const symbols = this.symbols;
-      //  console.log(stream.length)
-        while (position < stream.length) {
-            //console.log(this.symbols.keywords)
-            for (const key in symbols.keywords) {
-                let space_needed = symbols.keywords[key].length;
-               // console.log(stream[position] + stream[position+1])
-                if (key.toString().includes(
-                    (stream[position] + stream[position+1]))) {
-                    if (key.toString().includes(
-                    )) {
-                     //   console.log(total_chars[position])
-                        total_chars[position] = key;
-                      //  console.log(total_chars)
-                    }
-                    //   this.total_chars[position] = stream.slice(posit);
-                    position += space_needed;
-
-                } else {
-                    total_chars[position] = stream[position];
-
-                }
-            }
-
-            position += 1;
-        }
-
-        return total_chars
-    }
     findType(tk){
         const type_table = {
 
@@ -187,103 +142,19 @@ class Tokenizer {
         return type_table;
     }
 
-    token_match() {
-        const stream = this.getChars();
+    token_match(reader) {
         const valid_tokens = [];
         const symbols = this.symbols;
         const syntax =Object.values(symbols.syntax);
         const keywords = Object.values(symbols.keywords);
         const operations = Object.values(symbols.operations);
         const numbers = Object.values(symbols.numbers);
-        const control_flow = Object.values(symbols.control_flow)
+        const control_flow = Object.values(symbols.control_flow);
         let tokens = 0;
         let stream_pos= 0;
         let symbol_table = {};
         let holder = [];
         let bp_name = "";
-
-        while (stream.length >= tokens) {
-            //  if (syntax[tokens] === stream[tokens]) {
-
-            for (const items in keywords){
-                if(keywords[items]=== stream[tokens]){
-                    valid_tokens.push(keywords[items]);
-                    let type = this.findType(keywords[items]);
-                    symbol_table.content= {
-                        "valid_tokens": valid_tokens,
-                        "type": type.keywords,
-                        "name": keywords[items]
-
-                    };
-                }
-            }
-
-
-            for(const items in syntax) {
-                if (syntax[items] === stream[tokens]) {
-                    valid_tokens.push(syntax[items]);
-                 //   console.log(syntax[items]);
-                    symbol_table.content= {
-                        "valid_tokens": valid_tokens,
-                        "type": syntax,
-                 }}
-
-            }
-
-            for(const items in control_flow) {
-                if (control_flow[items] === stream[tokens]) {
-                    valid_tokens.push(control_flow[items]);
-                    let type = this.findType(control_flow[items]);
-                 //   console.log(type)
-
-                }
-
-            }
-            for (let i =0; i < numbers.length; i++){
-                //console.log(numbers[i],stream[tokens])
-                if(numbers[i].toString() === (stream[tokens]))
-                {
-                    valid_tokens.push(numbers[i]);
-                   // let type = this.findType(control_flow[i]);
-
-                };
-            }
-
-            for (const items in operations){
-                //  console.log(operations[items])
-                if(operations[items]===stream[tokens]){
-                    valid_tokens.push(operations[items]);
-                    let type = this.findType(control_flow[items]);
-
-                }
-            }
-
-
-            for (let i = 0; i < this.getChars().length; i++){
-                if ("." === stream[i]){
-                    //console.log(stream.toString().split(".").toString().split("("))
-
-
-                    bp_name = stream.toString().split("(")[0].split(".")[1];
-                    bp_name = bp_name.split(",").toString().trim();
-
-                }
-
-             //   console.log(this.getChars())
-            }
-
-
-            tokens += 1;
-            if(stream_pos <= stream.length){
-                stream_pos = stream.length-1
-            }
-            valid_tokens.push(holder);
-
-        }
-
-
-             bp_name = stream.toString().split("(")[0].split(".")[1];
-
 
 
         for (let n =0;n< bp_name; n++){
@@ -295,7 +166,7 @@ class Tokenizer {
                 }
                 else {
                     holder += char;
-                    console.log(holder)
+                    //console.log(holder)
                 }
                 if (holder.length <= bp_name.length) {
                     holder += char;

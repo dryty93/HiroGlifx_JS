@@ -1,108 +1,79 @@
-//const fs = require("FileReader");
+//
 //const FR =  FileReader;
 //FR.readAsText(".test.scroll")
 //console.log(FR);
 const tk = require('./Tokenizer.js');
 const scope = require('./Scope.js');
-//const reader = require('./fs')fs.FileReader;
+const reader = require('./Reader');
 class Parser {
     constructor() {
 
-        this.tokenizer = new tk.Tokenizer(
-            ".Add(){" +
-                "new # a = 2; " +
-                "new # b = 8; " +
-                "new fn addUp = (a,b)=> " +
-                    "new # amt = 2+3;" +
-                    "echo amt;" +
-
-            "  };" +
-
-            ".Sub(){" +
-            "new # q = 2-0;" +
-            "new # l = 1; };," +
-            ".Main()" +
-            "{" +
-            "new # m = 3;" +
-            "}," +
-            ".Mul(){" +
-            "new # y = 2*1;" +
-            " new x = 3;");
+        this.tokenizer = new tk.Tokenizer(reader.scroll);
+        this.scroll = new tk.Tokenizer();
         this.scope_list = [];
-        this.token_list = this.tokenizer.token_match();
+        this.token_list = this.tokenizer.token_match(reader.scroll);
         this.exp_list = []
         this.the_scope = Object.create(scope.Scope);
     }
 
-
-
-
-    structure_code(){
-       // (this.tokenizer.readScroll());
-        const stream = this.tokenizer.stream;
-        let statement_index = [];
+    structure_code() {
+        // (this.tokenizer.readScroll());
+        const stream = Object.create(reader.Reader).scroll;
         let scope_list = this.scope_list;
 
 
-        let statement_amt =stream.toString().split("()").length;
+        let class_scopes =stream.toString().split("()").length;
 
-       for(let items = 0; items < statement_amt; items ++) {
+               for(let items = 0; items < class_scopes; items ++) {
 
-           const newScope = Object.create(scope.Scope);
-           newScope.scope_name = stream.toString().split(".")[items].toString();
-           try {
+                   const class_scope = Object.create(scope.Scope);
+                       let bd = stream.toString().split("()")[items].split("new").toString().split('.')[1];
 
+                        class_scope.scope_name = bd;
 
-               newScope.body = newScope.scope_name.toString().split("{")[1].split(";").toString()
-                   .replace("}"," ").replace(","," ");
-           }
-           catch (e) {
+                   bd = stream.toString().split("break")[items].toString().split(".")[1]
+                    class_scope.body = bd;
+                   //console.log(class_scope);
+                //   console.log(class_scope.scope_name);
 
-           }
-           newScope.scope_name = newScope.scope_name.split("){")[0].split('(')[0];
+//                   newScope.scope_name = newScope.scope_name.toString().split(")")[0].toString().split('(')[0];
 
-           if( newScope.body && newScope.scope_name ){
+                        if (class_scope.scope_name && class_scope.body) {
+                            class_scope.scope_name = class_scope.body.split("()")[0]
+                            class_scope.body = class_scope.body.split("()")[1]
+                            scope_list.push(class_scope);
+                        }
 
-               scope_list.push(newScope);
-           }
-       }
-
-
-        for(let tk = 0; tk < scope_list.length; tk++) {
-          //  console.log(scope_list[tk].body)
+               }
 
 
+                for(let tk = 0; tk < stream.length; tk++) {
 
-            //Blueprint Declaration
-            if (stream[tk] === ".") {
-                 scope_list[tk].scope_types.data_structure.is_bp = true;
-               //  scope_list[tk].scope_types.data_structure.name = true;
-                // console.log(stream.split("(){")[tk])
 
+
+                    //Blueprint Declaration
+                    if (stream[tk] === ".") {
+//                         scope_list[0].scope_types.blueprint = true;
+//                         scope_list[tk].scope_types.data_structure.name = true;
+
+                    }
+
+                    //End of Statement
+                    if (stream[tk] === ";") {
+
+                        let statement = Object.create(Statement);
+                        statement.type.block = statement.type;
+                       // console.log(statement.type.block)
+                       //console.log( this.statement_list,'oij')
+                    }
+
+                };
+               // const class_scope = scope.Scope;
+                //class_scope.scope_name = this.tokenizer.token_match()[0];
+                //class_scope.body = this.scope_list[0];
+
+                return scope_list;
             }
-
-            //End of Statement
-            if (stream[tk] === ";") {
-
-                let statement = Object.create(Statement);
-                statement.type.block = statement.type;
-                let block = this.token_list[tk];
-              //  console.log(scope_list[tk].body);
-                statement_index += block;
-             //  console.log( this.statement_list,'oij')
-            }
-
-        };
-       // const class_scope = scope.Scope;
-        //class_scope.scope_name = this.tokenizer.token_match()[0];
-        //class_scope.body = this.scope_list[0];
-
-        return this.scope_list;
-    }
-
-
-
-
 
 };
 Statement= {
@@ -110,10 +81,11 @@ Statement= {
         name: "name",
         evals_to: 0,
         block: function (inp) {
-            console.log('k')
 
         },
 
     },
 };
+const st = new Parser().structure_code();
+console.log(st)
 module.exports ={Parser};
