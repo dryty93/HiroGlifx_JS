@@ -1,24 +1,28 @@
-.Add(){
+new .Main = ()
+    new # dig = 44;
+    break;
+new . Add = ()
     new # a = 2;
     new # b = 8;
     write("F");
-    new fn addUp:a,b =
 
-    {
+    new fn addUp =
        new # amt = 2+3;
-       echo amt;
-     };
-       };
+       echo(amt);
+   break;
 
-.Sub(){
+new . Sub = ()
      new # q = 2-0;
-     new # l = 1; };,
-     .Main()" +
-     {
-        new # m = 3;
-     },
-     .Mul(){
-        new # y = 2*1;
-        new x = 3;
-        };
+     new # l = 1;
+     break;
+
+new . Divide = ()
+     new # ii = 2/0;
+     new # gg = 1;
+     break;
+
+new .Mul = ()
+    new # y = 2*1;
+        new # x = 3;
+        break;
 
