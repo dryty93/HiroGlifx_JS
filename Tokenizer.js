@@ -3,7 +3,6 @@
 
 class Tokenizer {
     constructor(stream) {
-//        this.file = new File()
         this.stream = stream;
         this.total_chars = [];
         this.symbols = {
@@ -157,8 +156,8 @@ class Tokenizer {
         let bp_name = "";
 
 
-        for (let n =0;n< bp_name; n++){
-            if (bp_name[n].toString() !== ","){
+        for (let n =0;n< reader.length; n++){
+            if (bp_name[n].toString() === ""){
                 let char= bp_name[n];
                 if (!bp_name.match(",").input.match(/^[0-9a-z]+$/)){
                     holder += "";
@@ -166,7 +165,7 @@ class Tokenizer {
                 }
                 else {
                     holder += char;
-                    //console.log(holder)
+                    console.log(holder)
                 }
                 if (holder.length <= bp_name.length) {
                     holder += char;

@@ -1,12 +1,19 @@
 new .Main = ()
-    new # dig = 44;
+    new # digit = 44+3;
+    new # yt =digit+2;
+    new & add = add;
+    new & sub = sub;
+    is 26 < 3 ?
+        write(g);
+        write("gr");
+        new # er = 4;
     break;
+
 new . Add = ()
     new # a = 2;
     new # b = 8;
     write("F");
-
-    new fn addUp =
+    new : addUp =
        new # amt = 2+3;
        echo(amt);
    break;
@@ -17,7 +24,7 @@ new . Sub = ()
      break;
 
 new . Divide = ()
-     new # ii = 2/0;
+     new # ii = 2/2;
      new # gg = 1;
      break;
 

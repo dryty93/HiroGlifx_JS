@@ -11,7 +11,6 @@ class Parser {
         this.tokenizer = new tk.Tokenizer(reader.scroll);
         this.scroll = new tk.Tokenizer();
         this.scope_list = [];
-        this.token_list = this.tokenizer.token_match(reader.scroll);
         this.exp_list = []
         this.the_scope = Object.create(scope.Scope);
     }
@@ -87,5 +86,5 @@ Statement= {
     },
 };
 const st = new Parser().structure_code();
-console.log(st)
+//console.log(st)
 module.exports ={Parser};
