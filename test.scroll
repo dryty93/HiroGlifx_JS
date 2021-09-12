@@ -15,7 +15,7 @@ new . Add = ()
     write("F");
     new : addUp =
        new # amt = 2+3;
-       echo(amt);
+       echo(n);
    break;
 
 new . Sub = ()

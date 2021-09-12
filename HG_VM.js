@@ -131,7 +131,7 @@ for (let i = 0; i < new_HGVM.body().length; i++) {
 
     for (let items = 0; new_HGVM.nested_list.length > items; items++) {
         if (new_HGVM.nested_list[items].parent.toString() === "Main") {
-        //    console.log(new_HGVM.nested_list[items].name)//,new_HGVM.scopes)
+            console.log(new_HGVM.nested_list[items])//,new_HGVM.scopes)
         }
         else {
           //  console.log(new_HGVM.nested_list[items].name,'erogep')
@@ -139,4 +139,4 @@ for (let i = 0; i < new_HGVM.body().length; i++) {
         }
     }
 
-console.log(new_HGVM.nested_list);
+//console.log(new_HGVM.nested_list);
