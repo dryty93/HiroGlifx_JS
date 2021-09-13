@@ -3,16 +3,16 @@
 const DeadSeaScrolls = {
 
     assignment :{
-        data_struct_name: function (data_struct_unformated) {
+        data_struct_val: function (data_struct_unformated) {
             try {
-                return data_struct_unformated.split("new")
+                return data_struct_unformated.split("new").join("")
             }
             catch (e) {
              //   console.log(e)
             }
         },
-        data_struct_val: function (data_struct_unformated) {
-            return data_struct_unformated.toString().split("new").toString().split("=")
+        data_struct_name: function (data_struct_unformated) {
+            return data_struct_unformated.toString().split("new").toString().split("=")[0]
 
         },
 

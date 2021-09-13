@@ -1,7 +1,7 @@
 //
 //const FR =  FileReader;
 //FR.readAsText(".test.scroll")
-//console.log(FR);
+;
 const tk = require('./Tokenizer.js');
 const scope = require('./Scope.js');
 const reader = require('./Reader');
@@ -11,7 +11,6 @@ class Parser {
         this.tokenizer = new tk.Tokenizer(reader.scroll);
         this.scroll = new tk.Tokenizer();
         this.scope_list = [];
-        this.token_list = this.tokenizer.token_match(reader.scroll);
         this.exp_list = []
         this.the_scope = Object.create(scope.Scope);
     }
@@ -33,11 +32,6 @@ class Parser {
 
                    bd = stream.toString().split("break")[items].toString().split(".")[1]
                     class_scope.body = bd;
-                   //console.log(class_scope);
-                //   console.log(class_scope.scope_name);
-
-//                   newScope.scope_name = newScope.scope_name.toString().split(")")[0].toString().split('(')[0];
-
                         if (class_scope.scope_name && class_scope.body) {
                             class_scope.scope_name = class_scope.body.split("()")[0]
                             class_scope.body = class_scope.body.split("()")[1]
@@ -63,8 +57,6 @@ class Parser {
 
                         let statement = Object.create(Statement);
                         statement.type.block = statement.type;
-                       // console.log(statement.type.block)
-                       //console.log( this.statement_list,'oij')
                     }
 
                 };
@@ -87,5 +79,5 @@ Statement= {
     },
 };
 const st = new Parser().structure_code();
-console.log(st)
+
 module.exports ={Parser};
