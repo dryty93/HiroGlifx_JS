@@ -2,11 +2,14 @@ new .Main = ()
     new # digit = 44+3;
     new # yt =digit+2;
     new & add = add;
-    new & sub = sub;
-    is 26 < 3 ?
+     is 26 < 3 ?
+            write(g);
+            write("gr");
+            new # er = 4;
+    is 2 < 3 ?
         write(g);
-        write("gr");
-        new # er = 4;
+        write("e");
+        new # gew = 3;
     break;
 
 new . Add = ()

@@ -165,7 +165,7 @@ class Tokenizer {
                 }
                 else {
                     holder += char;
-                    console.log(holder)
+                    //console.log(holder)
                 }
                 if (holder.length <= bp_name.length) {
                     holder += char;

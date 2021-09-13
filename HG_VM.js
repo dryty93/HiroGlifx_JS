@@ -74,27 +74,28 @@ for (let i = 0; i < new_HGVM.body().length; i++) {
 
 
                 for (let sc = 0; sc < parser.scope_list.length; sc++) {
-                        if (new_HGVM.nested_scopes.type.toString().match("&")) {
-                            if(parser.scope_list[sc].scope_name.split("=")[0].toString().toLocaleLowerCase()===
-                            new_HGVM.nested_scopes.name){
-                                new_HGVM.nested_scopes.val = new_HGVM.body()[sc]
-                            }
+                    if (new_HGVM.nested_scopes.type.toString().match("&")) {
+                        if (parser.scope_list[sc].scope_name.split("=")[0].toString().toLocaleLowerCase() ===
+                            new_HGVM.nested_scopes.name) {
+                            new_HGVM.nested_scopes.val = new_HGVM.body()[sc]
                         }
+                    }
                     new_HGVM.nested_scopes.nested_obj = {
                         name: new_HGVM.nested_scopes.name,
                         type: new_HGVM.nested_scopes.type,
                         parent: new_HGVM.nested_scopes.parent,
                         val: new_HGVM.nested_scopes.val
                     };
-
-
                 }
+
+
 
                 if (statement[s_index].toString().match("is")) {
                     new_HGVM.nested_scopes.type = "?";
                     new_HGVM.nested_scopes.name = "is";
 
                     let exp = statement[s_index].toString().split("?")[0].toString().split("is")[1].toString()
+
                     let isTrrue = eval(exp);
                     let exps_exec = [];
                     let exp_to_exec = statement.toString().split("?")[1].split(";")
@@ -103,13 +104,12 @@ for (let i = 0; i < new_HGVM.body().length; i++) {
 
                         if (exp_to_exec[exp].length > 0) {
                             exps_exec.push(exp_to_exec[exp])
+
                             //   exp_to_exec.splice(exp)
                         }
                     }
                     new_HGVM.nested_scopes.val = isTrrue;
                     new_HGVM.nested_scopes.parent = new_HGVM.scopes[i].scope_name;
-
-
                     new_HGVM.nested_scopes.nested_obj = {
                         name: new_HGVM.nested_scopes.name,
                         type: new_HGVM.nested_scopes.type,
@@ -117,7 +117,6 @@ for (let i = 0; i < new_HGVM.body().length; i++) {
                         val: new_HGVM.nested_scopes.val,
                         exp_to_execute: exps_exec
                     };
-                    new_HGVM.nested_list.push(new_HGVM.nested_scopes.nested_obj)
 
 
 
@@ -129,14 +128,6 @@ for (let i = 0; i < new_HGVM.body().length; i++) {
         }
         //
 
-    for (let items = 0; new_HGVM.nested_list.length > items; items++) {
-        if (new_HGVM.nested_list[items].parent.toString() === "Main") {
-            console.log(new_HGVM.nested_list[items])//,new_HGVM.scopes)
-        }
-        else {
-          //  console.log(new_HGVM.nested_list[items].name,'erogep')
+console.log(new_HGVM.nested_list)
 
-        }
-    }
-
-//console.log(new_HGVM.nested_list);
+module.exports ={new_HGVM};
