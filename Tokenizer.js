@@ -156,31 +156,10 @@ class Tokenizer {
         let bp_name = "";
 
 
-        for (let n =0;n< reader.length; n++){
-            if (bp_name[n].toString() === ""){
-                let char= bp_name[n];
-                if (!bp_name.match(",").input.match(/^[0-9a-z]+$/)){
-                    holder += "";
-
-                }
-                else {
-                    holder += char;
-                    console.log(holder)
-                }
-                if (holder.length <= bp_name.length) {
-                    holder += char;
-
-               //     console.log(holder.length, n,bp_name.length)
-                }
-
-
-
-            }
-        //console.log(holder)
-        }
-
            valid_tokens[0] = holder;
+        console.log(holder)
         return valid_tokens;
     }
 }
+
 module.exports ={Tokenizer};

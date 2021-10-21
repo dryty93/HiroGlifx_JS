@@ -1,25 +1,20 @@
-//
-//const FR =  FileReader;
-//FR.readAsText(".test.scroll")
-//console.log(FR);
-const tk = require('./Tokenizer.js');
+
 const scope = require('./Scope.js');
 const reader = require('./Reader');
 class Parser {
     constructor() {
-
-        this.tokenizer = new tk.Tokenizer(reader.scroll);
-        this.scroll = new tk.Tokenizer();
         this.scope_list = [];
-        this.exp_list = []
         this.the_scope = Object.create(scope.Scope);
+        this.import_mods = []
     }
 
-    structure_code() {
-        // (this.tokenizer.readScroll());
+
+    structure_code()
+    {
+
+
         const stream = Object.create(reader.Reader).scroll;
         let scope_list = this.scope_list;
-
 
         let class_scopes =stream.toString().split("()").length;
 
@@ -29,17 +24,12 @@ class Parser {
                        let bd = stream.toString().split("()")[items].split("new").toString().split('.')[1];
 
                         class_scope.scope_name = bd;
-
-                   bd = stream.toString().split("break")[items].toString().split(".")[1]
+                        //let imports = this.imported_modules();
+                   bd = stream.toString().split("break")[items].toString().split(".")[1];
                     class_scope.body = bd;
-                   //console.log(class_scope);
-                //   console.log(class_scope.scope_name);
-
-//                   newScope.scope_name = newScope.scope_name.toString().split(")")[0].toString().split('(')[0];
-
                         if (class_scope.scope_name && class_scope.body) {
-                            class_scope.scope_name = class_scope.body.split("()")[0]
-                            class_scope.body = class_scope.body.split("()")[1]
+                            class_scope.scope_name = class_scope.body.split("()")[0];
+                            class_scope.body = class_scope.body.split("()")[1].toString();
                             scope_list.push(class_scope);
                         }
 
@@ -57,22 +47,59 @@ class Parser {
 
                     }
 
+                    if (stream[tk] === "//"){
+                        tk+=1
+                        console.log(tk)
+                    }
+
                     //End of Statement
                     if (stream[tk] === ";") {
 
                         let statement = Object.create(Statement);
                         statement.type.block = statement.type;
-                       // console.log(statement.type.block)
-                       //console.log( this.statement_list,'oij')
                     }
 
                 };
+
+
                // const class_scope = scope.Scope;
                 //class_scope.scope_name = this.tokenizer.token_match()[0];
                 //class_scope.body = this.scope_list[0];
 
                 return scope_list;
             }
+
+    imported_modules (){
+        let module_list = [];
+
+
+            if (this.structure_code()[0].body.split("I").toString().split(";")[0].toString().split("=")[0].replace(",,","") === "imports") {
+              //  console.log(this.structure_code())
+                const new_reader = Object.create(reader.Reader);
+                let mod_names  = this.structure_code()[0].body.split("&").toString().split(";")[0].toString().split("=")[1].toString().split("~")
+                for (let items = 0; items < mod_names.length;items++){
+                    let imported_module = new_reader.file(mod_names[items].toString() +".scroll")
+                    module_list.push({
+                       name: mod_names[items],
+                        imported_as: "",
+                        body: imported_module.split(")")[1],
+                        parent:"Main",
+                    })
+
+
+                   //  this.scope_list[0].body += imported.imports.toString() + " "+ imported.body
+
+
+
+            }
+        }
+        return module_list;
+
+    }
+
+
+
+
 
 };
 Statement= {
@@ -85,6 +112,6 @@ Statement= {
 
     },
 };
-const st = new Parser().structure_code();
-//console.log(st)
+const st = new Parser();
+//console.log(st.imported_modules())
 module.exports ={Parser};
