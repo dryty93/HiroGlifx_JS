@@ -1,38 +1,12 @@
-new .Main = ()
-    new # digit = 44+3;
-    new # yt =digit+2;
-    new & add = add;
-     is 26 < 3 ?
-            write(g);
-            write("gr");
-            new # er = 4;
-    is 2 < 3 ?
-        write(g);
-        write("e");
-        new # gew = 3;
+
+Main is the scope
+
+
+ .Main = ()
+    I imports = User~Server;
+    & buyer[late~pass~em~19] = User;
+    & wsgi[30~1270008000] = Server;
+    # r = 3;
+    $ a = 'de';
     break;
-
-new . Add = ()
-    new # a = 2;
-    new # b = 8;
-    write("F");
-    new : addUp =
-       new # amt = 2+3;
-       echo(n);
-   break;
-
-new . Sub = ()
-     new # q = 2-0;
-     new # l = 1;
-     break;
-
-new . Divide = ()
-     new # ii = 2/2;
-     new # gg = 1;
-     break;
-
-new .Mul = ()
-    new # y = 2*1;
-        new # x = 3;
-        break;
 

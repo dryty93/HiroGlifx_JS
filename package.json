@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "FileReader": "^0.10.2",
+    "tailwindcss": "^2.2.15",
     "xmlhttprequest": "^1.8.0"
   }
 }

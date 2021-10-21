@@ -1,0 +1,13 @@
+.User = ()
+    [$username;
+     $password;
+     $email;
+     #age;]
+     : login<a~b~c> = [
+        echo:a+b;]
+     : logout<a~b~c> =echo:a+b;
+
+   break;
+
+
+
