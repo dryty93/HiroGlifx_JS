@@ -30,10 +30,29 @@ This project represents a unique experiment in human-readable, symbolic programm
 
    break;
 
+.Server = ()
+    [#port;
+     $host;]
+   : start_server= echo(K) ;
+
+break;
+
+ .Main = ()
+    I imports = User~Server;
+    & wsgi[30~1270008000] = Server;
+    & buyer[late~pass~em~19] = User;
+    # r = 3+2;
+    $ a = 'de';
+    break;
+
 ```
 
-This scroll compiles into valid JavaScript and executes through the HiroGlifx VM.
+This scroll imports two classes from separate files and executes through the HiroGlifx VM. The resulting output is a json tree as shown below:
 
+```
+[{"name":"Iimports","val":"User~Server","type":".","parent":"User~Server"},{"name":"&wsgi","val":{"0":"#port=30","1":",$host=1270008000","name":"Server","imported_as":"&wsgi","body":",[#port;,$host;],:start_server=echo(K","parent":"Main","value":["30","1270008000]"],"look_up":{"key":["#port","$host",""],"params":[{"key_name":"#port","value":"30"},{"key_name":"$host","value":"1270008000]"}]}},"type":"&","parent":"Server","vals":["30","1270008000"]},{"name":"&buyer","val":{"0":"#port=30","1":",$host=1270008000","2":"$username=late","3":",$password=pass","name":"User","imported_as":"&buyer","body":",[$username;,$password;,$email;,#age;],:login=[,echo:a+b;],:logout=echo:a+b;,,break;,,,,","parent":"Main","value":["late","pass","em","19]"],"look_up":{"key":["$username","$password","$email","#age",""],"params":[{"key_name":"$username","value":"late"},{"key_name":"$password","value":"pass"},{"key_name":"$email","value":"em"},{"key_name":"#age","value":"19]"}]}},"type":"&","parent":"User","vals":["late","pass","em","19"]},{"name":"#r","val":5,"type":"#","parent":"Main"},{"name":"$a","val":"de","type":"$","parent":"Main"},{"name":"[object Object]","type":"[","parent":"Main"},{"name":"[object Object]","type":"[","parent":"Main"}]
+
+```
 ---
 
 ## 🗂️ Project Structure
