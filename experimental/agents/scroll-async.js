@@ -70,7 +70,7 @@ class AsyncRuntime {
       await this.memory.set(name,values[0],values[1]);return values[1];
      }
      const child=instances.get(node.target);if(!child)throw Error('Unknown agent instance '+node.target);
-     return this.invoke(child.blueprint,node.method,values,depth+1,child);
+     return this.invoke(child.blueprint,node.method,values,depth+1,child,effectivePermissions);
     }
    }
    throw Error('Unsupported async expression '+node.type);
