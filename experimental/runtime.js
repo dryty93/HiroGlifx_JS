@@ -17,7 +17,13 @@ class Runtime {
     case '<':return a<b;case '>':return a>b;case '<=':return a<=b;case '>=':return a>=b;
    }
   }if(e.type==='Call'){const target=instances.get(e.target);if(!target)throw Error('Unknown agent instance '+e.target);return this.invoke(target.blueprint,e.method,e.args.map(evaluate),depth+1,target);}throw Error('Unknown expression '+e.type);};
-  for(const s of bp.body){if(s.type==='Import'){for(const n of s.names)if(!this.blueprints.has(n))throw Error('Missing import '+n);}else if(s.type==='Instance'){if(!this.blueprints.has(s.blueprint))throw Error('Unknown blueprint '+s.blueprint);if(!instances.has(s.name))instances.set(s.name,{blueprint:s.blueprint,vars:new Map(),instances:new Map()});}else if(s.type==='Assign')vars.set(s.name,evaluate(s.value));else if(s.type==='Method')methods.set(s.name,s);}
+  for(const s of bp.body){if(s.type==='Import'){for(const n of s.names)if(!this.blueprints.has(n))throw Error('Missing import '+n);}else if(s.type==='Instance'){if(!this.blueprints.has(s.blueprint))throw Error('Unknown blueprint '+s.blueprint);if(!instances.has(s.name)){
+   const child=this.blueprints.get(s.blueprint);
+   const params=child.params||[];
+   if(params.length!==s.args.length)throw Error('Constructor argument count mismatch for '+s.blueprint);
+   const state=new Map();params.forEach((name,i)=>state.set(name,evaluate(s.args[i])));
+   instances.set(s.name,{blueprint:s.blueprint,vars:state,instances:new Map()});
+  }}else if(s.type==='Assign')vars.set(s.name,evaluate(s.value));else if(s.type==='Method')methods.set(s.name,s);}
   const fn=methods.get(method);if(!fn)throw Error('Unknown method '+blueprint+'.'+method);if(fn.params.length!==args.length)throw Error('Argument count mismatch for '+blueprint+'.'+method);
   fn.params.forEach((p,i)=>vars.set(p,args[i]));this.trace.push({agent:blueprint,method,depth});
   let steps=0;
