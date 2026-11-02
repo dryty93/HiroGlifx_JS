@@ -7,7 +7,7 @@ class AsyncRuntime {
   this.runtime=runtime;this.models=models;this.provider=provider;this.tools=tools;this.permissions=permissions;this.memory=memory;this.steps=0;this.active=0;
  }
  async invoke(name,method='run',args=[],depth=0,instance=null){
-  const rt=this.runtime;if(++this.steps>rt.maxSteps)throw Error('Maximum execution steps exceeded');if(depth>=rt.maxDepth)throw Error('Maximum agent call depth exceeded');
+  const rt=this.runtime;const started=Date.now();rt.trace.push({event:'start',agent:name,method,depth});if(++this.steps>rt.maxSteps)throw Error('Maximum execution steps exceeded');if(depth>=rt.maxDepth)throw Error('Maximum agent call depth exceeded');
   const bp=rt.blueprints.get(name);if(!bp)throw Error('Unknown blueprint '+name);
   const config=rt.configuration(name),vars=instance?.vars||new Map(),instances=instance?.instances||new Map();
   const lookup=(env,key)=>{for(let e=env;e;e=e.parent)if(e.values.has(key))return e.values.get(key);throw Error('Undefined variable '+key);};
@@ -102,9 +102,15 @@ class AsyncRuntime {
    }
    return {returned:false};
   };
-  const output=(await exec(fn.body,local)).value;
-  if(config.output!==undefined)validate(output,config.output,'output');
-  return output;
+  try{
+   const output=(await exec(fn.body,local)).value;
+   if(config.output!==undefined)validate(output,config.output,'output');
+   rt.trace.push({event:'complete',agent:name,method,depth,durationMs:Date.now()-started});
+   return output;
+  }catch(error){
+   rt.trace.push({event:'failed',agent:name,method,depth,errorName:error.name,durationMs:Date.now()-started});
+   throw error;
+  }
  }
 }
 module.exports={AsyncRuntime};
