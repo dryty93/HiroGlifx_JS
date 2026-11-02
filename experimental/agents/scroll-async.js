@@ -7,12 +7,12 @@ class AsyncRuntime {
   this.runtime=runtime;this.models=models;this.provider=provider;this.tools=tools;this.permissions=permissions;this.memory=memory;this.steps=0;this.active=0;this.signal=signal;this.deadline=timeoutMs===undefined?Infinity:Date.now()+timeoutMs;
  }
  checkActive(){if(this.signal?.aborted)throw Error('Agent execution cancelled');if(Date.now()>this.deadline)throw Error('Agent execution deadline exceeded');}
- async invoke(name,method='run',args=[],depth=0,instance=null){
+ async invoke(name,method='run',args=[],depth=0,instance=null,grants=this.permissions){
   this.checkActive();
   const rt=this.runtime;const started=Date.now();rt.trace.push({event:'start',agent:name,method,depth});if(++this.steps>rt.maxSteps)throw Error('Maximum execution steps exceeded');if(depth>=rt.maxDepth)throw Error('Maximum agent call depth exceeded');
   const bp=rt.blueprints.get(name);if(!bp)throw Error('Unknown blueprint '+name);
   const config=rt.configuration(name),vars=instance?.vars||new Map(),instances=instance?.instances||new Map();
-  const previousPermissions=this.permissions;this.permissions=previousPermissions.filter(p=>(config.tools||[]).includes(p));
+  const effectivePermissions=grants.filter(p=>(config.tools||[]).includes(p));
   const lookup=(env,key)=>{for(let e=env;e;e=e.parent)if(e.values.has(key))return e.values.get(key);throw Error('Undefined variable '+key);};
   const assign=(env,key,value)=>{for(let e=env;e;e=e.parent)if(e.values.has(key)){e.values.set(key,value);return;}env.values.set(key,value);};
   const root={values:vars,parent:null};
@@ -49,14 +49,14 @@ class AsyncRuntime {
       const tasks=values[0].map(task=>{
        if(!task||typeof task!=='object'||typeof task.agent!=='string'||typeof task.method!=='string'||!Array.isArray(task.args))throw Error('Invalid parallel task');
        const child=instances.get(task.agent);if(!child)throw Error('Unknown agent instance '+task.agent);
-       return this.invoke(child.blueprint,task.method,task.args,depth+1,child);
+       return this.invoke(child.blueprint,task.method,task.args,depth+1,child,effectivePermissions);
       });
       return Promise.all(tasks);
      }
      if(node.target==='tool'&&node.method==='call'){
       if(!this.tools)throw Error('Tool registry required');
       if(values.length!==2||typeof values[0]!=='string')throw Error('tool.call requires name and arguments');
-      const allowed=(config.tools||[]).filter(x=>this.permissions.includes(x));
+      const allowed=(config.tools||[]).filter(x=>effectivePermissions.includes(x));
       this.checkActive();const output=await this.tools.call(values[0],values[1],{allowed,signal:this.signal});this.checkActive();return output;
      }
      if(node.target==='memory'&&node.method==='get'){
@@ -110,10 +110,8 @@ class AsyncRuntime {
    const output=(await exec(fn.body,local)).value;
    if(config.output!==undefined)validate(output,config.output,'output');
    rt.trace.push({event:'complete',agent:name,method,depth,durationMs:Date.now()-started});
-   this.permissions=previousPermissions;
    return output;
   }catch(error){
-   this.permissions=previousPermissions;
    rt.trace.push({event:'failed',agent:name,method,depth,errorName:error.name,durationMs:Date.now()-started});
    throw error;
   }
