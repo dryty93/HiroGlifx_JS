@@ -1,0 +1,10 @@
+'use strict';
+const test=require('node:test');const assert=require('node:assert/strict');
+const {parseExpression,evaluateExpression}=require('../language/expressions');
+const run=(source,env)=>evaluateExpression(parseExpression(source),env);
+test('arithmetic precedence',()=>assert.equal(run('2 + 3 * 4'),14));
+test('parentheses',()=>assert.equal(run('(2 + 3) * 4'),20));
+test('boolean logic',()=>assert.equal(run('true && !false'),true));
+test('comparison',()=>assert.equal(run('score >= 10',{score:12}),true));
+test('undefined variable',()=>assert.throws(()=>run('unknown'),/Undefined identifier/));
+test('no code execution',()=>assert.throws(()=>parseExpression('process.exit(1)'),SyntaxError));
