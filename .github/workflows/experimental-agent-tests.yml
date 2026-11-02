@@ -2,7 +2,9 @@ name: Experimental agent runtime
 on:
   push:
     branches:
-      - experimental/agent-blueprints
+      - qa
+      - 'feature/**'
+      - 'fix/**'
   pull_request:
     paths:
       - 'experimental/**'
@@ -21,6 +23,8 @@ jobs:
           node --check experimental/parser.js
           node --check experimental/runtime.js
           node --check experimental/cli.js
+          node --check experimental/language/expressions.js
+          node --check experimental/modules.js
       - name: Unit tests
         run: node --test experimental/tests/*.test.js
       - name: End-to-end sample
