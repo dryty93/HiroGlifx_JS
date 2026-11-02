@@ -1,0 +1,25 @@
+.Researcher = ()
+    :run($topic) = {
+        return $topic;
+    };
+
+.Writer = ()
+    :run($research) = {
+        return $research;
+    };
+
+.Journalist = ()
+    I imports = Researcher ~ Writer;
+    &researcher = Researcher();
+    &writer = Writer();
+    :run($topic) = {
+        $notes = researcher.run($topic);
+        return writer.run($notes);
+    };
+
+.Main = ()
+    I imports = Journalist;
+    &journalist = Journalist();
+    :run() = {
+        return journalist.run("Agent composition works");
+    };
