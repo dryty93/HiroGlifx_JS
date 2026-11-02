@@ -31,13 +31,23 @@ function parse(source) {
   return left;
  };
  const argsList=()=>{const args=[];if(peek()!==')'){args.push(expr());while(peek()===','){take(',');args.push(expr());}}return args;};
+ const block=()=>{take('{');const body=[];while(peek()!=='}'){if(peek()==='<eof>')throw new SyntaxError('Unclosed block');body.push(stmt());}take('}');return body;};
  const stmt=()=>{
+  if(peek()==='if'){
+   take('if');take('(');const condition=expr();take(')');const then=block();
+   let otherwise=[];if(peek()==='else'){take('else');otherwise=block();}
+   if(peek()===';')take(';');return {type:'If',condition,then,otherwise};
+  }
+  if(peek()==='while'){
+   take('while');take('(');const condition=expr();take(')');const body=block();
+   if(peek()===';')take(';');return {type:'While',condition,body};
+  }
   if(peek()==='I'){take('I');take('imports');take('=');const names=[id()];while(peek()==='~'){take('~');names.push(id());}take(';');return {type:'Import',names};}
   if(peek()==='&'){take('&');const name=id();take('=');const blueprint=id();take('(');const args=argsList();take(')');take(';');return {type:'Instance',name,blueprint,args};}
   if(peek()==='$'){take('$');const name=id();take('=');const value=expr();take(';');return {type:'Assign',name,value};}
   if(peek()==='return'){take('return');const value=expr();take(';');return {type:'Return',value};}
   if(peek()==='echo'){take('echo');take('(');const value=expr();take(')');take(';');return {type:'Echo',value};}
-  if(peek()===':'){take(':');const name=id();take('(');const params=[];if(peek()!==')'){take('$');params.push(id());while(peek()===','){take(',');take('$');params.push(id());}}take(')');take('=');take('{');const body=[];while(peek()!=='}')body.push(stmt());take('}');take(';');return {type:'Method',name,params,body};}
+  if(peek()===':'){take(':');const name=id();take('(');const params=[];if(peek()!==')'){take('$');params.push(id());while(peek()===','){take(',');take('$');params.push(id());}}take(')');take('=');const body=block();take(';');return {type:'Method',name,params,body};}
   throw new SyntaxError('Unexpected token '+peek()+' at '+tokens[pos].offset);
  };
  const blueprints=[];
