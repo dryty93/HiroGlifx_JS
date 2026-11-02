@@ -2,11 +2,11 @@
 // Asynchronous scroll evaluator for model-backed agent calls.
 // Only explicitly supported expressions are executable.
 class AsyncRuntime {
- constructor(runtime,{models,provider='mock',tools,permissions=[]}={}){
-  this.runtime=runtime;this.models=models;this.provider=provider;this.tools=tools;this.permissions=permissions;this.steps=0;
+ constructor(runtime,{models,provider='mock',tools,permissions=[],memory}={}){
+  this.runtime=runtime;this.models=models;this.provider=provider;this.tools=tools;this.permissions=permissions;this.memory=memory;this.steps=0;this.active=0;
  }
  async invoke(name,method='run',args=[],depth=0,instance=null){
-  const rt=this.runtime;if(depth>=rt.maxDepth)throw Error('Maximum agent call depth exceeded');
+  const rt=this.runtime;if(++this.steps>rt.maxSteps)throw Error('Maximum execution steps exceeded');if(depth>=rt.maxDepth)throw Error('Maximum agent call depth exceeded');
   const bp=rt.blueprints.get(name);if(!bp)throw Error('Unknown blueprint '+name);
   const config=rt.configuration(name),vars=instance?.vars||new Map(),instances=instance?.instances||new Map();
   const lookup=(env,key)=>{for(let e=env;e;e=e.parent)if(e.values.has(key))return e.values.get(key);throw Error('Undefined variable '+key);};
@@ -37,6 +37,32 @@ class AsyncRuntime {
       const output=await this.models.generate(this.provider,{model:config.model,prompt:values[0]});
       rt.trace.push({agent:name,method:'ai.reason',depth:depth+1,model:output.model,usage:output.usage});
       return output.text;
+     }
+     if(node.target==='agents'&&node.method==='parallel'){
+      if(values.length!==1||!Array.isArray(values[0]))throw Error('agents.parallel requires a task array');
+      if(values[0].length>8)throw Error('Parallel agent limit exceeded');
+      const tasks=values[0].map(task=>{
+       if(!task||typeof task!=='object'||typeof task.agent!=='string'||typeof task.method!=='string'||!Array.isArray(task.args))throw Error('Invalid parallel task');
+       const child=instances.get(task.agent);if(!child)throw Error('Unknown agent instance '+task.agent);
+       return this.invoke(child.blueprint,task.method,task.args,depth+1,child);
+      });
+      return Promise.all(tasks);
+     }
+     if(node.target==='tool'&&node.method==='call'){
+      if(!this.tools)throw Error('Tool registry required');
+      if(values.length!==2||typeof values[0]!=='string')throw Error('tool.call requires name and arguments');
+      const allowed=(config.tools||[]).filter(x=>this.permissions.includes(x));
+      return this.tools.call(values[0],values[1],{allowed});
+     }
+     if(node.target==='memory'&&node.method==='get'){
+      if(!this.memory||config.memory!=='session')throw Error('Memory access denied');
+      if(values.length!==1||typeof values[0]!=='string')throw Error('memory.get requires key');
+      return this.memory.get(name,values[0]);
+     }
+     if(node.target==='memory'&&node.method==='set'){
+      if(!this.memory||config.memory!=='session')throw Error('Memory access denied');
+      if(values.length!==2||typeof values[0]!=='string')throw Error('memory.set requires key and value');
+      await this.memory.set(name,values[0],values[1]);return values[1];
      }
      const child=instances.get(node.target);if(!child)throw Error('Unknown agent instance '+node.target);
      return this.invoke(child.blueprint,node.method,values,depth+1,child);

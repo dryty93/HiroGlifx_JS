@@ -54,12 +54,12 @@ class Runtime {
   return execute(fn.body,local).value;
  }
  // Async execution is opt-in; deterministic invoke() remains unchanged.
- async invokeAsync(blueprint,method='run',args=[],{models,provider='mock',depth=0,permissions=[],tools}={}){
+ async invokeAsync(blueprint,method='run',args=[],{models,provider='mock',depth=0,permissions=[],tools,memory}={}){
   if(depth>=this.maxDepth)throw Error('Maximum agent call depth exceeded');
   const bp=this.blueprints.get(blueprint);if(!bp)throw Error('Unknown blueprint '+blueprint);
   const config=this.configuration(blueprint);
   const {AsyncRuntime}=require('./agents/scroll-async');
-  return new AsyncRuntime(this,{models,provider,tools,permissions}).invoke(blueprint,method,args,depth);
+  return new AsyncRuntime(this,{models,provider,tools,permissions,memory}).invoke(blueprint,method,args,depth);
  }
 
 }
