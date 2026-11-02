@@ -1,7 +1,9 @@
 'use strict';
 const {parse}=require('./parser');
+const {agentConfiguration}=require('./agents/configuration');
 class Runtime {
- constructor(program,{log=console.log,maxDepth=16,maxSteps=10000}={}){this.blueprints=new Map();this.log=log;this.maxDepth=maxDepth;this.maxSteps=maxSteps;this.trace=[];for(const bp of program.blueprints){if(this.blueprints.has(bp.name))throw Error('Duplicate blueprint '+bp.name);this.blueprints.set(bp.name,bp);}}
+ constructor(program,{log=console.log,maxDepth=16,maxSteps=10000}={}){this.blueprints=new Map();this.log=log;this.maxDepth=maxDepth;this.maxSteps=maxSteps;this.trace=[];for(const bp of program.blueprints){if(this.blueprints.has(bp.name))throw Error('Duplicate blueprint '+bp.name);agentConfiguration(bp);this.blueprints.set(bp.name,bp);}}
+ configuration(name){const blueprint=this.blueprints.get(name);if(!blueprint)throw Error('Unknown blueprint '+name);return agentConfiguration(blueprint);}
  invoke(blueprint,method='run',args=[],depth=0,instance=null){if(depth>=this.maxDepth)throw Error('Maximum agent call depth exceeded');const bp=this.blueprints.get(blueprint);if(!bp)throw Error('Unknown blueprint '+blueprint);
   const vars=instance?.vars||new Map(),instances=instance?.instances||new Map(),methods=new Map();
   const state={values:vars,parent:null};
@@ -31,7 +33,7 @@ class Runtime {
    if(params.length!==s.args.length)throw Error('Constructor argument count mismatch for '+s.blueprint);
    const state=new Map();params.forEach((name,i)=>state.set(name,evaluate(s.args[i])));
    instances.set(s.name,{blueprint:s.blueprint,vars:state,instances:new Map()});
-  }}else if(s.type==='Assign'){if(!vars.has(s.name))vars.set(s.name,evaluate(s.value));}else if(s.type==='Method')methods.set(s.name,s);}
+  }}else if(s.type==='Assign'){if(!vars.has(s.name))vars.set(s.name,evaluate(s.value));}else if(s.type==='Method')methods.set(s.name,s);else if(s.type==='AgentConfig')continue;}
   const fn=methods.get(method);if(!fn)throw Error('Unknown method '+blueprint+'.'+method);if(fn.params.length!==args.length)throw Error('Argument count mismatch for '+blueprint+'.'+method);
   const local={values:new Map(),parent:state};
   fn.params.forEach((p,i)=>local.values.set(p,args[i]));
