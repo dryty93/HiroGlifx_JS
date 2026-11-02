@@ -2,8 +2,8 @@
 // Asynchronous scroll evaluator for model-backed agent calls.
 // Only explicitly supported expressions are executable.
 class AsyncRuntime {
- constructor(runtime,{models,provider='mock',tools,permissions=[]}={}){
-  this.runtime=runtime;this.models=models;this.provider=provider;this.tools=tools;this.permissions=permissions;this.steps=0;
+ constructor(runtime,{models,provider='mock',tools,permissions=[],memory}={}){
+  this.runtime=runtime;this.models=models;this.provider=provider;this.tools=tools;this.permissions=permissions;this.memory=memory;this.steps=0;
  }
  async invoke(name,method='run',args=[],depth=0,instance=null){
   const rt=this.runtime;if(depth>=rt.maxDepth)throw Error('Maximum agent call depth exceeded');
@@ -37,6 +37,22 @@ class AsyncRuntime {
       const output=await this.models.generate(this.provider,{model:config.model,prompt:values[0]});
       rt.trace.push({agent:name,method:'ai.reason',depth:depth+1,model:output.model,usage:output.usage});
       return output.text;
+     }
+     if(node.target==='tool'&&node.method==='call'){
+      if(!this.tools)throw Error('Tool registry required');
+      if(values.length!==2||typeof values[0]!=='string')throw Error('tool.call requires name and arguments');
+      const allowed=(config.tools||[]).filter(x=>this.permissions.includes(x));
+      return this.tools.call(values[0],values[1],{allowed});
+     }
+     if(node.target==='memory'&&node.method==='get'){
+      if(!this.memory||config.memory!=='session')throw Error('Memory access denied');
+      if(values.length!==1||typeof values[0]!=='string')throw Error('memory.get requires key');
+      return this.memory.get(name,values[0]);
+     }
+     if(node.target==='memory'&&node.method==='set'){
+      if(!this.memory||config.memory!=='session')throw Error('Memory access denied');
+      if(values.length!==2||typeof values[0]!=='string')throw Error('memory.set requires key and value');
+      await this.memory.set(name,values[0],values[1]);return values[1];
      }
      const child=instances.get(node.target);if(!child)throw Error('Unknown agent instance '+node.target);
      return this.invoke(child.blueprint,node.method,values,depth+1,child);
