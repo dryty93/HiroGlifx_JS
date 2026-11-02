@@ -51,7 +51,19 @@ function parse(source) {
   throw new SyntaxError('Unexpected token '+peek()+' at '+tokens[pos].offset);
  };
  const blueprints=[];
- while(peek()!=='<eof>'){take('.');const name=id();take('=');take('(');take(')');const body=[];while(peek()!=='break'&&peek()!=='.'&&peek()!=='<eof>')body.push(stmt());if(peek()==='break'){take('break');take(';');}blueprints.push({type:'Blueprint',name,body});}
+ while(peek()!=='<eof>'){
+  take('.');const name=id();take('=');take('(');
+  const params=[];
+  if(peek()!==')'){
+   take('$');params.push(id());
+   while(peek()===','){take(',');take('$');params.push(id());}
+  }
+  take(')');
+  const body=[];
+  while(peek()!=='break'&&peek()!=='.'&&peek()!=='<eof>')body.push(stmt());
+  if(peek()==='break'){take('break');take(';');}
+  blueprints.push({type:'Blueprint',name,params,body});
+ }
  return {type:'Program',blueprints};
 }
 module.exports={parse};
