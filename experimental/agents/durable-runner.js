@@ -2,8 +2,8 @@
 const {CheckpointStore}=require('./checkpoints');
 const {createHash}=require('node:crypto');
 class DurableRunner {
- constructor({store=new CheckpointStore(),maxSteps=100,tools}={}){
-  this.store=store;this.maxSteps=maxSteps;this.tools=tools;
+ constructor({store=new CheckpointStore(),maxSteps=100,tools,approvalAuthority}={}){
+  this.store=store;this.maxSteps=maxSteps;this.tools=tools;this.approvalAuthority=approvalAuthority;
  }
  async run(runId,steps,{input,signal,permissions=[],approvals=[]}={}){
   if(!Array.isArray(steps)||steps.length>this.maxSteps)throw Error('Invalid workflow step budget');
@@ -31,7 +31,7 @@ class DurableRunner {
    if(signal?.aborted)throw Error('Workflow cancelled');
    const step=steps.find(s=>!completed.has(s.id)&&(s.dependsOn||[]).every(d=>completed.has(d)));
    if(!step)throw Error('Dependency cycle detected');
-   if(step.type==='tool'&&step.approvalRequired&&!approvals.includes(step.id)){
+   if(step.type==='tool'&&step.approvalRequired&&!(this.approvalAuthority&&approvals.some(token=>this.approvalAuthority.verify(token,{runId,stepId:step.id,planHash})))){
     waitingFor=step.id;await save();
     return {results,completed:[...completed],status:'awaiting_approval',waitingFor};
    }
