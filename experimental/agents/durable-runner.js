@@ -3,7 +3,7 @@ const {CheckpointStore}=require('./checkpoints');
 const {createHash}=require('node:crypto');
 class DurableRunner {
  constructor({store=new CheckpointStore(),maxSteps=100,tools}={}){this.store=store;this.maxSteps=maxSteps;this.tools=tools;}
- async run(runId,steps,{input,signal,permissions=[]}={}){
+ async run(runId,steps,{input,signal,permissions=[],approvals=[]}={}){
   if(!Array.isArray(steps)||steps.length>this.maxSteps)throw Error('Invalid workflow step budget');
   const ids=new Set();
   for(const s of steps){if(!s.id||ids.has(s.id)||!['identity','tool'].includes(s.type))throw Error('Invalid durable step');ids.add(s.id);}
@@ -16,13 +16,17 @@ class DurableRunner {
   const results=Object.assign(Object.create(null),prior?.results||{});
   if(!prior)results.input=input;
   const completed=new Set(prior?.completed||[]);
-  let inFlight=null;
-  const save=()=>this.store.save(runId,{version:1,planHash,input,results,completed:[...completed],inFlight,status:completed.size===steps.length?'completed':'running'});
+  let inFlight=null,waitingFor=null;
+  const save=()=>this.store.save(runId,{version:1,planHash,input,results,completed:[...completed],inFlight,waitingFor,status:waitingFor?'awaiting_approval':completed.size===steps.length?'completed':'running'});
   if(!prior)await save();
   while(completed.size<steps.length){
    if(signal?.aborted)throw Error('Workflow cancelled');
    const step=steps.find(s=>!completed.has(s.id)&&(s.dependsOn||[]).every(d=>completed.has(d)));
    if(!step)throw Error('Dependency cycle detected');
+   if(step.type==='tool'&&step.approvalRequired&&!approvals.includes(step.id)){
+    waitingFor=step.id;await save();
+    return {results,completed:[...completed],status:'awaiting_approval',waitingFor};
+   }
    const value=step.type==='tool'?step.args:step.value;
    const resolved=typeof value==='string'&&value.startsWith('
    results[step.id]=output;completed.add(step.id);
