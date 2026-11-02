@@ -12,15 +12,23 @@ function parse(source) {
  const id=()=>{const t=tokens[pos];if(t.kind!=='id')throw new SyntaxError('Expected identifier at '+t.offset);pos++;return t.value;};
  const precedence={'||':1,'&&':2,'==':3,'!=':3,'===':3,'!==':3,'<':4,'>':4,'<=':4,'>=':4,'+':5,'-':5,'*':6,'/':6};
  const atom=()=>{
-  if(tokens[pos].kind==='string')return {type:'Literal',value:decodeString(take())};
-  if(tokens[pos].kind==='number')return {type:'Literal',value:Number(take())};
-  if(['true','false','null'].includes(peek())){const v=take();return {type:'Literal',value:v==='null'?null:v==='true'};}
-  if(peek()==='!'||peek()==='-'){const op=take();return {type:'Unary',op,arg:atom()};}
-  if(peek()==='('){take('(');const inner=expr(0);take(')');return inner;}
-  if(peek()==='$'){take('$');return {type:'Variable',name:id()};}
-  const name=id();
-  if(peek()==='.') {take('.');const method=id();take('(');const args=argsList();take(')');return {type:'Call',target:name,method,args};}
-  return {type:'Name',name};
+  let node;
+  if(tokens[pos].kind==='string')node={type:'Literal',value:decodeString(take())};
+  else if(tokens[pos].kind==='number')node={type:'Literal',value:Number(take())};
+  else if(['true','false','null'].includes(peek())){const v=take();node={type:'Literal',value:v==='null'?null:v==='true'};}
+  else if(peek()==='!'||peek()==='-'){const op=take();node={type:'Unary',op,arg:atom()};}
+  else if(peek()==='('){take('(');node=expr(0);take(')');}
+  else if(peek()==='['){take('[');const elements=[];if(peek()!==']'){elements.push(expr());while(peek()===','){take(',');elements.push(expr());}}take(']');node={type:'Array',elements};}
+  else if(peek()==='{'){take('{');const entries=[];if(peek()!=='}'){do{const key=tokens[pos].kind==='string'?decodeString(take()):id();take(':');entries.push({key,value:expr()});if(peek()!==',')break;take(',');}while(true);}take('}');node={type:'Object',entries};}
+  else if(peek()==='$'){take('$');node={type:'Variable',name:id()};}
+  else {const name=id();node={type:'Name',name};}
+  while(peek()==='['||peek()==='.'){
+   if(peek()==='['){take('[');const key=expr();take(']');node={type:'Access',target:node,key};continue;}
+   take('.');const property=id();
+   if(peek()==='('){take('(');const args=argsList();take(')');if(node.type!=='Name')throw new SyntaxError('Method calls require an agent instance');node={type:'Call',target:node.name,method:property,args};}
+   else node={type:'Access',target:node,key:{type:'Literal',value:property}};
+  }
+  return node;
  };
  const expr=(min=0)=>{
   let left=atom();

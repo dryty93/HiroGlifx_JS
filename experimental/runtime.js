@@ -5,6 +5,10 @@ class Runtime {
  invoke(blueprint,method='run',args=[],depth=0,instance=null){if(depth>=this.maxDepth)throw Error('Maximum agent call depth exceeded');const bp=this.blueprints.get(blueprint);if(!bp)throw Error('Unknown blueprint '+blueprint);
   const vars=instance?.vars||new Map(),instances=instance?.instances||new Map(),methods=new Map();
   const evaluate=e=>{if(e.type==='Literal')return e.value;if(e.type==='Variable'){if(!vars.has(e.name))throw Error('Undefined variable '+e.name);return vars.get(e.name);}if(e.type==='Name')return e.name;
+  if(e.type==='Array')return e.elements.map(evaluate);
+  if(e.type==='Object'){const value=Object.create(null);for(const entry of e.entries){if(['__proto__','prototype','constructor'].includes(entry.key))throw Error('Unsafe object key');value[entry.key]=evaluate(entry.value);}return value;}
+  if(e.type==='Access'){const target=evaluate(e.target),key=evaluate(e.key);if(target===null||target===undefined)throw Error('Cannot access null value');if(typeof key!=='string'&&typeof key!=='number')throw Error('Invalid property key');if(['__proto__','prototype','constructor'].includes(String(key)))throw Error('Unsafe property access');if(!Object.hasOwn(Object(target),key))throw Error('Missing property '+String(key));return target[key];}
+  
   if(e.type==='Unary'){const v=evaluate(e.arg);return e.op==='!'?!v:-v;}
   if(e.type==='Binary'){
    const a=evaluate(e.left);
