@@ -6,7 +6,7 @@ const {parse,Runtime}=require('../runtime');
 const html=fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
 const MAX_SOURCE=100000;
 function handler(req,res){
- const send=(status,body,type='application/json')=>{res.writeHead(status,{'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(type==='application/json'?JSON.stringify(body):body);};
+ const send=(status,body,type='application/json')=>{res.writeHead(status,{'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(type==='application/json'?JSON.stringify(body):body);};
  if(req.method==='GET'&&req.url==='/')return send(200,html,'text/html; charset=utf-8');
  if(req.method==='GET'&&req.url==='/app.js')return send(200,fs.readFileSync(path.join(__dirname,'app.js'),'utf8'),'application/javascript; charset=utf-8');
  if(req.method!=='POST'||req.url!=='/api/analyze')return send(404,{error:'Not found'});
