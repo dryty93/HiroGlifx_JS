@@ -1,5 +1,6 @@
 'use strict';
 const {CheckpointStore}=require('./checkpoints');
+const {createHash}=require('node:crypto');
 class DurableRunner {
  constructor({store=new CheckpointStore(),maxSteps=100}={}){this.store=store;this.maxSteps=maxSteps;}
  async run(runId,steps,{input,signal}={}){
@@ -7,12 +8,14 @@ class DurableRunner {
   const ids=new Set();
   for(const s of steps){if(!s.id||ids.has(s.id)||s.type!=='identity')throw Error('Only unique identity steps supported in durable v0');ids.add(s.id);}
   for(const s of steps)for(const dep of s.dependsOn||[])if(!ids.has(dep))throw Error('Missing dependency '+dep);
+  const planHash=createHash('sha256').update(JSON.stringify(steps)).digest('hex');
   const prior=await this.store.load(runId);
+  if(prior&&prior.planHash!==planHash)throw Error('Workflow definition changed since checkpoint');
   if(prior&&JSON.stringify(prior.input)!==JSON.stringify(input))throw Error('Run input mismatch');
   const results=Object.assign(Object.create(null),prior?.results||{});
   if(!prior)results.input=input;
   const completed=new Set(prior?.completed||[]);
-  const save=()=>this.store.save(runId,{version:1,input,results,completed:[...completed],status:completed.size===steps.length?'completed':'running'});
+  const save=()=>this.store.save(runId,{version:1,planHash,input,results,completed:[...completed],status:completed.size===steps.length?'completed':'running'});
   if(!prior)await save();
   while(completed.size<steps.length){
    if(signal?.aborted)throw Error('Workflow cancelled');
