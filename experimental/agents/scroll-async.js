@@ -1,4 +1,5 @@
 'use strict';
+const {validate}=require('./contracts');
 // Asynchronous scroll evaluator for model-backed agent calls.
 // Only explicitly supported expressions are executable.
 class AsyncRuntime {
@@ -84,6 +85,7 @@ class AsyncRuntime {
     }
    }else if(s.type==='Assign'&&!vars.has(s.name))vars.set(s.name,await evalExpr(s.value,root));
   }
+  if(config.input!==undefined){if(args.length!==1)throw Error('@input contract requires exactly one argument');validate(args[0],config.input,'input');}
   const fn=methods.get(method);if(!fn)throw Error('Unknown method '+name+'.'+method);
   if(fn.params.length!==args.length)throw Error('Argument count mismatch');
   const local={values:new Map(fn.params.map((p,i)=>[p,args[i]])),parent:root};
@@ -100,7 +102,9 @@ class AsyncRuntime {
    }
    return {returned:false};
   };
-  return (await exec(fn.body,local)).value;
+  const output=(await exec(fn.body,local)).value;
+  if(config.output!==undefined)validate(output,config.output,'output');
+  return output;
  }
 }
 module.exports={AsyncRuntime};
