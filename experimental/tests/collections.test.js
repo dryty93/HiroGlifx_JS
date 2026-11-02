@@ -1,0 +1,10 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {Runtime,parse}=require('../runtime');
+const run=x=>new Runtime(parse('.Main = () :run() = { return '+x+'; };')).invoke('Main');
+test('array index',()=>assert.equal(run('[10,20,30][1]'),20));
+test('object property',()=>assert.equal(run('{name:"Ada",age:33}.age'),33));
+test('nested collections',()=>assert.equal(run('{items:[2,4,6]}.items[2]'),6));
+test('expressions in collections',()=>assert.equal(run('[2+3,4*2][0]'),5));
+test('missing property errors',()=>assert.throws(()=>run('{a:1}.b'),/Missing property/));
+test('prototype access blocked',()=>assert.throws(()=>run('{a:1}.constructor'),/Unsafe property/));
