@@ -50,6 +50,7 @@ function parse(source) {
    take('while');take('(');const condition=expr();take(')');const body=block();
    if(peek()===';')take(';');return {type:'While',condition,body};
   }
+  if(peek()==='@'){take('@');const name=id();take('=');const value=expr();take(';');return {type:'AgentConfig',name,value};}
   if(peek()==='I'){take('I');take('imports');take('=');const names=[id()];while(peek()==='~'){take('~');names.push(id());}take(';');return {type:'Import',names};}
   if(peek()==='&'){take('&');const name=id();take('=');const blueprint=id();take('(');const args=argsList();take(')');take(';');return {type:'Instance',name,blueprint,args};}
   if(peek()==='$'){take('$');const name=id();take('=');const value=expr();take(';');return {type:'Assign',name,value};}
