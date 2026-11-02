@@ -38,6 +38,16 @@ class AsyncRuntime {
       rt.trace.push({agent:name,method:'ai.reason',depth:depth+1,model:output.model,usage:output.usage});
       return output.text;
      }
+     if(node.target==='agents'&&node.method==='parallel'){
+      if(values.length!==1||!Array.isArray(values[0]))throw Error('agents.parallel requires a task array');
+      if(values[0].length>8)throw Error('Parallel agent limit exceeded');
+      const tasks=values[0].map(task=>{
+       if(!task||typeof task!=='object'||typeof task.agent!=='string'||typeof task.method!=='string'||!Array.isArray(task.args))throw Error('Invalid parallel task');
+       const child=instances.get(task.agent);if(!child)throw Error('Unknown agent instance '+task.agent);
+       return this.invoke(child.blueprint,task.method,task.args,depth+1,child);
+      });
+      return Promise.all(tasks);
+     }
      if(node.target==='tool'&&node.method==='call'){
       if(!this.tools)throw Error('Tool registry required');
       if(values.length!==2||typeof values[0]!=='string')throw Error('tool.call requires name and arguments');
