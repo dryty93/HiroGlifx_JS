@@ -23,7 +23,7 @@ class Runtime {
    if(params.length!==s.args.length)throw Error('Constructor argument count mismatch for '+s.blueprint);
    const state=new Map();params.forEach((name,i)=>state.set(name,evaluate(s.args[i])));
    instances.set(s.name,{blueprint:s.blueprint,vars:state,instances:new Map()});
-  }}else if(s.type==='Assign')vars.set(s.name,evaluate(s.value));else if(s.type==='Method')methods.set(s.name,s);}
+  }}else if(s.type==='Assign'){if(!vars.has(s.name))vars.set(s.name,evaluate(s.value));}else if(s.type==='Method')methods.set(s.name,s);}
   const fn=methods.get(method);if(!fn)throw Error('Unknown method '+blueprint+'.'+method);if(fn.params.length!==args.length)throw Error('Argument count mismatch for '+blueprint+'.'+method);
   fn.params.forEach((p,i)=>vars.set(p,args[i]));this.trace.push({agent:blueprint,method,depth});
   let steps=0;
