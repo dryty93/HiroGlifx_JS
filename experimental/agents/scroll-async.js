@@ -12,6 +12,7 @@ class AsyncRuntime {
   const rt=this.runtime;const started=Date.now();rt.trace.push({event:'start',agent:name,method,depth});if(++this.steps>rt.maxSteps)throw Error('Maximum execution steps exceeded');if(depth>=rt.maxDepth)throw Error('Maximum agent call depth exceeded');
   const bp=rt.blueprints.get(name);if(!bp)throw Error('Unknown blueprint '+name);
   const config=rt.configuration(name),vars=instance?.vars||new Map(),instances=instance?.instances||new Map();
+  const previousPermissions=this.permissions;this.permissions=previousPermissions.filter(p=>(config.tools||[]).includes(p));
   const lookup=(env,key)=>{for(let e=env;e;e=e.parent)if(e.values.has(key))return e.values.get(key);throw Error('Undefined variable '+key);};
   const assign=(env,key,value)=>{for(let e=env;e;e=e.parent)if(e.values.has(key)){e.values.set(key,value);return;}env.values.set(key,value);};
   const root={values:vars,parent:null};
@@ -109,8 +110,10 @@ class AsyncRuntime {
    const output=(await exec(fn.body,local)).value;
    if(config.output!==undefined)validate(output,config.output,'output');
    rt.trace.push({event:'complete',agent:name,method,depth,durationMs:Date.now()-started});
+   this.permissions=previousPermissions;
    return output;
   }catch(error){
+   this.permissions=previousPermissions;
    rt.trace.push({event:'failed',agent:name,method,depth,errorName:error.name,durationMs:Date.now()-started});
    throw error;
   }
