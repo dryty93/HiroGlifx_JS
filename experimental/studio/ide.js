@@ -98,7 +98,15 @@
   if(!close)return false;
   const from=source.selectionStart,to=source.selectionEnd;
   const selected=source.value.slice(from,to);
-  if(from===to&&source.value[from]===close&&character===close)return false;
+  if(from===to&&source.value[from]===close&&character===close){source.setSelectionRange(from+1,from+1);return true;}
+  const lineStart=source.value.lastIndexOf('\n',Math.max(0,from-1))+1;
+  const leading=source.value.slice(lineStart,from);
+  let activeQuote=null,escaped=false;
+  for(const c of leading){
+   if(activeQuote){if(escaped)escaped=false;else if(c==='\\')escaped=true;else if(c===activeQuote)activeQuote=null;}
+   else if(c==='"'||c==="'")activeQuote=c;
+  }
+  if(activeQuote)return false;
   const text=character+selected+close;
   source.setRangeText(text,from,to,'preserve');
   source.setSelectionRange(from+1,from+1+selected.length);
