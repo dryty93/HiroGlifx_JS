@@ -5,7 +5,7 @@ test('studio serves HTML and analyzes source',async()=>{
  const server=start({port:0});await new Promise(resolve=>server.once('listening',resolve));
  try{
   const base='http://127.0.0.1:'+server.address().port;
-  const page=await fetch(base);assert.equal(page.status,200);assert.match(await page.text(),/HiroGlifx Studio/);
+  const page=await fetch(base);assert.equal(page.status,200);const pageHTML=await page.text();assert.match(pageHTML,/HiroGlifx Studio/);assert.match(pageHTML,/:add\(\$value\):/);
   const res=await fetch(base+'/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'.Main = () :run() = { return 42; };',run:true})});
   assert.equal(res.status,200);const body=await res.json();assert.equal(body.result,42);assert.equal(body.blueprints[0].name,'Main');
  }finally{await new Promise(resolve=>server.close(resolve));}
@@ -14,4 +14,26 @@ test('studio rejects invalid code',async()=>{
  const server=start({port:0});await new Promise(resolve=>server.once('listening',resolve));
  try{const res=await fetch('http://127.0.0.1:'+server.address().port+'/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'not scroll'})});assert.equal(res.status,400);}
  finally{await new Promise(resolve=>server.close(resolve));}
+});
+
+test('studio analyzes and executes indentation-style source',async()=>{
+ const server=start({port:0});await new Promise(resolve=>server.once('listening',resolve));
+ try{
+  const source=[
+   '.Calculator = ($base)',
+   '    :add($n):',
+   '        return $base + $n',
+   '.Main = ()',
+   '    I imports = Calculator',
+   '    &calc = Calculator(11)',
+   '    :run():',
+   '        return calc.add(9)'
+  ].join('\n');
+  const res=await fetch('http://127.0.0.1:'+server.address().port+'/api/analyze',{
+   method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source,run:true})
+  });
+  assert.equal(res.status,200);
+  const body=await res.json();assert.equal(body.result,20);
+  assert.equal(body.blueprints[1].instances[0].name,'calc');
+ }finally{await new Promise(resolve=>server.close(resolve));}
 });

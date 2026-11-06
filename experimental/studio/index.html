@@ -1,10 +1,24 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>HiroGlifx Studio</title><style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#0d1018;color:#f0f3ff}*{box-sizing:border-box}body{margin:0}header{padding:16px 24px;border-bottom:1px solid #2a3042;display:flex;justify-content:space-between;align-items:center;gap:12px}h1{font-size:20px;margin:0}small{color:#a5b0c7}main{display:grid;grid-template-columns:minmax(300px,1.5fr) minmax(260px,1fr);gap:16px;padding:20px;min-height:calc(100vh - 72px)}section{background:#171d2a;border:1px solid #313b51;border-radius:12px;padding:16px;min-width:0}h2{font-size:15px;margin:0 0 12px}textarea{width:100%;height:65vh;resize:vertical;background:#0b0f18;color:#dce8ff;border:1px solid #39435a;border-radius:8px;padding:14px;font:14px/1.5 ui-monospace,monospace}button{background:#8075ff;color:white;border:0;padding:10px 15px;border-radius:8px;cursor:pointer;font-weight:600}button:hover{background:#998fff}button:focus-visible,textarea:focus-visible{outline:2px solid #b4adff}.actions{display:flex;gap:8px;flex-wrap:wrap}.panel{margin-bottom:18px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b0f18;border-radius:8px;padding:12px;min-height:65px;color:#c3f4db}ul{padding-left:20px}li{margin-bottom:8px}#error{color:#ff9f9f;min-height:24px}@media(max-width:850px){main{grid-template-columns:1fr}textarea{height:40vh}}
-</style></head><body><header><div><h1>⚡ HiroGlifx Studio</h1><small>Local deterministic playground · Experimental</small></div><div class="actions"><button id="analyze">Analyze</button><button id="run">Run Main</button></div></header><main><section><h2>Source editor</h2><textarea id="source" spellcheck="false" aria-label="HiroGlifx source code">.Worker = ()
-    :run($value) = { return $value * 2; };
+.editor-hints{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:10px 0}.syntax-help{padding:8px 0}.syntax-help summary{cursor:pointer;font-weight:600}.syntax-help p{font-size:13px}.syntax-help a{color:#a99eff}#save-status{color:#9be8bc}</style></head><body><header><div><h1>⚡ HiroGlifx Studio</h1><small>Indentation-first · Local deterministic playground · Experimental</small></div><div class="actions"><button id="reset" type="button">Load sample</button><button id="analyze">Analyze</button><button id="run">Run Main</button></div></header><main><section><h2>Source editor</h2><textarea id="source" spellcheck="false" aria-label="HiroGlifx source code">.Calculator = ($base)
+    :add($value):
+        return $base + $value
 
 .Main = ()
-    I imports = Worker;
-    &worker = Worker();
-    :run() = { return worker.run(7); };</textarea><p id="error" role="alert"></p></section><section><div class="panel"><h2>Blueprints & dependencies</h2><ul id="blueprints"><li>Click Analyze to inspect the source.</li></ul></div><div class="panel"><h2>Result</h2><pre id="result">Ready</pre></div><div class="panel"><h2>Execution trace</h2><pre id="trace">No run yet</pre></div></section></main><script src="/app.js"></script></body></html>
+    I imports = Calculator
+    &calc = Calculator(10)
+
+    :run():
+        $result = calc.add(5)
+        if $result > 10:
+            return $result
+        else:
+            return 0</textarea><div class="editor-hints"><small>4 spaces per level · Tab to indent · Enter to continue a block · ⌘/Ctrl+Enter to run</small><small id="save-status" aria-live="polite">Draft saved in this browser</small></div><details class="syntax-help"><summary>Quick syntax guide</summary><pre>.Agent = ($name)
+    :run($topic):
+        if $topic == "AI":
+            return $name + $topic
+        return "Unknown"
+
+I imports = Agent
+&amp;agent = Agent("Helper")</pre><p>Legacy brace syntax remains supported. <a href="https://github.com/dryty93/HiroGlifx_JS/blob/qa/experimental/SYNTAX.md" target="_blank" rel="noopener noreferrer">Full syntax reference</a></p></details><p id="error" role="alert"></p></section><section><div class="panel"><h2>Blueprints & dependencies</h2><ul id="blueprints"><li>Click Analyze to inspect the source.</li></ul></div><div class="panel"><h2>Result</h2><pre id="result">Ready</pre></div><div class="panel"><h2>Execution trace</h2><pre id="trace">No run yet</pre></div></section></main><script src="/app.js"></script></body></html>

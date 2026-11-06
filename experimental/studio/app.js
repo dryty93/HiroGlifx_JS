@@ -16,3 +16,43 @@ async function submit(run){
 }
 document.getElementById('analyze').addEventListener('click',()=>submit(false));
 document.getElementById('run').addEventListener('click',()=>submit(true));
+
+
+// The editor persists only in the local browser; it does not upload source files.
+const draftKey='hiroglifx.studio.draft.v1';
+const sample=source.value;
+const saveStatus=document.getElementById('save-status');
+try{
+ const stored=localStorage.getItem(draftKey);
+ if(stored!==null){source.value=stored;saveStatus.textContent='Local draft restored';}
+}catch(_){saveStatus.textContent='Browser storage unavailable';}
+function saveDraft(){
+ try{localStorage.setItem(draftKey,source.value);saveStatus.textContent='Draft saved in this browser';}
+ catch(_){saveStatus.textContent='Storage unavailable — copy your code';}
+}
+function insertAtCursor(value,cursorShift=value.length){
+ const start=source.selectionStart,end=source.selectionEnd;
+ source.value=source.value.slice(0,start)+value+source.value.slice(end);
+ source.selectionStart=source.selectionEnd=start+cursorShift;
+ saveDraft();
+}
+source.addEventListener('input',saveDraft);
+source.addEventListener('keydown',event=>{
+ if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){
+  event.preventDefault();submit(true);return;
+ }
+ if(event.key==='Tab'&&!event.metaKey&&!event.ctrlKey&&!event.altKey){
+  event.preventDefault();insertAtCursor('    ');return;
+ }
+ if(event.key==='Enter'&&!event.shiftKey&&!event.metaKey&&!event.ctrlKey){
+  const before=source.value.slice(0,source.selectionStart);
+  const previous=before.slice(before.lastIndexOf('\n')+1);
+  const indent=(previous.match(/^ */)||[''])[0];
+  const extra=previous.trimEnd().endsWith(':')?'    ':'';
+  event.preventDefault();insertAtCursor('\n'+indent+extra);
+ }
+});
+document.getElementById('reset').addEventListener('click',()=>{
+ if(source.value!==sample&&!window.confirm('Replace the current editor text with the sample?'))return;
+ source.value=sample;saveDraft();source.focus();
+});

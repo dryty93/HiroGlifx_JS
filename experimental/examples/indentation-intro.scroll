@@ -1,0 +1,14 @@
+.Calculator = ($base)
+    :add($value):
+        return $base + $value
+
+.Main = ()
+    I imports = Calculator
+    &calc = Calculator(10)
+
+    :run():
+        $sum = calc.add(5)
+        if $sum > 10:
+            return {total: $sum, ok: true}
+        else:
+            return {total: $sum, ok: false}
