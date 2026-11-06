@@ -43,3 +43,14 @@ brace-based programs also work. See ../SYNTAX.md for examples.
 3. Isolated execution runner, breakpoints, variable inspection and trace replay.
 4. Capability approval UI, model provider configuration and usage budgets.
 5. Authenticated project storage, GitHub sync and sharing.
+
+## IDE editing assistance (experimental)
+
+- Auto-correct (on by default): on Enter, completed method and control-flow headers gain a missing colon; a few unambiguous typos are offered as quick fixes.
+- Four-space indentation: Tab / Shift+Tab indent and outdent lines; Enter continues blocks; else: dedents toward its if.
+- Autocomplete: suggestions appear while typing; Ctrl/Cmd+Space opens them; arrows navigate, Enter accepts, Escape dismisses.
+- Format / Save: Format button or Alt+Shift+F; Ctrl/Cmd+S formats (if Auto-correct enabled) and saves locally.
+- Problems pane: live parser diagnostics and individually actionable safe quick fixes.
+- Navigation: line numbers and a caret line/column indicator.
+
+This is not a full VS Code/JetBrains language service: semantic refactoring, multi-file completion, breakpoints and diff tooling remain planned. Review automatic formatting in unfinished or complex programs.
