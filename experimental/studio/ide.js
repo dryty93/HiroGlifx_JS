@@ -155,6 +155,7 @@
     row.append(label,button);problems.append(row);
    }
    if(!problems.childElementCount)problems.textContent='No syntax issues detected';
+   window.dispatchEvent(new CustomEvent('studio:diagnostics',{detail:data}));
   }catch(e){if(serial===lastDiagnostic)problems.textContent='Diagnostics unavailable: '+e.message;}
  }
  function scheduleDiagnostics(){
@@ -191,7 +192,7 @@
    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();selectedSuggestion=(selectedSuggestion+proposals.length+(e.key==='ArrowDown'?1:-1))%proposals.length;drawCompletions();return;}
    e.preventDefault();acceptCompletion();return;
   }
-  if(e.key==='Tab'&&!meta&&!e.altKey){e.preventDefault();replaceLines(e.shiftKey?'outdent':'indent');return;}
+  if(e.key==='Tab'&&!meta&&!e.altKey){e.preventDefault();if(!e.shiftKey&&source.selectionStart===source.selectionEnd){edit(source.selectionStart,source.selectionEnd,INDENT);}else replaceLines(e.shiftKey?'outdent':'indent');return;}
   if(e.key==='Enter'&&!e.shiftKey&&!meta&&!e.altKey){e.preventDefault();smartEnter();return;}
   if(!meta&&!e.altKey&&!e.shiftKey&&'([{\"\''.includes(e.key)){
    // Skip inserting paired quotes inside existing string literals is future language work.
