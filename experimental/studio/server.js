@@ -10,6 +10,7 @@ function handler(req,res){
  const send=(status,body,type='application/json')=>{res.writeHead(status,{'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"});res.end(type==='application/json'?JSON.stringify(body):body);};
  if(req.method==='GET'&&req.url==='/')return send(200,html,'text/html; charset=utf-8');
  if(req.method==='GET'&&req.url==='/editor-core.js')return send(200,fs.readFileSync(path.join(__dirname,'editor-core.js'),'utf8'),'application/javascript; charset=utf-8');
+ if(req.method==='GET'&&req.url==='/ide.js')return send(200,fs.readFileSync(path.join(__dirname,'ide.js'),'utf8'),'application/javascript; charset=utf-8');
  if(req.method==='GET'&&req.url==='/app.js')return send(200,fs.readFileSync(path.join(__dirname,'app.js'),'utf8'),'application/javascript; charset=utf-8');
  if(req.method!=='POST'||!['/api/analyze','/api/assist'].includes(req.url))return send(404,{error:'Not found'});
  let raw='';req.on('data',chunk=>{raw+=chunk;if(raw.length>MAX_SOURCE){req.destroy();}});req.on('end',()=>{
