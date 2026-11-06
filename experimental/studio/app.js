@@ -37,22 +37,9 @@ function insertAtCursor(value,cursorShift=value.length){
  saveDraft();
 }
 source.addEventListener('input',saveDraft);
-source.addEventListener('keydown',event=>{
- if((event.metaKey||event.ctrlKey)&&event.key==='Enter'){
-  event.preventDefault();submit(true);return;
- }
- if(event.key==='Tab'&&!event.metaKey&&!event.ctrlKey&&!event.altKey){
-  event.preventDefault();insertAtCursor('    ');return;
- }
- if(event.key==='Enter'&&!event.shiftKey&&!event.metaKey&&!event.ctrlKey){
-  const before=source.value.slice(0,source.selectionStart);
-  const previous=before.slice(before.lastIndexOf('\n')+1);
-  const indent=(previous.match(/^ */)||[''])[0];
-  const extra=previous.trimEnd().endsWith(':')?'    ':'';
-  event.preventDefault();insertAtCursor('\n'+indent+extra);
- }
-});
 document.getElementById('reset').addEventListener('click',()=>{
  if(source.value!==sample&&!window.confirm('Replace the current editor text with the sample?'))return;
  source.value=sample;saveDraft();source.focus();
 });
+
+window.StudioApp={source,submit,saveDraft,sample};
