@@ -19,9 +19,9 @@ function handler(req,res){
    if(req.url==='/api/assist'){
     const quickFixes=editor.quickFixes(data.source);
     const formatted=data.format===true?editor.format(data.source):undefined;
-    let diagnostic=null;
-    try{parse(data.source);}catch(e){const line=String(e.message).match(/\bline\s+(\d+)/i);diagnostic={severity:'error',message:e.message,line:line?Number(line[1]):null};}
-    return send(200,{diagnostic,quickFixes,formatted});
+    let diagnostic=null,outline=null;
+    try{const program=parse(data.source);outline=program.blueprints.map(bp=>({name:bp.name,methods:bp.body.filter(x=>x.type==='Method').map(x=>x.name),instances:bp.body.filter(x=>x.type==='Instance').map(x=>x.name),imports:bp.body.filter(x=>x.type==='Import').flatMap(x=>x.names)}));}catch(e){const line=String(e.message).match(/\bline\s+(\d+)/i);diagnostic={severity:'error',message:e.message,line:line?Number(line[1]):null};}
+    return send(200,{diagnostic,quickFixes,formatted,outline});
    }
    const program=parse(data.source),blueprints=program.blueprints.map(bp=>({name:bp.name,imports:bp.body.filter(x=>x.type==='Import').flatMap(x=>x.names),instances:bp.body.filter(x=>x.type==='Instance').map(x=>({name:x.name,blueprint:x.blueprint})),methods:bp.body.filter(x=>x.type==='Method').map(x=>x.name)}));
    if(data.run!==true)return send(200,{blueprints});
