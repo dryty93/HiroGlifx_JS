@@ -1,12 +1,13 @@
 'use strict';
 const {tokenize}=require('./lexer');
+const {normalizeLayout}=require('./language/layout');
 function decodeString(raw) {
  if(raw[0]==='"') return JSON.parse(raw);
  const inner=raw.slice(1,-1);
  return inner.replace(/\\\\/g,'\\').replace(/\\'/g,"'").replace(/\\n/g,'\n').replace(/\\t/g,'\t');
 }
 function parse(source) {
- const tokens=tokenize(source); let pos=0;
+ const tokens=tokenize(normalizeLayout(source)); let pos=0;
  const peek=()=>tokens[pos].value;
  const take=(expected)=>{const t=tokens[pos];if(expected!==undefined&&t.value!==expected)throw new SyntaxError('Expected '+expected+' at '+t.offset+', found '+t.value);pos++;return t.value;};
  const id=()=>{const t=tokens[pos];if(t.kind!=='id')throw new SyntaxError('Expected identifier at '+t.offset);pos++;return t.value;};
