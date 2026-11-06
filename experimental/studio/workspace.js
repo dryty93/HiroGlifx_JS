@@ -15,11 +15,11 @@
   source.dispatchEvent(new Event('input',{bubbles:true}));
   saveDraft();
  }
- function doFind(backwards=false){
-  const query=search.value,from=backwards?source.selectionStart:source.selectionEnd;
+ function doFind(backwards=false,focusEditor=true){
+  const query=search.value,from=!focusEditor?0:backwards?source.selectionStart:source.selectionEnd;
   const found=util.findNext(source.value,query,from,{backwards});
   if(!found){findStatus.textContent=query?'No matches':'Enter text to search';return null;}
-  source.focus();source.setSelectionRange(found.from,found.to);
+  if(focusEditor)source.focus();source.setSelectionRange(found.from,found.to);
   findStatus.textContent='Match at line '+(source.value.slice(0,found.from).split('\n').length);
   ide.refresh();return found;
  }
@@ -51,7 +51,7 @@
   if(e.key==='Enter'){e.preventDefault();doFind(e.shiftKey);}
   if(e.key==='Escape')closeFind();
  });
- search.addEventListener('input',()=>{if(search.value)doFind();else findStatus.textContent='';});
+ search.addEventListener('input',()=>{if(search.value)doFind(false,false);else findStatus.textContent='';});
  document.addEventListener('keydown',e=>{
   const meta=e.metaKey||e.ctrlKey;
   if(meta&&e.key.toLowerCase()==='f'){e.preventDefault();openFind();}
