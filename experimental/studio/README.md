@@ -54,3 +54,11 @@ brace-based programs also work. See ../SYNTAX.md for examples.
 - Navigation: line numbers and a caret line/column indicator.
 
 This is not a full VS Code/JetBrains language service: semantic refactoring, multi-file completion, breakpoints and diff tooling remain planned. Review automatic formatting in unfinished or complex programs.
+## Navigation and file tools
+
+- Open a local .scroll file through the browser (100 KB limit; nothing uploaded).
+- Download the current editor contents as a .scroll file.
+- Find and replace within the file; use Ctrl/Cmd+F, F3/Shift+F3 to navigate matches.
+- Filter live blueprints and methods using Ctrl/Cmd+P, then click a symbol to jump to it.
+- Review the last 15 deterministic run summaries in local browser storage.
+- This is not a multi-file workspace or Git sync yet; local file download is the durable-save option.
