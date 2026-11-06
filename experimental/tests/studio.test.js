@@ -37,3 +37,17 @@ test('studio analyzes and executes indentation-style source',async()=>{
   assert.equal(body.blueprints[1].instances[0].name,'calc');
  }finally{await new Promise(resolve=>server.close(resolve));}
 });
+
+test('studio serves smart editor assets and IDE controls',async()=>{
+ const server=start({port:0});await new Promise(resolve=>server.once('listening',resolve));
+ try{
+  const base='http://127.0.0.1:'+server.address().port;
+  const page=await (await fetch(base)).text();
+  for(const id of ['format-code','fix-code','completions','problems','line-numbers','cursor-status','autoformat'])
+   assert.match(page,new RegExp('id="'+id+'"'));
+  const ide=await fetch(base+'/ide.js');assert.equal(ide.status,200);
+  const code=await ide.text();assert.match(code,/smartEnter/);assert.match(code,/formatDocument/);
+  const helper=await fetch(base+'/editor-core.js');assert.equal(helper.status,200);
+  assert.match(await helper.text(),/quickFixes/);
+ }finally{await new Promise(resolve=>server.close(resolve));}
+});
