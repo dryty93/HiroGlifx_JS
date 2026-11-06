@@ -202,9 +202,11 @@
   }
   if(e.key==='Tab'&&!meta&&!e.altKey){e.preventDefault();if(!e.shiftKey&&source.selectionStart===source.selectionEnd){edit(source.selectionStart,source.selectionEnd,INDENT);}else replaceLines(e.shiftKey?'outdent':'indent');return;}
   if(e.key==='Enter'&&!e.shiftKey&&!meta&&!e.altKey){e.preventDefault();smartEnter();return;}
-  if(!meta&&!e.altKey&&!e.shiftKey&&'([{\"\''.includes(e.key)){
-   // Skip inserting paired quotes inside existing string literals is future language work.
-   e.preventDefault();autoPair(e.key);return;
+  if(!meta&&!e.altKey&&!e.shiftKey&&[')',']','}'].includes(e.key)&&source.selectionStart===source.selectionEnd&&source.value[source.selectionStart]===e.key){
+   e.preventDefault();source.setSelectionRange(source.selectionStart+1,source.selectionStart+1);return;
+  }
+  if(!meta&&!e.altKey&&!e.shiftKey&&['(','[','{','"',"'"].includes(e.key)){
+   if(autoPair(e.key)){e.preventDefault();return;}
   }
  });
  source.addEventListener('input',e=>{
