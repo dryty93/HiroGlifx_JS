@@ -11,8 +11,8 @@ async function submit(run){
    li.textContent=bp.name+' — imports: '+(bp.imports.join(', ')||'none')+'; instances: '+(bp.instances.map(x=>x.name+':'+x.blueprint).join(', ')||'none')+'; methods: '+(bp.methods.join(', ')||'none');
    list.append(li);
   }
-  if(run){result.textContent=JSON.stringify(data.result,null,2);trace.textContent=JSON.stringify({events:data.trace,logs:data.logs},null,2);}
- }catch(e){error.textContent=e.message;result.textContent='Failed';}
+  if(run){result.textContent=JSON.stringify(data.result,null,2);trace.textContent=JSON.stringify({events:data.trace,logs:data.logs},null,2);window.dispatchEvent(new CustomEvent('studio:run',{detail:{result:data.result}}));}
+ }catch(e){error.textContent=e.message;result.textContent='Failed';if(run)window.dispatchEvent(new CustomEvent('studio:run',{detail:{error:e.message}}));}
 }
 document.getElementById('analyze').addEventListener('click',()=>submit(false));
 document.getElementById('run').addEventListener('click',()=>submit(true));

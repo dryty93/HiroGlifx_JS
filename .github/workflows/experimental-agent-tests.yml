@@ -25,6 +25,12 @@ jobs:
           node --check experimental/cli.js
           node --check experimental/language/expressions.js
           node --check experimental/modules.js
+          node --check experimental/studio/server.js
+          node --check experimental/studio/app.js
+          node --check experimental/studio/editor-core.js
+          node --check experimental/studio/ide.js
+          node --check experimental/studio/workspace-core.js
+          node --check experimental/studio/workspace.js
       - name: Unit tests
         run: node --test experimental/tests/*.test.js
       - name: End-to-end sample
