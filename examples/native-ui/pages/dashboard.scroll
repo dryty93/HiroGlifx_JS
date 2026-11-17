@@ -1,0 +1,61 @@
+ui application
+import native-ui
+
+.CounterButton = (PrimaryButton)
+    $ label = "Increase the number";
+    : render(self) = [
+        element button button root;
+        class button "hg-button hg-button-primary";
+        attr button type "button";
+        text button "Clicked {count} times";
+        on button click activate;
+    ]
+    : activate(self) = [
+        increment count 1;
+    ]
+    break;
+
+.Main = ()
+    : render(self) = [
+        element page main root;
+        component Navigation navigation page;
+        element wrap div page;
+        class wrap "hg-wrap";
+        element hero header wrap;
+        class hero "hg-hero";
+        element eyebrow p hero;
+        class eyebrow "hg-eyebrow";
+        text eyebrow "WORKSPACE / OVERVIEW";
+        element title h1 hero;
+        class title "hg-display";
+        text title "Your command center.";
+        element copy p hero;
+        class copy "hg-lead";
+        text copy "A beautifully composed, data-rich dashboard written in native HiroGlifx.";
+        element grid section wrap;
+        class grid "hg-grid";
+        component MetricCard revenue grid;
+        prop revenue title "Total revenue";
+        prop revenue value "$48,290";
+        prop revenue description "Up 18.4% this month";
+        component MetricCard customers grid;
+        prop customers title "Active customers";
+        prop customers value "1,284";
+        prop customers description "Across all projects";
+        component MetricCard orders grid;
+        prop orders title "Conversion";
+        prop orders value "7.8%";
+        prop orders description "Last 30 days";
+        element section section wrap;
+        class section "hg-section";
+        element subtitle h2 section;
+        class subtitle "hg-title";
+        text subtitle "Live component state";
+        element info p section;
+        class info "hg-muted";
+        text info "This button is a HiroGlifx subclass with an overridden event method.";
+        component CounterButton counter section;
+        component SuccessButton more section;
+        prop more label "Another inherited button";
+    ]
+    break;
