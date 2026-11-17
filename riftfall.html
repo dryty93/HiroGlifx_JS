@@ -113,7 +113,11 @@ async function initialize(){
    showOverlay("Could not start Riftfall",error.message+" Havok requires modern WebAssembly SIMD support and network access to the development CDN.","Initialization unavailable");
  }
 }
-$("start").onclick=()=>{if(!demo?.ready)return;demo.start();started=true;$("overlay").hidden=true;$("game").focus();status("Defeat the raiders. "+demo.assetStatus);};
+$("start").onclick=async()=>{
+ if(!demo?.ready)return;
+ if(demo.rules.done||!demo.combat.actor("hero").alive){await initialize();if(!demo?.ready)return;}
+ demo.start();started=true;$("overlay").hidden=true;$("game").focus();status("Defeat the raiders. "+demo.assetStatus);
+};
 $("attack").onclick=()=>demo?.attack();
 $("jump").onclick=()=>demo?.character.jump();
 $("restart").onclick=()=>{started=false;showOverlay("Rebuilding the arena","Reloading the original HiroGlifx combat rules, characters and physics.","Loading...");initialize();};
