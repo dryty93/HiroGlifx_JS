@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071023">
+<meta name="description" content="Explore games, creative tools and interactive applications built with HiroGlifx.">
+<title>HiroGlifx Showcase · Built in the Browser</title>
+<style>
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#f5faff;background:#071023}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 70% 3%,#223e79,transparent 45%),#071023}
+a{color:inherit;text-decoration:none}.wrap{max-width:1260px;margin:auto;padding:24px clamp(16px,4vw,56px) 72px}
+nav{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:18px}.mark{width:37px;height:37px;background:linear-gradient(130deg,#61c1ff,#9063ff);border-radius:12px;display:grid;place-items:center;font-size:23px}
+.nav-links{display:flex;gap:18px;color:#b8d4f2;font-size:14px;font-weight:750}
+.nav-links a:hover{color:white}
+.hero{padding:90px 0 62px;max-width:850px}.tag{color:#80d6ff;font-size:12px;letter-spacing:.22em;text-transform:uppercase;font-weight:900}
+h1{font-size:clamp(45px,7vw,86px);letter-spacing:-.064em;line-height:1.03;margin:20px 0}
+h1 span{background:linear-gradient(110deg,#8fdbff,#a89bff,#ffe0a1);background-clip:text;-webkit-background-clip:text;color:transparent}
+.hero p{max-width:680px;color:#c0d1e7;font-size:18px;line-height:1.65}
+.actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}
+.button{display:inline-block;padding:15px 20px;border-radius:12px;background:linear-gradient(110deg,#83d8ff,#a9a2ff);font-weight:900;color:#07182e}
+.button.secondary{background:#243e66;color:#d7ecff;border:1px solid #5577a4}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+h2{font-size:31px;letter-spacing:-.04em;margin:0}.section-head p{color:#9cb6d3;font-size:14px;margin:9px 0 0}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.card{display:block;background:#14243e;border:1px solid #365477;border-radius:20px;overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.card:hover{transform:translateY(-6px);border-color:#8dd8ff;box-shadow:0 18px 50px #0005}
+.art{height:220px;position:relative;overflow:hidden;display:grid;place-items:center;background:linear-gradient(150deg,#274884,#171f48)}
+.art .shape{width:100px;height:100px;border-radius:21px;background:#8cbcff;transform:rotate(-18deg);box-shadow:24px 25px 0 -4px #7c60ed,-30px -13px 0 -18px #ffdc80}
+.art.game{background:linear-gradient(140deg,#3a65b7,#1b2655)}
+.art.game:before{content:"";position:absolute;left:30%;top:52%;width:34%;height:22%;transform:skewY(-18deg);background:#60baff;box-shadow:105px -33px 0 #a68aff,190px -67px 0 #f7cf64}
+.art.game:after{content:"";position:absolute;left:36%;top:29%;width:30px;height:75px;border-radius:10px;background:#a58aff;box-shadow:0 -20px 0 -7px #fde68a}
+.art.video{background:radial-gradient(circle at center,#8158ff,#17274f 67%)}
+.art.video:before{content:"";width:170px;height:98px;border:9px solid #bfdcff;border-radius:18px;transform:rotate(-12deg);box-shadow:0 0 45px #7ba3ff}
+.art.video:after{content:"▶";position:absolute;font-size:40px;color:#fff}
+.art.code{background:linear-gradient(140deg,#18475d,#122342)}
+.art.code:after{content:".Main = ()";font:900 24px monospace;color:#9de9d0}
+.art.editor{background:linear-gradient(145deg,#283459,#182345)}
+.art.editor:after{content:"{   }";font:900 70px monospace;color:#8ce5ff}
+.art.preview{background:linear-gradient(145deg,#38446d,#1a2641)}
+.art.preview:after{content:"✦";font-size:100px;color:#b99bff}
+.details{padding:23px}.meta{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.16em;color:#80cfff}
+h3{font-size:21px;margin:9px 0;letter-spacing:-.02em}.details p{font-size:14px;line-height:1.6;color:#b2c6e1;min-height:66px}
+.card-link{font-size:13px;color:#b1e7ff;font-weight:800}.featured{grid-column:span 2}
+.featured .art{height:300px}
+.callout{margin-top:46px;padding:30px;border-radius:20px;background:linear-gradient(120deg,#233f74,#312962);border:1px solid #647abd}
+.callout h2{font-size:29px}.callout p{color:#d7e5fc;max-width:720px;line-height:1.7}
+footer{text-align:center;margin-top:50px;color:#8299b7;font-size:13px}
+@media(max-width:800px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.featured{grid-column:span 2}.hero{padding:65px 0 46px}}
+@media(max-width:540px){.cards{grid-template-columns:1fr}.featured{grid-column:span 1}.featured .art{height:220px}.hero{padding:50px 0}.nav-links{gap:12px}h3{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.card{transition:none}.card:hover{transform:none}}
+</style></head><body><div class="wrap">
+<nav><a href="./showcase.html" class="logo"><span class="mark">✦</span> HIROGLIFX <span style="font-size:11px;letter-spacing:.16em;color:#8cbdf8">SHOWCASE</span></a>
+<div class="nav-links"><a href="#projects">Explore</a><a href="./canonical-playground.html">Learn syntax</a><a href="https://github.com/dryty93/HiroGlifx_JS">GitHub</a></div></nav>
+<section class="hero"><div class="tag">Creative coding in the browser</div>
+<h1>Build worlds.<br><span>Make them move.</span></h1>
+<p>One expressive language for games, animations, and interactive experiences. Explore what HiroGlifx can already create—and follow the journey toward complete browser-made applications and games.</p>
+<div class="actions"><a class="button" href="./skybound.html">Play Skybound Obby</a><a class="button secondary" href="./creative-studio.html">Open Creative Studio</a></div></section>
+<section id="projects"><div class="section-head"><div><div class="tag">SELECTED BUILDS</div><h2>Explore the playgrounds</h2><p>Real demos from the HiroGlifx repository. More projects will be added as the platform grows.</p></div></div>
+<div class="cards">
+<a class="card featured" href="./skybound.html"><div class="art game" role="img" aria-label="Illustrated floating platforms"></div><div class="details"><div class="meta">Featured · 3D game</div><h3>Skybound Obby</h3><p>A five-stage floating obstacle challenge with moving platforms, lava, checkpoints, and time trials.</p><span class="card-link">Play game →</span></div></a>
+<a class="card" href="./creative-studio.html"><div class="art video" role="img" aria-label="Illustrated video player"></div><div class="details"><div class="meta">Creative tools</div><h3>Creative Studio</h3><p>Make 2D scenes, explore Babylon.js and Phaser, scrub timelines, and record browser video.</p><span class="card-link">Open studio →</span></div></a>
+<a class="card" href="./obby-playground.html"><div class="art editor" role="img" aria-label="Illustrated editor brackets"></div><div class="details"><div class="meta">Game development</div><h3>Obby Code Builder</h3><p>Edit a canonical HiroGlifx obstacle course and render the world directly in your browser.</p><span class="card-link">Edit a game →</span></div></a>
+<a class="card" href="./canonical-playground.html"><div class="art code" role="img" aria-label="HiroGlifx Main syntax"></div><div class="details"><div class="meta">Language</div><h3>Canonical Playground</h3><p>Learn typed variables, reusable object references, and animation controllers.</p><span class="card-link">Try code →</span></div></a>
+<a class="card" href="./playground-sandboxed.html"><div class="art preview" role="img" aria-label="Illustrated star representing sandbox preview"></div><div class="details"><div class="meta">Visual app building</div><h3>Sandboxed Playground</h3><p>Create simple reactive browser interfaces using declarative scroll commands.</p><span class="card-link">Open playground →</span></div></a>
+</div></section>
+<section class="callout"><div class="tag">WHAT'S NEXT</div><h2>A portfolio powered by HiroGlifx</h2>
+<p>The showcase is designed as a starting point for a future multi-project portfolio. It currently links to real HiroGlifx demo pages—not external apps that haven't been integrated. Future additions can include authored project entries, demos, videos, and source-code explorations.</p>
+<a class="button secondary" href="https://github.com/dryty93/HiroGlifx_JS">See the language source</a></section>
+<footer>HiroGlifx Showcase · Browser-first creative language · Demo gallery</footer>
+</div></body></html>
