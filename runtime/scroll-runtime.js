@@ -148,10 +148,14 @@
         case "browser.click":
         case "browser.type":
         case "browser.wait":
-        case "browser.screenshot": {
+        case "browser.screenshot":
+        case "browser.hover":
+        case "browser.press":
+        case "browser.scroll":
+        case "browser.read": {
           if (!this.browser) throw new Error("Browser adapter required");
           const action = command.split(".")[1];
-          requireArgs(args, action === "type" ? 2 : 1, command);
+          requireArgs(args, ["type","press"].includes(action) ? 2 : 1, command);
           if (typeof this.browser[action] !== "function") throw new Error("Browser method unavailable: " + action);
           if (action === "open") args[0] = safeUrl(args[0]);
           return this.browser[action](...args);
