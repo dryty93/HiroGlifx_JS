@@ -1,0 +1,78 @@
+// Skybound: game scoring, difficulty, combos, checkpoints and victory
+// are HiroGlifx rules. Babylon draws; the shared JS world engine handles contacts.
+.Main = ()
+    # score = 0;
+    # combo = 0;
+    # deaths = 0;
+    # jumps = 0;
+    # checkpoints = 0;
+    # stage = 1;
+    # elapsed = 0;
+    # runSpeed = 6;
+    # jumpForce = 9.8;
+    ? done = false;
+    $ message = "Run, jump and reach the golden gate.";
+
+    : tick(dt) = [
+        elapsed = elapsed + dt;
+        runSpeed = 6;
+        jumpForce = 9.8;
+        if stage == 2 [
+            runSpeed = 6.4;
+        ]
+        if stage == 3 [
+            runSpeed = 6.7;
+        ]
+        if stage == 4 [
+            runSpeed = 7;
+            jumpForce = 10.1;
+        ]
+        if stage == 5 [
+            runSpeed = 7.1;
+            jumpForce = 10.3;
+        ]
+        // Namespaced call to the reusable physics engine.
+        world_configure(runSpeed, jumpForce);
+    ]
+
+    : onStage(nextStage) = [
+        if nextStage > stage [
+            score = score + nextStage * 100;
+            combo = combo + 1;
+            stage = nextStage;
+            message = "Stage " + stage + " cleared! Combo " + combo;
+        ]
+        return score;
+    ]
+
+    : onCheckpoint() = [
+        checkpoints = checkpoints + 1;
+        score = score + 75 + combo * 20;
+        message = "Checkpoint saved! +" + (75 + combo * 20);
+        return score;
+    ]
+
+    : onJump() = [
+        jumps = jumps + 1;
+        return jumps;
+    ]
+
+    : onRespawn() = [
+        deaths = deaths + 1;
+        combo = 0;
+        score = max(0, score - 25);
+        message = "Respawned. Keep going!";
+        return deaths;
+    ]
+
+    : onFinish() = [
+        done = true;
+        score = score + max(150, 1500 - floor(elapsed * 10) - deaths * 50);
+        message = "Skybound conquered! Final score: " + score;
+        return score;
+    ]
+
+    : draw() = [
+        // Three-dimensional world is rendered by Babylon.js, not Canvas.
+    ]
+    break;
