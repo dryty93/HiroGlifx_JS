@@ -9,6 +9,7 @@ From repository root:
     node hiro.js package add examples/native-ui examples/native-ui-library
     node hiro.js check examples/native-ui
     node hiro.js dev examples/native-ui 3000
+    node hiro.js build examples/native-ui
 
 Open / for the landing page, /dashboard for the interactive dashboard, /form for the form. The package manager pins the package SHA-256 content hash and checks it at every build. Package add runs only once.
 
@@ -35,6 +36,10 @@ Element directives: element ID TAG PARENT, component CLASS ID PARENT, prop CHILD
 
 Styles supply dark tokens and a light override using data-hg-theme=light, responsive grids, focus-visible states, transitions, and reduced-motion support.
 
+## Static deployment
+
+The build command emits a dependency-free static site to examples/native-ui/dist, including index.html, dashboard/index.html, form/index.html and the native runtime asset. Serve that directory from the site root on any static host; route folders have their own index.html. Existing legacy pages are intentionally not compiled with this native UI-only build path. The compiled output contains the resolved, integrity-verified .scroll source, not JavaScript application components.
+
 ## Verify
 
     node --test tests/native-ui.test.js
@@ -44,4 +49,4 @@ Chromium e2e requires Playwright and its browser installed. The smoke test creat
 
 ## Limitations
 
-This explicitly selected UI dialect shares class declaration and override semantics with native game classes but does not yet unify the complete game and DOM AST/interpreter. It does not implement keyed diffing, generalized slots, async data, production static bundling, or custom CSS scoped per instance. Form submissions are local demos; no backend persistence. The Modal class is a reusable starting primitive, not a production focus-trapped dialog. Arbitrary expressions, portals, sophisticated animation timelines, full form validation, and HMR preserving state remain unsupported. Updates currently rebuild DOM and attempt to restore focus. These boundaries need additional work before the entire issue #63 acceptance criteria can be considered complete.
+This explicitly selected UI dialect shares class declaration and override semantics with native game classes but does not yet unify the complete game and DOM AST/interpreter. It does not implement keyed diffing, generalized slots, async data, or custom CSS scoped per instance. Form submissions are local demos; no backend persistence. The Modal class is a reusable starting primitive, not a production focus-trapped dialog. Arbitrary expressions, portals, sophisticated animation timelines, full form validation, and HMR preserving state remain unsupported. Updates currently rebuild DOM and attempt to restore focus. These boundaries need additional work before the entire issue #63 acceptance criteria can be considered complete.
