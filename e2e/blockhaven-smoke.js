@@ -26,6 +26,7 @@ async function run(){
   await page.waitForFunction(()=>window.HiroBlockhavenSnapshot?.()?.blocks>200,null,{timeout:90000});
   const before=await page.evaluate(()=>window.HiroBlockhavenSnapshot());
   assert.ok(before.blocks>200);
+  assert.equal(before.terrainRulesLoaded,true);
   await page.screenshot({path:path.join(out,"blockhaven-desktop.png"),fullPage:true});
   await page.getByRole("button",{name:/Enter Blockhaven/}).click();
   await page.keyboard.down("KeyW");await page.waitForTimeout(1200);await page.keyboard.up("KeyW");
@@ -41,6 +42,7 @@ async function run(){
   const beforeMine=await page.evaluate(()=>window.HiroBlockhavenSnapshot().edits);
   await page.locator("#mobileMine").click();
   await page.waitForFunction(previous=>window.HiroBlockhavenSnapshot?.()?.edits>previous,beforeMine,{timeout:5000});
+  assert.ok((await page.evaluate(()=>window.HiroBlockhavenSnapshot().builderScore))>0);
   await page.screenshot({path:path.join(out,"blockhaven-mobile.png"),fullPage:true});
   assert.deepEqual(errors,[],"No uncaught browser errors");
   console.log("Blockhaven Chromium QA passed");
