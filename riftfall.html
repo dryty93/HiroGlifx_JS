@@ -82,6 +82,7 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 <script src="./runtime/game-save.js"></script>
 <script src="./runtime/game-audio.js"></script>
 <script src="./runtime/game-fx.js"></script>
+<script src="./runtime/game-chapters.js"></script>
 <script src="./runtime/riftfall-campaign.js"></script>
 <script src="./runtime/riftfall-ui.js"></script>
 <script>
@@ -90,6 +91,7 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 const $=id=>document.getElementById(id);
 let demo=null,started=false,ui=null;
 window.HiroRiftfallContentSnapshot=()=>demo?.campaign?.snapshot()||null;
+window.HiroRiftfallChapterSnapshot=()=>demo?.campaign?.chapters?.snapshot()||null;
 window.HiroRiftfallSnapshot=()=>demo?.ready?demo.snapshot():null;
 function status(message){$("status").textContent=message;}
 function showOverlay(title,description,button){
@@ -99,12 +101,13 @@ function showOverlay(title,description,button){
 async function initialize(){
  $("start").disabled=true;status("Loading Havok and local glTF...");
  try{
-   const [response,contentResponse]=await Promise.all([
+   const [response,contentResponse,chapterResponse]=await Promise.all([
      fetch("./examples/steam-rpg-combat.scroll",{cache:"no-store"}),
-     fetch("./examples/riftfall-content.scroll",{cache:"no-store"})
+     fetch("./examples/riftfall-content.scroll",{cache:"no-store"}),
+     fetch("./examples/riftfall-chapters.scroll",{cache:"no-store"})
    ]);
-   if(!response.ok||!contentResponse.ok)throw Error("HiroGlifx combat/content source unavailable");
-   const source=await response.text(),contentSource=await contentResponse.text();
+   if(!response.ok||!contentResponse.ok||!chapterResponse.ok)throw Error("HiroGlifx combat/content/chapter source unavailable");
+   const source=await response.text(),contentSource=await contentResponse.text(),chapterSource=await chapterResponse.text();
    $("source").textContent=source;
    if(ui){ui.dispose();ui=null;}
    if(demo)demo.dispose();
@@ -121,9 +124,9 @@ async function initialize(){
      }});
    await demo.initialize();
    const storage=(()=>{try{return localStorage;}catch{return null;}})();
-   new HiroRiftfallCampaign.RiftfallCampaign({demo,source:contentSource,storage,onChange:(_snapshot,e)=>{if(e.type!=="inventory")status(e.message);}});
+   new HiroRiftfallCampaign.RiftfallCampaign({demo,source:contentSource,chapterSource,storage,onChange:(_snapshot,e)=>{if(e.type!=="inventory")status(e.message);}});
    ui=new HiroRiftfallUI.RiftfallUI({stage:document.querySelector(".stage"),
-      toolbar:document.querySelector(".toolbar"),source:$("source"),combatSource:source,contentSource,
+      toolbar:document.querySelector(".toolbar"),source:$("source"),combatSource:source,contentSource,chapterSource,
       getDemo:()=>demo,status});
    $("start").disabled=false;$("start").textContent="▶ Enter the arena";
    status("Ready. "+demo.assetStatus);
