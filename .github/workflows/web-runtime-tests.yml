@@ -21,6 +21,8 @@ jobs:
           node --check runtime/obby-world.js
           node --check runtime/skybound-world.js
           node --check tests/skybound.test.js
+          node --check tests/skybound-course-path.test.js
+          node --check e2e/skybound-smoke.js
           node --check runtime/obby-canonical.js
           node --check runtime/obby-babylon.js
           node --check tests/obby-canonical.test.js
