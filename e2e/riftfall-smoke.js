@@ -66,6 +66,12 @@ async function run(){
    await page.locator("#loadButton").click();
    await page.screenshot({path:path.join(out,"riftfall-intro-desktop.png"),fullPage:true});
    await page.getByRole("button",{name:/Enter the arena/}).click();
+   assert.equal(await page.locator("#evade").isVisible(),true);
+   assert.equal(await page.locator("#parry").isVisible(),true);
+   assert.equal(typeof (await page.evaluate(()=>window.HiroRiftfallSnapshot().defense.evading)),"boolean");
+   await page.locator("#evade").click();
+   assert.match(await page.locator("#status").innerText(),/Evade/);
+
    await page.screenshot({path:path.join(out,"riftfall-rigged-game.png"),fullPage:true});
    const raidersBefore=await page.evaluate(()=>window.HiroRiftfallSnapshot()?.raiders);
    await page.waitForFunction(previous=>{
