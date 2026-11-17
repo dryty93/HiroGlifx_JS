@@ -72,7 +72,7 @@ function buildProject(project,destination=path.join(project,"dist")){
   const source=resolveSource(project,fs.readFileSync(file,"utf8"));
   if(!/^ui application$/m.test(source))throw new Error("Static build currently supports native UI pages only");
   const relative=file===files[0]?"index.html":path.join(path.basename(file,".scroll"),"index.html");
-  const markup='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HiroGlifx</title></head><body><main id="app"></main><script src="/assets/native-ui.js"></script><script>(function(){"use strict";const host=document.getElementById("app");new HiroNativeUI.NativeUIRuntime({document,mount:host}).execute('+
+  const markup='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HiroGlifx</title></head><body><div id="app"></div><script src="/assets/native-ui.js"></script><script>(function(){"use strict";const host=document.getElementById("app");new HiroNativeUI.NativeUIRuntime({document,mount:host}).execute('+
   JSON.stringify(source).replace(/</g,"\\u003c")+
   ');})();</script></body></html>';
   const dest=path.join(destination,relative);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,markup);output.push(dest);
