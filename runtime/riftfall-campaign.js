@@ -51,7 +51,7 @@ class RiftfallCampaign{
  tick(dt){
    this.content.rules.tick(dt);this.fx.tick(dt);
    const p=this.demo.character?.position;
-   if(p&&!this.reachedWatchtower&&p.z< -9&&Math.abs(p.x)<5){
+   if(p&&!this.reachedWatchtower&&p.z< -23&&Math.abs(p.x)<5){
      this.reachedWatchtower=true;
      this.content.reach("watchtower");this.audio.play("quest");
      this.emit("explore","Discovered the old watchtower");
@@ -131,7 +131,7 @@ class RiftfallCampaign{
  saveData(){
    const demo=this.demo,p=demo.character.position,hero=demo.combat.actor("hero");
    return {position:{x:p.x,y:p.y,z:p.z},health:hero.health,stamina:hero.stamina,
-     kills:demo.rules.get("kills"),wave:1,elapsed:demo.rules.get("elapsed"),
+     kills:demo.rules.get("kills"),wave:demo.wave,elapsed:demo.rules.get("elapsed"),
      inventory:this.content.inventory.snapshot(),quests:this.content.quests.snapshot(),
      raiders:demo.enemies.map(e=>{
        const a=demo.combat.actor(e.id);
@@ -152,6 +152,7 @@ class RiftfallCampaign{
    // Validate the entire saved progression before touching the live world.
    const previous=this.content.serialize();
    this.content.restore({inventory:saved.inventory,quests:saved.quests});
+   if(saved.wave>this.demo.wave)this.demo.ensureWave(saved.wave);
    try{
      const expected=new Set(demo.enemies.map(e=>e.id));
      if(saved.raiders.length!==expected.size||saved.raiders.some(r=>!expected.has(r.id)))
@@ -173,6 +174,8 @@ class RiftfallCampaign{
      }
      const rule=demo.rules.state.get("kills");
      if(rule)demo.rules.state.set("kills",{...rule,value:saved.kills});
+     const victory=demo.rules.state.get("done");
+     if(victory)demo.rules.state.set("done",{...victory,value:saved.kills>=7});
      const time=demo.rules.state.get("elapsed");
      if(time)demo.rules.state.set("elapsed",{...time,value:saved.elapsed});
      this.applyEquipment();this.reachedWatchtower=this.content.quests.entries.get("explorer")?.progress[0]>=1;
