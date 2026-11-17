@@ -52,6 +52,8 @@ async function main(){
      await range.waitFor();
      await range.evaluate(el=>{el.value="75";el.dispatchEvent(new Event("input",{bubbles:true}));});
      await page.waitForFunction(()=>[...document.querySelectorAll(".hg-compare")].some(el=>el.style.getPropertyValue("--hg-wipe")==="75"));
+     await range.focus();await page.keyboard.press("ArrowRight");
+     await page.waitForFunction(()=>[...document.querySelectorAll(".hg-compare")].some(el=>el.style.getPropertyValue("--hg-wipe")==="76"));
      assert(await page.locator(".hg-sticky-pane").count()===1);
     }
     if(route==="catalog-conversion"){
