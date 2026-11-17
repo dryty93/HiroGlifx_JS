@@ -35,6 +35,11 @@
      this.jumpBuffer=0;
      this.coyote=0;
      this.completedAt=null;
+     this.fixedStep=1/120;
+     this._accumulator=0;
+     this._motionX=0;this._motionZ=0;
+     this.groundAcceleration=28;this.airAcceleration=16;
+     this.groundFriction=33;this.airFriction=7;
    }
    tile(id,x,y,z,size=3,kind="solid",stage=1){
      const tile=super.tile(id,x,y,z,size,kind);
@@ -79,11 +84,24 @@
      const p=super.reset.call(this);
      this.jumpBuffer=0;this.coyote=0;
      this.telemetry.fallCount++;
+     this._motionX=0;this._motionZ=0;this._accumulator=0;
+     p.motionX=0;p.motionZ=0;
      return p;
    }
    step(dt){
      const delta=valid(dt,0,.05,"frame delta");
      if(!delta||this.completed)return;
+     // Fixed 120 Hz physics with an accumulator avoids jump-height and collision
+     // changes when the browser renders at 30, 60 or 120 FPS.
+     this._accumulator+=delta;
+     let steps=0;
+     while(this._accumulator>=this.fixedStep-1e-9&&steps<8&&!this.completed){
+       this._simulate(this.fixedStep);
+       this._accumulator=Math.max(0,this._accumulator-this.fixedStep);
+       steps++;
+     }
+   }
+   _simulate(delta){
      const p=this.player;
      if(!p)throw new Error("Player not spawned");
      const priorGround=p.grounded;
@@ -96,26 +114,48 @@
          oldPositions.set(id,{x:tile.x,z:tile.z});
          const phase=this.motionTime*Math.PI*2/mod.period;
          if(mod.type==="moving")tile[mod.axis]=mod.origin+Math.sin(phase)*mod.range;
-         else {
+         else{
            tile.x=mod.centerX+Math.sin(phase)*mod.range;
            tile.z=mod.centerZ+Math.cos(phase)*mod.range;
          }
        }else if(mod.type==="vanishing"){
-         if(mod.started!==null && this.motionTime-mod.started>=mod.delay){
+         if(mod.started!==null&&this.motionTime-mod.started>=mod.delay){
            tile.active=false;mod.started=null;mod.inactiveUntil=this.motionTime+2.3;
          }
          if(!tile.active&&this.motionTime>=mod.inactiveUntil)tile.active=true;
        }
      }
+     // Treat the platform as the supporting coordinate frame before integrating movement.
      if(priorGround&&p.standing&&oldPositions.has(p.standing)){
        const before=oldPositions.get(p.standing),current=this.tiles.get(p.standing);
        p.x+=current.x-before.x;p.z+=current.z-before.z;
      }
-     this.coyote=priorGround ? 0.10 : Math.max(0,this.coyote-delta);
+     const targetX=p.vx,targetZ=p.vz;
+     const inputMagnitude=Math.hypot(targetX,targetZ);
+     const speed=this.moveSpeed;
+     const accelerate=(current,target,rate)=>{
+       const difference=target-current;
+       const maximum=rate*delta;
+       return current+Math.max(-maximum,Math.min(maximum,difference));
+     };
+     const rate=(inputMagnitude>.001?(priorGround?this.groundAcceleration:this.airAcceleration):
+       (priorGround?this.groundFriction:this.airFriction));
+     this._motionX=accelerate(this._motionX,targetX*speed,rate);
+     this._motionZ=accelerate(this._motionZ,targetZ*speed,rate);
+     // Base ObbyWorld integrates p.vx/p.vz as normalized input. Feed it the smoothed
+     // motion, then restore the caller's input for the following fixed frame.
+     p.vx=this._motionX/speed;p.vz=this._motionZ/speed;
+     this.coyote=priorGround?0.10:Math.max(0,this.coyote-delta);
      this.jumpBuffer=Math.max(0,this.jumpBuffer-delta);
+     const deathCount=this.dead;
      super.step(delta);
+     if(this.dead===deathCount){
+       p.vx=targetX;p.vz=targetZ;
+     }
+     p.motionX=this._motionX;p.motionZ=this._motionZ;
      if(this.player.grounded&&this.jumpBuffer>0){
-       this.jumpBuffer=0;this.jump();
+       this.jumpBuffer=0;
+       this.jump();
      }
      const standing=this.tiles.get(this.player.standing);
      if(standing){
