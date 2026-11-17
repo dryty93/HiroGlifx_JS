@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HiroGlifx Canonical Syntax Preview</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0b1220;color:#e9f1ff;font:15px system-ui;padding:26px}
+main{max-width:1140px;margin:auto}header{display:flex;gap:15px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:17px;margin-top:18px}
+textarea{width:100%;height:455px;border:1px solid #3f5676;background:#122039;color:#d0efff;padding:17px;border-radius:13px;font:14px/1.75 monospace}
+#stage{background:#101827;border:1px solid #3f5676;border-radius:13px;height:455px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+button{background:#60a5fa;color:#081b33;border:0;border-radius:10px;padding:11px 20px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5}#status{min-height:23px;color:#a6ead0}p{color:#b3c5df}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1>HiroGlifx · Canonical Syntax</h1><p>Declare typed values and reusable animation controllers, all in browser-native JavaScript.</p></div><button id="run">Run scroll</button></header>
+<div class="grid"><section><h2>HiroGlifx editor</h2>
+<textarea id="source" spellcheck="false">.Main = ()
+    # speed = 5;
+    $ title = "My Animation";
+    ? active = true;
+    & hero = box("hero", 90, 90, "blue");
+    & intro = bounce(hero, 900);
+    intro.loop();
+    intro.play();
+    break;</textarea></section><section>
+<h2>Live output</h2><div id="stage"><h3>Animation preview</h3><div id="mount"></div>
+<div><button id="play">Play</button> <button id="pause">Pause</button> <button id="reverse">Reverse</button></div>
+<p id="status" role="status">Ready</p></div></section></div>
+<p>This is a canonical-subset playground. Existing command-style app pages and the original symbolic VM remain separate during migration.</p>
+</main>
+<script src="./runtime/scroll-runtime.js"></script>
+<script src="./runtime/canonical-runtime.js"></script>
+<script>
+(function(){
+"use strict";
+const source=document.querySelector("#source"),mount=document.querySelector("#mount"),status=document.querySelector("#status");
+let runtime;
+async function run(){
+ if(runtime)runtime.dispose();
+ mount.replaceChildren();
+ runtime=new HiroCanonical.CanonicalRuntime({document,mount});
+ try{await runtime.execute(source.value);status.textContent="Program ran successfully";}
+ catch(error){status.textContent=error.message;}
+}
+document.querySelector("#run").addEventListener("click",run);
+for(const name of ["play","pause","reverse"]){
+ document.querySelector("#"+name).addEventListener("click",()=>{
+   try{
+     if(!runtime)throw new Error("Run the program first");
+     const controller=runtime.get("intro");
+     if(!controller)throw new Error("Assign an animation to & intro first");
+     controller[name]();status.textContent="intro."+name+"()";
+   }catch(error){status.textContent=error.message;}
+ });
+}
+run();
+})();
+</script></body></html>

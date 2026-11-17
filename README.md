@@ -17,6 +17,50 @@ node hiro.js dev my-app
 
 Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
 
+## Canonical variable syntax — Phase 13
+
+The **new canonical-expression subset** brings typed variable declarations back to HiroGlifx's symbolic `.Main = ()` style. A shorthand may execute immediately or return a reusable object:
+
+```scroll
+.Main = ()
+    # speed = 5;
+    $ title = "HiroGlifx";
+    ? active = true;
+    & hero = box("hero", 90, 90, "blue");
+    & intro = bounce(hero, 900);
+    intro.loop();
+    intro.play();
+    intro.pause();
+    intro.reverse();
+    spin(hero, 500);
+    break;
+```
+
+**Rule:** `bounce(hero, 900);` plays at once. `& intro = bounce(hero, 900);` creates a reusable controller, but doesn't play until `intro.play()` is called. Symbol meanings: `#` number, `# HiroGlifx
+
+**A tiny, extensible language for interactive web apps, animations, and browser workflows.**
+
+HiroGlifx is a JavaScript-powered experimental language with a legacy symbolic VM and a newer beginner-friendly scroll runtime. It is a **local development preview**, not a production-hardened framework.
+
+## Quick start
+
+Requires Node.js 20+.
+
+~~~bash
+git clone https://github.com/dryty93/HiroGlifx_JS.git
+cd HiroGlifx_JS
+node hiro.js init my-app
+node hiro.js dev my-app
+~~~
+
+Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
+
+ string, `?` boolean, `&` object.
+
+To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonical-playground.html](canonical-playground.html) locally. Alternatively replace your `app.scroll` with canonical `.Main = ()` code and run `node hiro.js check my-app` and `node hiro.js dev my-app`; the dev server now dispatches to the corresponding runtime.
+
+This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
+
 ## Browser games, 3D scenes and video — Creative Studio
 
 Open `creative-studio.html` from a local static server to experiment with simple playable scenes, animation tracks and browser-recorded WebM videos. Choose **Canvas 2D**, **Phaser 4**, or **Babylon.js 3D**. The latter two are real browser engines loaded on demand.
