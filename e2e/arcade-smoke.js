@@ -20,7 +20,7 @@ async function run(){
   const page=await browser.newPage({viewport:{width:1400,height:950},deviceScaleFactor:1});
   const errors=[];page.on("pageerror",e=>errors.push(e.message));
   await page.goto(base+"/arcade.html",{waitUntil:"domcontentloaded"});
-  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes('arcade_game("pong")'));
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)") && window.HiroArcadeSnapshot?.()?.sourceMode==="native-scroll");
   assert.equal(await page.locator(".game-tab").count(),6);
   await page.getByRole("button",{name:"Play",exact:false}).first().click();
   await page.keyboard.down("ArrowDown");await page.waitForTimeout(220);await page.keyboard.up("ArrowDown");
