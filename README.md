@@ -94,6 +94,24 @@ Arrays, indexed operations, nested bounded `for`/`while` loops, custom methods, 
 **Blockhaven's source viewer** continues to show its actual `.scroll` initialization, but the voxel game logic is still in host JavaScript; it has *not* been ported to native `.scroll` game scripts.
 
 
+## Phase 29 — Offline desktop packaging (Electron / Steam preparation)
+
+An experimental [Riftfall desktop project](desktop/README.md) stages the full RPG **offline** with pinned, locally bundled Babylon.js, glTF loaders, Havok JS/WASM, all engine modules, the authored `.scroll` files and the original skinned glTF. The staging step checks exact dependency versions, replaces CDN scripts, supplies a restrictive Content Security Policy and records SHA-256 hashes.
+
+```bash
+cd desktop
+npm install
+npm run stage
+npm run validate
+npm run dev
+# macOS DMG/ZIP, Windows NSIS or Linux AppImage (on appropriate host):
+npm run dist
+```
+
+A sandboxed Electron custom protocol blocks external URLs, window creation and permission requests. The **desktop game intentionally uses the A* navigation fallback** instead of bundling an unverified Recast dependency; the HUD reflects the actual mode. CI stages the game and runs real Chromium tests with external network requests blocked, plus an unsigned Linux packaging smoke test.
+
+**This is an unsigned/offline packaging prototype, not a signed, notarized or Steamworks-certified release.** Steam onboarding, actual AppIDs, SteamPipe upload, store assets, achievements, cloud saves and binary signing require separate authorized work. See [desktop packaging details](desktop/README.md).
+
 ## Riftfall Phase 28 — Three chapters, rigged hero and navmesh support
 
 Riftfall now draws three connected Havok-colliding environments, runs **seven** enemy encounters across Ashen Clearing, Fallen Forge and Obsidian Gate, and displays current chapter progression in its HUD. Every region, enemy stat and spawn point is authored in [HiroGlifx `.scroll`](examples/riftfall-levels.scroll); the [quest catalog](examples/riftfall-content.scroll) and [combat victory rules](examples/steam-rpg-combat.scroll) have been updated to match.
