@@ -20,7 +20,7 @@ const requiredProjectFiles=[
  "runtime/game-fx.js","runtime/game-chapters.js","runtime/riftfall-campaign.js",
  "runtime/riftfall-ui.js"
 ];
-const vendorFiles=[...Object.values(external),"vendor/HavokPhysics.wasm","vendor/recast.wasm"];
+const vendorFiles=[...Object.values(external),"vendor/HavokPhysics.wasm"];
 function hash(buffer){return crypto.createHash("sha256").update(buffer).digest("hex");}
 function stage({root=path.resolve(__dirname,".."),vendorRoot=path.join(root,"vendor"),
  output=path.join(root,"dist","riftfall")}={}){
@@ -29,9 +29,17 @@ function stage({root=path.resolve(__dirname,".."),vendorRoot=path.join(root,"ven
     !output.startsWith(root+path.sep))throw Error("Unsafe desktop output directory");
  const missing=requiredProjectFiles.filter(file=>!fs.existsSync(path.join(root,file)));
  const absent=vendorFiles.filter(file=>!fs.existsSync(path.join(vendorRoot,path.basename(file))));
+ if(!fs.existsSync(path.join(vendorRoot,"vendor-lock.json")))absent.push("vendor/vendor-lock.json");
  if(missing.length||absent.length)throw Error(
    "Offline package blocked. Missing project files: "+(missing.join(", ")||"none")+
    "; missing vetted vendor assets: "+(absent.join(", ")||"none"));
+ const lock=JSON.parse(fs.readFileSync(path.join(vendorRoot,"vendor-lock.json"),"utf8"));
+ if(lock.source!=="pinned-npm"||!lock.files||typeof lock.files!=="object")throw Error("Invalid vendor lock metadata");
+ for(const file of vendorFiles){
+   const basename=path.basename(file),entry=lock.files[basename],bytes=fs.readFileSync(path.join(vendorRoot,basename));
+   if(!entry||entry.sha256!==hash(bytes)||entry.bytes!==bytes.length)throw Error("Vendor checksum mismatch: "+basename);
+   if(basename.endsWith(".wasm")&&!WebAssembly.validate(bytes))throw Error("Vendor WASM failed validation: "+basename);
+ }
  if(fs.existsSync(output))fs.rmSync(output,{recursive:true,force:true});
  fs.mkdirSync(output,{recursive:true});
  const manifest={kind:"hiroglifx-riftfall-offline-preview",files:{}};
@@ -40,7 +48,7 @@ function stage({root=path.resolve(__dirname,".."),vendorRoot=path.join(root,"ven
    fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,bytes);
    manifest.files[file]=hash(bytes);
  }
- for(const file of vendorFiles){
+ for(const file of [...vendorFiles,"vendor/vendor-lock.json"]){
    const bytes=fs.readFileSync(path.join(vendorRoot,path.basename(file))),destination=path.join(output,file);
    fs.mkdirSync(path.dirname(destination),{recursive:true});fs.writeFileSync(destination,bytes);
    manifest.files[file]=hash(bytes);
