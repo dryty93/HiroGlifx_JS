@@ -17,7 +17,7 @@ function fakeDOM(){
   appendChild(node){this.children.push(node);return node;},
   remove(){this.removed=true;},
   replaceChildren(...items){this.children=[...items];},
-  setAttribute(k,v){this.attributes[k]=v;},
+  setAttribute(k,v){this.attributes[k]=v;if(k==="type")this.type=v;},
   addEventListener(k,v){this.listeners[k]=v;},removeEventListener(k){delete this.listeners[k];},
   focus(){doc.activeElement=this;}
  });
