@@ -8,7 +8,7 @@ function page(name){return fs.readFileSync(path.join(ROOT,"examples/native-ui",n
 function makeProject(){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-"));
  fs.mkdirSync(path.join(dir,"pages"));fs.copyFileSync(path.join(ROOT,"examples/native-ui/app.scroll"),path.join(dir,"app.scroll"));
- for(const name of ["dashboard","form","experiences","studio","catalog","catalog-heroes","catalog-portfolios","catalog-stories","catalog-conversion","showcase"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
+ for(const name of ["dashboard","form","experiences","studio","catalog","catalog-heroes","catalog-portfolios","catalog-stories","catalog-conversion","showcase","raindrop-inspiration"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
  installLocal(dir,path.join(ROOT,"examples/native-ui-library"));return dir;
 }
 function fakeDOM(){
@@ -70,8 +70,8 @@ test("text escaping, malicious attributes, handlers and input form events",()=>{
 test("production build emits standalone route pages without unsafe inline source injection",()=>{
  const {buildProject}=require("../hiro");const dir=makeProject();
  try{
-  const files=buildProject(dir);assert.equal(files.length,11);
-  for(const route of ["index.html","dashboard/index.html","form/index.html","experiences/index.html","studio/index.html","catalog/index.html","catalog-heroes/index.html","catalog-portfolios/index.html","catalog-stories/index.html","catalog-conversion/index.html","showcase/index.html"]){
+  const files=buildProject(dir);assert.equal(files.length,12);
+  for(const route of ["index.html","dashboard/index.html","form/index.html","experiences/index.html","studio/index.html","catalog/index.html","catalog-heroes/index.html","catalog-portfolios/index.html","catalog-stories/index.html","catalog-conversion/index.html","showcase/index.html","raindrop-inspiration/index.html"]){
    const content=fs.readFileSync(path.join(dir,"dist",route),"utf8");
    assert(content.includes("HiroNativeUI.NativeUIRuntime"));
    assert(content.includes("/assets/native-ui.js"));
@@ -131,11 +131,11 @@ test("one-command UI starter installs the experience package and all preview rou
  const parent=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-starter-")),dir=path.join(parent,"new-studio");
  try{
   makeNativeProject(dir);
-  assert.equal(validateProject(dir),11);
+  assert.equal(validateProject(dir),12);
   assert(fs.existsSync(path.join(dir,"hiro.lock.json")));
   assert(fs.existsSync(path.join(dir,"packages/native-ui/main.scroll")));
   assert(fs.existsSync(path.join(dir,"assets/studio-placeholder.svg")));
-  assert.equal(buildProject(dir).length,11);
+  assert.equal(buildProject(dir).length,12);
  }finally{fs.rmSync(parent,{recursive:true,force:true});}
 });
 
@@ -210,12 +210,12 @@ test("all-experiences showroom covers every exported native UI class, including 
  const names=[...compile(LIB).classes.keys()];
  const missing=names.filter(name=>!instantiated.includes(name));
  assert.deepEqual(missing,[],"all exported classes must have a live preview");
- assert.equal(names.length,66);
- assert.equal(new Set(instantiated).size,66,"all components present at least once");
+ assert.equal(names.length,84);
+ assert.equal(new Set(instantiated).size,84,"all components present at least once");
  const anchorSteps=steps.filter(step=>step.op==="attr"&&step.args[1]==="id"&&step.args[2].startsWith("hg-showcase-"));
- assert.equal(anchorSteps.length,7,"seven jump-to-category anchors");
+ assert.equal(anchorSteps.length,8,"eight jump-to-category anchors");
  const codeExamples=steps.filter(step=>step.op==="class"&&step.args[1]==="hg-showcase-code");
- assert.equal(codeExamples.length,66,"one native source snippet for each class");
+ assert.equal(codeExamples.length,84,"one native source snippet for each class");
 });
 test("native class showroom is importable and valid for a fully built starter",()=>{
  const dir=makeProject();
@@ -236,7 +236,7 @@ test("unsafe showcase anchor ids are rejected",()=>{
 });
 
 
-test("full 66-class showroom mounts and unmounts every native component in the DOM host",()=>{
+test("full 84-class showroom mounts and unmounts every native component in the DOM host",()=>{
  const dir=makeProject();
  try{
   const dom=fakeDOM();
@@ -245,8 +245,37 @@ test("full 66-class showroom mounts and unmounts every native component in the D
   const rendered=new Set(dom.nodes.map(node=>node.dataset.hiroComponent).filter(Boolean));
   const expected=[...compile(LIB).classes.keys()];
   assert.deepEqual(expected.filter(name=>!rendered.has(name)),[],"missing DOM component instance");
-  assert.equal(dom.nodes.filter(node=>node.tagName==="PRE").length,66);
+  assert.equal(dom.nodes.filter(node=>node.tagName==="PRE").length,84);
   ui.dispose();
   assert.equal(dom.mount.children.length,0);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test("Raindrop collection adds original native components with real typed state actions",()=>{
+ const classes=compile(LIB).classes;
+ const names=["AnnouncementRibbon","MegaNavigation","FullscreenNavigation","BreadcrumbTrail","SidebarWorkspace","CommandPalette","RewardCardPack","IdleMascot","HoverCardStack","SkeletonMorph","ShimmerHeadline","GradientMeshBackground","SuccessBurst","MotionButtonRow","AnimatedPillTabs","ToastNotification","DashboardAnalytics","StarRating"];
+ assert.equal(names.length,18);
+ for(const name of names){
+  const cls=classes.get(name);
+  assert(cls&&cls.methods.has("render"),"missing native component "+name);
+ }
+ assert(classes.get("RewardCardPack").fields.has("revealed"));
+ assert(classes.get("IdleMascot").methods.has("render"));
+ assert(classes.get("MegaNavigation").methods.has("toggleMenu"));
+ assert(classes.get("StarRating").methods.has("rate4"));
+});
+test("Raindrop inspiration route imports and renders all 18 originals",()=>{
+ const dir=makeProject();
+ try{
+  const src=resolveSource(dir,page("pages/raindrop-inspiration.scroll"));
+  const compiled=compile(src),ops=compiled.classes.get("Main").methods.get("render");
+  const names=ops.filter(op=>op.op==="component").map(op=>op.args[0]);
+  const curated=["AnnouncementRibbon","MegaNavigation","FullscreenNavigation","BreadcrumbTrail","SidebarWorkspace","CommandPalette","RewardCardPack","IdleMascot","HoverCardStack","SkeletonMorph","ShimmerHeadline","GradientMeshBackground","SuccessBurst","MotionButtonRow","AnimatedPillTabs","ToastNotification","DashboardAnalytics","StarRating"];
+  for(const name of curated)assert(names.includes(name),"missing preview "+name);
+  const dom=fakeDOM(),runtime=new NativeUIRuntime(dom).execute(src);
+  const rendered=new Set(dom.nodes.map(node=>node.dataset.hiroComponent).filter(Boolean));
+  for(const name of curated)assert(rendered.has(name),"not mounted "+name);
+  runtime.dispose();
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
