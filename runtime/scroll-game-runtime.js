@@ -166,11 +166,12 @@
    sin:Math.sin,cos:Math.cos
  };
  class ScrollGame{
-   constructor(source,{name="game"}={}){
+   constructor(source,{name="game",classes=null}={}){
      this.program=parseProgram(source);this.source=source;
      this.kind="arcade-game";this.name=name;this.width=800;this.height=520;
      this.keys=new Set();this.pointer=null;this.elapsed=0;this.ctx=null;
      this.randomState=7919;this.callDepth=0;
+     this.classes=classes;
      this.reset();
    }
    typeOf(value){return Array.isArray(value)?"object":typeof value;}
