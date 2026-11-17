@@ -488,7 +488,7 @@ ui library
     $ alt = "Abstract gradient artwork";
     : render(self) = [
         element tile article root;
-        class tile "hg-bento-tile hg-bento-tall";
+        class tile "hg-bento-tile hg-bento-tall hg-photo-tile";
         motion tile hover-rise;
         element photo img tile;
         class photo "hg-image";
