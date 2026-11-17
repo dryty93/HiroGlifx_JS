@@ -144,6 +144,19 @@ async function main(argv=process.argv.slice(2)){
     }
     throw Error("Unknown UI command "+action);
   }
+  if(command==="showcase"){
+    const os=require("node:os");
+    const temp=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-showcase-"));
+    try{
+      makeNativeProject(temp);
+      const port=location===undefined?3000:Number(location);
+      const live=await serveProject(temp,port,{watch:false});
+      process.once("exit",()=>fs.rmSync(temp,{recursive:true,force:true}));
+      console.log("HiroGlifx showcase: http://127.0.0.1:"+live.server.address().port+"/showcase");
+      console.log("All components are loaded from the verified native-ui package. Ctrl+C to stop.");
+      return live;
+    }catch(error){fs.rmSync(temp,{recursive:true,force:true});throw error;}
+  }
   if(command==="package"){
     const [action,projectDir,arg]=[location,rest[0],rest[1]];
     if(!projectDir)throw new Error("Usage: hiro package <add|remove|list> <project> [path|name]");
@@ -188,7 +201,7 @@ async function main(argv=process.argv.slice(2)){
     console.log("HiroGlifx app: http://127.0.0.1:"+live.server.address().port);
     return live;
   }
-  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro ui list <project>\n  hiro ui add <project> <Component> <route>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
+  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro showcase [port]\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro ui list <project>\n  hiro ui add <project> <Component> <route>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
 }
 if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
 module.exports={main,makeProject,makeNativeProject,validateProject,buildProject,uiClasses,createUIPage};
