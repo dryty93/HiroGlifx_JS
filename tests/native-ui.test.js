@@ -8,7 +8,7 @@ function page(name){return fs.readFileSync(path.join(ROOT,"examples/native-ui",n
 function makeProject(){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-"));
  fs.mkdirSync(path.join(dir,"pages"));fs.copyFileSync(path.join(ROOT,"examples/native-ui/app.scroll"),path.join(dir,"app.scroll"));
- for(const name of ["dashboard","form"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
+ for(const name of ["dashboard","form","experiences","studio"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
  installLocal(dir,path.join(ROOT,"examples/native-ui-library"));return dir;
 }
 function fakeDOM(){
@@ -70,12 +70,23 @@ test("text escaping, malicious attributes, handlers and input form events",()=>{
 test("production build emits standalone route pages without unsafe inline source injection",()=>{
  const {buildProject}=require("../hiro");const dir=makeProject();
  try{
-  const files=buildProject(dir);assert.equal(files.length,3);
-  for(const route of ["index.html","dashboard/index.html","form/index.html"]){
+  const files=buildProject(dir);assert.equal(files.length,5);
+  for(const route of ["index.html","dashboard/index.html","form/index.html","experiences/index.html","studio/index.html"]){
    const content=fs.readFileSync(path.join(dir,"dist",route),"utf8");
    assert(content.includes("HiroNativeUI.NativeUIRuntime"));
    assert(content.includes("/assets/native-ui.js"));
   }
   assert(fs.readFileSync(path.join(dir,"dist/assets/native-ui.js"),"utf8").includes("NativeUIRuntime"));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test("experience components compile with inherited visual variants and safe declarative effects",()=>{
+ const classes=compile(LIB).classes;
+ assert(classes.has("CinematicHero")&&classes.has("BentoShowcase")&&classes.has("ShowcaseCarousel"));
+ assert(classes.has("PricingPanel")&&classes.has("FAQItem")&&classes.has("PhotoTile"));
+ assert.notEqual(classes.get("EditorialHero").methods.get("render"),classes.get("CinematicHero").methods.get("render"));
+ assert.notEqual(classes.get("BentoWide").methods.get("render"),classes.get("BentoTile").methods.get("render"));
+ assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n motion panel javascript;\n ]\n break;'),/Invalid render command/);
+ assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n attr panel style "background:url(javascript:evil)";\n ]\n break;'),/Invalid render command/);
 });
