@@ -21,7 +21,7 @@ async function main(){
     await page.locator('[data-hiro-component="Main"]').waitFor();
     await page.waitForFunction(()=>document.querySelectorAll('[data-hiro-component]').length>=3);
     assert.equal(await page.getByRole("main").count(),1,"one main landmark");
-    const overflow=await page.evaluate(()=>({body:document.body.scrollWidth,viewport:innerWidth}));
+    const overflow=await page.evaluate(()=>({body:document.body.scrollWidth,viewport:innerWidth,offenders:[...document.querySelectorAll("body *")].filter(el=>{const rect=el.getBoundingClientRect();return rect.width>0&&(rect.right>innerWidth+2||rect.left< -2);}).slice(0,10).map(el=>({tag:el.tagName,id:el.id,cls:String(el.className),right:Math.round(el.getBoundingClientRect().right)}))}));
     assert(overflow.body<=overflow.viewport+2,route+" "+width+" horizontal overflow "+JSON.stringify(overflow));
     // Scroll all chapters into view before capturing a full-page screenshot.
     // The production reveal effect is intentionally viewport-driven; an immediate
