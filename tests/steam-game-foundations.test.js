@@ -71,7 +71,8 @@ test("Phase 25: armor, range, stamina, cooldown, weapon and status effects",()=>
  assert.equal(first.hit,true);assert.equal(first.damage,27);
  assert.equal(goblin.health,33);assert.equal(hero.stamina,80);
  assert.equal(w.strike("hero","goblin",{damage:20}).reason,"cooldown");
- w.tick(.61);assert.ok(hero.stamina>80);
+ for(let i=0;i<13;i++)w.tick(.05);
+ assert.ok(hero.stamina>80);
  assert.equal(w.strike("hero","goblin",{damage:35}).hit,true);
  assert.equal(goblin.alive,false);
  const events=w.events.map(e=>e.type);assert.ok(events.includes("defeat"));
@@ -108,6 +109,7 @@ test("Phase 26: behavior selector, condition, sequence and cooldown",()=>{
  assert.equal(tree.tick({distance:1},.02),SUCCESS);assert.equal(attacks,1);
  assert.equal(tree.tick({distance:1},.02),SUCCESS);assert.equal(chases,1);
  assert.equal(tree.tick({distance:10},.02),SUCCESS);assert.equal(chases,2);
- tree.tick({distance:1},1.1);assert.equal(attacks,2);
+ for(let i=0;i<12;i++)tree.tick({distance:10},.1);
+ tree.tick({distance:1},.02);assert.equal(attacks,2);
  assert.throws(()=>new BehaviorTree({type:"action",name:"evil"},{actions:{}}).tick({},.01),/Unregistered/);
 });
