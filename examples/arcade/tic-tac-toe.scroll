@@ -1,0 +1,6 @@
+// HiroGlifx Arcade — tic-tac-toe
+// Replace the game type or customize its engine to make your own edition.
+.Main = ()
+    $ title = "Tic Tac Toe";
+    & game = arcade_game("tic-tac-toe");
+    break;
