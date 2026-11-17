@@ -13,7 +13,7 @@ const requiredProjectFiles=[
  "examples/steam-rpg-combat.scroll","examples/riftfall-content.scroll",
  "examples/riftfall-levels.scroll","examples/riftfall-chapters.scroll",
  "runtime/scroll-game-runtime.js","runtime/scroll-world-rules.js",
- "runtime/game-physics.js","runtime/game-assets.js","runtime/game-combat.js",
+ "runtime/game-physics.js","runtime/game-assets.js","runtime/game-combat.js","runtime/game-attack-windows.js",
  "runtime/game-ai.js","runtime/game-navmesh.js","runtime/game-region-stream.js",
  "runtime/riftfall-world.js","runtime/steam-rpg-demo.js","runtime/game-progression.js",
  "runtime/game-content.js","runtime/game-save.js","runtime/game-audio.js",
