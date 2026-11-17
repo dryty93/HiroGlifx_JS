@@ -110,6 +110,8 @@ const $=id=>document.getElementById(id),keys=new Set(),segments=[...document.que
 const cards=[...document.querySelectorAll(".stage-card")];
 let runtime=null,model=null,renderer=null,started=false,paused=true,ready=false,source=null,events=[],raf=0,lastStage=1,muted=false,audio=null;
 const bestKey="hiroglifx-skybound-best-v1";
+// Read-only state snapshot for browser QA and performance diagnostics.
+window.HiroSkyboundSnapshot=()=>model?Object.freeze({x:model.player.x,z:model.player.z,stage:model.currentStage,time:model.elapsed,completed:model.completed}):null;
 function best(){try{return Number(localStorage.getItem(bestKey))||0;}catch{return 0;}}
 function setBest(value){try{localStorage.setItem(bestKey,String(value));}catch{}}
 function time(value){const minutes=Math.floor(value/60),seconds=(value%60).toFixed(1).padStart(4,"0");return minutes+":"+seconds;}
