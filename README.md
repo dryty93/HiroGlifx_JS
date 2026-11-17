@@ -1,111 +1,148 @@
-# HiroGlifx_JS
+# HiroGlifx
 
-**HiroGlifx_JS** is a symbolic, scroll-based domain-specific language (DSL) that compiles into JavaScript logic for rapidly prototyping client-side and server-side applications.
+**A tiny, extensible language for interactive web apps, animations, and browser workflows.**
 
-This project represents a unique experiment in human-readable, symbolic programming and demonstrates how abstract command structures can be interpreted and executed by a custom-built JavaScript virtual machine.
+HiroGlifx is a JavaScript-powered experimental language with a legacy symbolic VM and a newer beginner-friendly scroll runtime. It is a **local development preview**, not a production-hardened framework.
 
----
+## Quick start
 
-## 🔍 Key Features
+Requires Node.js 20+.
 
-- **Scroll-Based Syntax**: Declare variables and commands using symbolic notation like `$`, `#`, `&`, etc.
-- **Custom Parser & VM**: Includes a hand-built tokenizer, parser, and runtime that interprets HiroGlifx scroll files into executable JavaScript.
-- **Scope Resolution**: Variable scoping logic supports nesting and global resolution.
-- **Built-In Functions**: Scrolls can define `if`, `loop`, `write`, and other fundamental logic constructs using HiroGlifx's native keywords.
-- **Dual-Purpose**: Capable of powering both frontend (via browser) and backend-style automation via Node.js logic.
+~~~bash
+git clone https://github.com/dryty93/HiroGlifx_JS.git
+cd HiroGlifx_JS
+node hiro.js init my-app
+node hiro.js dev my-app
+~~~
 
----
+Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
 
-## 🧠 Example Syntax
+## Build animated interfaces in a few commands
 
-```scroll
-.User = ()
-    [$username;
-     $password;
-     $email;
-     #age;]
-     : login<a~b~c> = [
-        echo:a+b;]
-     : logout<a~b~c> =echo:a+b;
+~~~scroll
+.Main = [
+  page "My HiroGlifx App";
+  box logo 96 96 blue;
+  center logo;
+  float logo 1200 infinite;
+  button celebrate "Celebrate";
+  when click celebrate => spin logo 700;
+  link about "About" /about;
+]
+~~~
 
-   break;
+Easy animation presets: **bounce, spin, pulse, fade, slide, shake, flip, float, pop, swing, zoom**. Durations are milliseconds, with optional infinite repetition. These compile to the Web Animations API; no arbitrary JavaScript evaluation is needed.
 
-.Server = ()
-    [#port;
-     $host;]
-   : start_server= echo(K) ;
+## Extend classes directly in HiroGlifx
 
-break;
+Component classes can extend another component. A descendant may replace an inherited element declaration with the same command and ID.
 
- .Main = ()
-    I imports = User~Server;
-    & wsgi[30~1270008000] = Server;
-    & buyer[late~pass~em~19] = User;
-    # r = 3+2;
-    $ a = 'de';
-    break;
+~~~scroll
+extends FancyCard Card
 
-```
+.Main = [
+  use FancyCard first;
+  use FancyCard second;
+]
 
-This scroll imports two classes from separate files and executes through the HiroGlifx VM. The resulting output is a json tree as shown below:
+.Card = [
+  text heading "Basic card";
+  box badge 70 70 blue;
+  center badge;
+]
 
-```
-[{"name":"Iimports","val":"User~Server","type":".","parent":"User~Server"},{"name":"&wsgi","val":{"0":"#port=30","1":",$host=1270008000","name":"Server","imported_as":"&wsgi","body":",[#port;,$host;],:start_server=echo(K","parent":"Main","value":["30","1270008000]"],"look_up":{"key":["#port","$host",""],"params":[{"key_name":"#port","value":"30"},{"key_name":"$host","value":"1270008000]"}]}},"type":"&","parent":"Server","vals":["30","1270008000"]},{"name":"&buyer","val":{"0":"#port=30","1":",$host=1270008000","2":"$username=late","3":",$password=pass","name":"User","imported_as":"&buyer","body":",[$username;,$password;,$email;,#age;],:login=[,echo:a+b;],:logout=echo:a+b;,,break;,,,,","parent":"Main","value":["late","pass","em","19]"],"look_up":{"key":["$username","$password","$email","#age",""],"params":[{"key_name":"$username","value":"late"},{"key_name":"$password","value":"pass"},{"key_name":"$email","value":"em"},{"key_name":"#age","value":"19]"}]}},"type":"&","parent":"User","vals":["late","pass","em","19"]},{"name":"#r","val":5,"type":"#","parent":"Main"},{"name":"$a","val":"de","type":"$","parent":"Main"},{"name":"[object Object]","type":"[","parent":"Main"},{"name":"[object Object]","type":"[","parent":"Main"}]
+.FancyCard = [
+  text heading "Custom card";
+  pulse badge 1200 infinite;
+]
+~~~
 
-```
----
+The instances get independent IDs such as first-badge and second-badge. Inheritance supports one parent, detects cycles, and has a bounded expansion depth. This is component inheritance, not complete general-purpose object-oriented programming.
 
-## 🗂️ Project Structure
+### Define simple reusable abilities
 
-| File                  | Purpose |
-|-----------------------|---------|
-| `Parser.js`           | Converts scroll syntax into an AST (abstract syntax tree) |
-| `HG_VM.js`            | Virtual machine that executes compiled scroll code |
-| `Tokenizer.js`        | Lexical analyzer to identify tokens |
-| `Scope.js`            | Manages variable and scope resolution |
-| `main.js`             | Entry point to run scrolls in the browser |
-| `index.html`          | Basic UI interface for loading scrolls |
-| `String.scroll`       | Sample scroll showcasing string manipulation |
-| `server.scroll`       | Server-side usage example |
+~~~scroll
+ability celebrate target => spin {target} 700 | color {target} purple
 
----
+.Main = [
+  box badge 90 90 blue;
+  do celebrate badge;
+]
+~~~
 
-## 🚀 How to Run
+Abilities are command recipes written in HiroGlifx itself. Separate actions with a vertical bar. They execute in order, but animation playback may overlap. There is no arbitrary source-code eval.
 
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/dryty93/HiroGlifx_JS.git
-   cd HiroGlifx_JS
-   ```
+## Simplified browser actions
 
-2. Open `index.html` in your browser to run in client-side mode.
+~~~scroll
+web.open "https://example.com"
+web.wait "h1"
+web.read "h1"
+web.snap "example.png"
+~~~
 
-3. Modify and run scrolls by editing `main.js` and `.scroll` files.
+| Command | Operation |
+| --- | --- |
+| web.open URL | Navigate |
+| web.click selector | Click |
+| web.fill selector value | Fill an input |
+| web.wait selector | Wait for visible element |
+| web.hover selector | Hover |
+| web.press selector Enter | Press key |
+| web.scroll selector | Scroll into view |
+| web.read selector | Extract text |
+| web.snap file.png | Screenshot |
 
----
+Browser commands require an injected Playwright adapter. The permissioned adapter provides domain allowlisting and approval for clicks, fills, and keypresses; it is not a complete network sandbox. The visual playground does not allow browser actions.
 
-## 📦 Use Cases
+## Extend the runtime from trusted host integrations
 
-- Prompt DSL for LLM automation and chaining
-- Teaching symbolic logic and runtime interpretation
-- Custom scripting engine for internal tools or agents
-- Personal experimentation with language design
+External tools, libraries and game adapters can be registered under a namespaced command. For example:
 
----
+~~~javascript
+const { ExpressiveRuntime } = require("./runtime/expressive-runtime");
+const runtime = new ExpressiveRuntime();
+runtime.registerCapability("game", {
+  say: ({args}) => console.log("Game:", args.join(" "))
+});
+await runtime.execute('game.say "Hello"');
+~~~
 
-## 📌 Why This Project Matters
+A scroll cannot execute arbitrary JavaScript: the host must deliberately provide any new capability.
 
-HiroGlifx_JS isn’t just a quirky DSL — it shows you can:
-- Build compilers and interpreters from scratch
-- Design logical runtime engines and scope resolvers
-- Structure domain-specific languages for task automation
+## Minecraft and other games
 
-This project reflects strong skills in language design, abstraction, backend runtime logic, and creative problem-solving — a great asset in AI tooling, DevTools, and backend automation roles.
+HiroGlifx could integrate through three separate adapters:
 
----
+- **Minecraft Java + Fabric:** A Fabric mod listens for game events and forwards authorized commands to a controlled bridge.
+- **Minecraft Bedrock:** An add-on using the official Minecraft Script API implements game-side actions, with an appropriately secured bridge.
+- **Minecraft Java bot:** Mineflayer can control an authorized bot on a supported server; a HiroGlifx extension could offer game.chat or game.follow commands.
 
-## 👤 Author
+These are design paths, **not Minecraft functionality currently implemented**. They require game-version-specific adapters, permissions, authentication and integration tests.
 
-**Tyler-Joshua Dryden**  
-Creator of HiroGlifx and backend engineer focused on LLM tooling, automation, and internal product architecture.  
-[GitHub Profile →](https://github.com/dryty93)
+## Repository structure
+
+| File | Purpose |
+| --- | --- |
+| hiro.js | init, dev, check CLI |
+| runtime/dev-server.js | Local page routing and live reload |
+| runtime/expressive-runtime.js | Class inheritance, abilities, shortcuts, extension registry |
+| runtime/app-runtime.js | State, forms and components |
+| runtime/scroll-runtime.js | UI and animations |
+| runtime/browser-policy.js | Browser approvals and audit |
+| runtime/postgres-store.js | PostgreSQL storage |
+| runtime/owned-api-server.js | Authenticated user-owned records |
+| playground-sandboxed.html | Restricted visual playground |
+| HG_VM.js / Parser.js | Original symbolic runtime |
+
+## Development and limitations
+
+~~~bash
+node --test tests/*.test.js
+~~~
+
+The CLI serves trusted local scroll files and supports full-page route navigation; it is not a production backend launcher. Reloads reset in-memory UI state. The new application syntax is a narrow subset of the original VM, which remains intact. Production use still requires hardened identity, rate limiting, backup/restore, strict browser network isolation and deployment testing.
+
+See the deployment checklist at docs/phase9-deployment-readiness.md.
+
+License: Apache-2.0 (see LICENSE).
