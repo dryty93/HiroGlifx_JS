@@ -94,6 +94,14 @@ Arrays, indexed operations, nested bounded `for`/`while` loops, custom methods, 
 **Blockhaven's source viewer** continues to show its actual `.scroll` initialization, but the voxel game logic is still in host JavaScript; it has *not* been ported to native `.scroll` game scripts.
 
 
+## Riftfall Phase 27 — RPG content and persistence
+
+The [Riftfall RPG](riftfall.html) now includes a real inventory/equipment screen, atomic crafting, four objectives with XP and rewards, Keeper Nara's branching dialogue, healing potions, local versioned save/load, synthesized original sounds and combat-hit effects. All game-specific item, recipe, dialogue and quest definitions are authored in the complete [HiroGlifx content source](examples/riftfall-content.scroll), separately from [combat rules](examples/steam-rpg-combat.scroll).
+
+Controls: **I** Inventory, **Q** Quests, **C** Craft, **E** Talk, **H** Heal, **F5** Save, **F9** Load, in addition to WASD, Space and J. The game's source viewer can switch between both executable `.scroll` files.
+
+The reusable engine modules are [inventory/quests](runtime/game-progression.js), [content loader](runtime/game-content.js), [versioned saves](runtime/game-save.js), [procedural audio](runtime/game-audio.js), and [combat VFX](runtime/game-fx.js). Save data stays in local browser storage; it is **not** uploaded to a cloud account. See [Phase 27 detail and limitations](docs/riftfall-phase27.md).
+
 ## Phases 23–26 — Riftfall: advanced 3D game foundations
 
 **[Play Riftfall](riftfall.html)**, a playable browser action-RPG vertical slice built to validate four reusable systems working together:
