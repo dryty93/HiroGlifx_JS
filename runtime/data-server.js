@@ -118,7 +118,7 @@ class DataServer extends AppRuntime {
         const data = await readBody(req);
         return send(201, this.store.insert(collection, data));
       }
-      if (req.method === "DELETE" && id) return send(this.store.delete(collection,id) ? 200 : 404,{deleted:!this.store.list(collection).some(row=>row.id===id)});
+      if (req.method === "DELETE" && id) { const deleted = this.store.delete(collection, id); return send(deleted ? 200 : 404, {deleted}); }
       return send(405,{error:"Unsupported method"});
     } catch(error) {
       if (res.destroyed) return;
