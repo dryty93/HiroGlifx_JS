@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>html,body{min-height:100%;margin:0}body{font:16px system-ui;background:#101827;color:#edf4ff}#stage{min-height:100vh;box-sizing:border-box;padding:28px;text-align:center}#stage button{border:0;background:#60a5fa;padding:11px 22px;border-radius:9px;margin:8px;cursor:pointer}#stage input{display:block;margin:16px auto;padding:11px;border-radius:8px}#stage div{margin:15px auto}#stage p{font-size:19px}</style>
+</head><body><div id="stage"></div>
+<script src="./runtime/scroll-runtime.js"></script>
+<script src="./runtime/app-runtime.js"></script>
+<script src="./runtime/preview-policy.js"></script>
+<script>
+(function(){
+ "use strict";
+ let runtime=null;
+ const stage=document.querySelector("#stage");
+ function send(nonce,status,message){parent.postMessage({source:"hiro-preview",nonce,status,message},"*");}
+ window.addEventListener("message",async event=>{
+   if(event.source!==parent || !event.data || event.data.source!=="hiro-parent" || typeof event.data.nonce!=="string")return;
+   const {nonce,code}=event.data;
+   if(typeof code!=="string")return;
+   if(runtime)runtime.dispose();
+   stage.replaceChildren();
+   try{
+     HiroGlifxPreviewPolicy.validate(code);
+     runtime=new HiroGlifxApp.AppRuntime({document,mount:stage});
+     await runtime.execute(code);
+     send(nonce,"success","Preview updated");
+   }catch(error){send(nonce,"error",String(error.message));}
+ });
+ parent.postMessage({source:"hiro-preview",status:"ready"},"*");
+})();
+</script></body></html>

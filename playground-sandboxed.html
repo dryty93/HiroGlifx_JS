@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HiroGlifx Sandboxed Playground</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:26px;background:#0b1220;color:#e7efff;font:15px system-ui}
+main{max-width:1200px;margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+h1{font-size:28px;margin:8px 0}p{color:#a8bbd6}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+textarea{width:100%;min-height:480px;background:#101d32;color:#bdeaff;border:1px solid #3f5574;border-radius:12px;padding:18px;font:14px/1.6 monospace;resize:vertical}
+iframe{width:100%;min-height:480px;border:1px solid #3f5574;border-radius:12px;background:#101827}
+button{padding:12px 20px;background:#67adff;border:0;border-radius:9px;color:#091426;font-weight:bold;cursor:pointer}
+#error{min-height:26px;color:#ffb6b6;white-space:pre-wrap}label{font-weight:bold}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1>HiroGlifx · Secure Visual Playground</h1><p>Live reactive interfaces inside a restricted browser frame.</p></div><button id="run">Run preview</button></header>
+<div id="error" role="status" aria-live="polite"></div>
+<div class="grid"><section><label for="source">.scroll editor</label><textarea id="source" spellcheck="false">.Main = [
+  page "HiroGlifx App";
+  background "#101827";
+  state count 0;
+  state name "friend";
+  use Header hero;
+  text tally "";
+  bind text tally "Clicked {count} times";
+  button add "Add one";
+  on click add => increment count;
+  input nameInput "Your name";
+  bind input nameInput name;
+  on input nameInput => set name @value;
+  text greeting "";
+  bind text greeting "Hello, {name}!";
+]
+.Header = [
+  text heading "Welcome to HiroGlifx";
+  box square 64 64 blue;
+  center square;
+  animate square pulse 1200 infinite;
+]</textarea></section><section><label for="preview">Isolated preview</label>
+<iframe id="preview" title="HiroGlifx sandboxed app preview" src="./sandbox-preview.html" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe></section></div>
+<p>Preview code cannot call browser automation, APIs, or backend commands. The iframe has an opaque origin and no same-origin access.</p>
+</main><script>
+(function(){
+"use strict";
+const frame=document.querySelector("#preview");
+const error=document.querySelector("#error");
+const run=document.querySelector("#run");
+let active=null,ready=false;
+function execute(){
+ if(!ready){error.textContent="Waiting for preview frame";return;}
+ active=typeof crypto!=="undefined" && crypto.randomUUID?crypto.randomUUID():String(Date.now())+String(Math.random());
+ error.textContent="Rendering…";
+ frame.contentWindow.postMessage({source:"hiro-parent",nonce:active,code:document.querySelector("#source").value},"*");
+}
+window.addEventListener("message",event=>{
+ if(event.source!==frame.contentWindow || event.origin!=="null" || !event.data || event.data.source!=="hiro-preview")return;
+ if(event.data.status==="ready"){ready=true;execute();return;}
+ if(event.data.nonce!==active)return;
+ error.textContent=event.data.status==="error" ? event.data.message : "Preview ready";
+});
+run.addEventListener("click",execute);
+})();
+</script></body></html>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680">
+<rect width="1200" height="680" fill="#0b1220"/>
+<text x="48" y="66" fill="#ecf3ff" font-family="Arial" font-size="32" font-weight="bold">HiroGlifx — Phase 6 Sandboxed Playground</text>
+<text x="48" y="100" fill="#9aaeca" font-family="Arial" font-size="17">Code-derived design illustration · not a browser screenshot</text>
+<rect x="48" y="133" width="543" height="476" rx="16" fill="#142039" stroke="#455978" stroke-width="2"/>
+<rect x="610" y="133" width="543" height="476" rx="16" fill="#101827" stroke="#455978" stroke-width="2"/>
+<text x="76" y="172" fill="#82b7ff" font-family="monospace" font-size="18">.scroll editor</text>
+<text x="75" y="222" fill="#e5f1ff" font-family="monospace" font-size="17">.Main = [</text>
+<text x="93" y="259" fill="#a8e7ca" font-family="monospace" font-size="17">state count 0;</text>
+<text x="93" y="296" fill="#e5f1ff" font-family="monospace" font-size="17">text tally "";</text>
+<text x="93" y="333" fill="#e5f1ff" font-family="monospace" font-size="17">bind text tally "Clicked {count}";</text>
+<text x="93" y="370" fill="#e5f1ff" font-family="monospace" font-size="17">button add "Add one";</text>
+<text x="93" y="407" fill="#e5f1ff" font-family="monospace" font-size="17">on click add =&gt; increment count;</text>
+<text x="75" y="444" fill="#e5f1ff" font-family="monospace" font-size="17">]</text>
+<rect x="76" y="501" width="482" height="74" rx="12" fill="#233a58"/>
+<text x="98" y="531" fill="#a5f2bf" font-family="Arial" font-size="18" font-weight="bold">Valid commands only</text>
+<text x="98" y="555" fill="#a9bdd8" font-family="Arial" font-size="14">Server and browser automation disabled</text>
+<text x="637" y="172" fill="#82b7ff" font-family="Arial" font-size="18">Isolated preview</text>
+<circle cx="881" cy="267" r="38" fill="#3b82f6" opacity=".95"/>
+<text x="881" y="340" fill="#f0f4ff" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold">Welcome to HiroGlifx</text>
+<text x="881" y="390" fill="#d5e2f5" text-anchor="middle" font-family="Arial" font-size="20">Clicked 0 times</text>
+<rect x="783" y="411" width="196" height="49" rx="11" fill="#60a5fa"/>
+<text x="881" y="443" fill="#10203a" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">Add one</text>
+<rect x="721" y="490" width="320" height="48" rx="9" fill="#253850" stroke="#5e7494"/>
+<text x="741" y="520" fill="#c6d6ef" font-family="Arial" font-size="17">Your name</text>
+<text x="881" y="570" fill="#d5e2f5" text-anchor="middle" font-family="Arial" font-size="18">Hello, friend!</text>
+<rect x="48" y="629" width="1105" height="30" rx="10" fill="#1b3049"/>
+<text x="600" y="650" fill="#a9e7c5" text-anchor="middle" font-family="Arial" font-size="15">sandbox=allow-scripts · opaque origin · command allowlist · nonce-checked messages</text>
+</svg>
