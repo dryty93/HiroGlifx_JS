@@ -1,0 +1,21 @@
+name: Web runtime tests
+on:
+  push:
+    branches: [main, feat/web-visual-browser-runtime]
+  pull_request:
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Syntax checks
+        run: |
+          node --check runtime/scroll-runtime.js
+          node --check runtime/playwright-adapter.js
+          node --check runtime/run-server.js
+          node --check tests/runtime.test.js
+      - name: Runtime tests
+        run: node --test tests/runtime.test.js
