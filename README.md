@@ -61,6 +61,32 @@ To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonica
 
 This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
 
+## Build a Roblox-style obstacle course — Browser Obby Builder
+
+The new [Obby Builder](obby-playground.html) demonstrates a single-player Babylon.js tile obstacle game written in the **canonical `.Main = ()` syntax**. It includes platform jumps, hazards, checkpoints, finish detection, and a live course editor. It is an original browser game, not an integration with Roblox.
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# open http://127.0.0.1:8000/obby-playground.html
+```
+
+```scroll
+.Runner = ()
+    # speed = 6;
+    : leap = self.jump();
+    break;
+.Main = ()
+    & world = obby_world();
+    & ground = obby_tile(world, "start", 0, 0, 0, 4, "solid");
+    & end = obby_tile(world, "end", 5, 0, 0, 3, "finish");
+    & hero = obby_player(world, "hero", 0, 2, 0);
+    & runner = bp_create("Runner", hero);
+    @ win = obby_event(world, "finish");
+    break;
+```
+
+Blueprints now support basic typed defaults, one-parent inheritance and explicitly whitelisted single-expression methods. Typed `@` references can track game events through `.count()` and `.occurred()`. This is a restricted canonical game-oriented subset, not full object-oriented language parity. See [Obby Builder documentation](docs/obby-builder.md).
+
 ## Browser games, 3D scenes and video — Creative Studio
 
 Open `creative-studio.html` from a local static server to experiment with simple playable scenes, animation tracks and browser-recorded WebM videos. Choose **Canvas 2D**, **Phaser 4**, or **Babylon.js 3D**. The latter two are real browser engines loaded on demand.

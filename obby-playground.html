@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HiroGlifx Obby Builder</title>
+<style>
+*{box-sizing:border-box}body{background:#0b1220;color:#edf4ff;font:15px system-ui;margin:0;padding:24px}
+main{max-width:1350px;margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+h1{margin:0}p{color:#b5c9e4}.layout{display:grid;grid-template-columns:1fr 1.35fr;gap:17px;margin-top:18px}
+textarea{width:100%;height:540px;resize:vertical;padding:14px;background:#14243a;color:#d8ebff;border-radius:12px;border:1px solid #47607c;font:12px/1.65 monospace}
+canvas{height:auto;width:100%;aspect-ratio:16/9;display:block;background:#101827;border:1px solid #47607c;border-radius:12px}
+button{background:#60a5fa;color:#08192d;font-weight:700;border:0;border-radius:8px;padding:11px 16px;cursor:pointer}
+button:disabled{opacity:.5}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+#status{padding:12px;min-height:44px;color:#aee9c8;background:#172a42;border-radius:8px}
+#stats{font-weight:bold;color:#facc15}.keys{margin:12px 0;padding:10px;background:#1c314a;border-radius:8px;color:#d6e6fa}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1>HiroGlifx · Obby Builder</h1><p>Canonical blueprints + Babylon.js 3D tiles, hazards, checkpoints and jump controls</p></div>
+<button id="build">Build &amp; play</button></header>
+<div class="layout"><section><h2>Editable .scroll course</h2>
+<textarea id="source" spellcheck="false" aria-label="HiroGlifx obby source"></textarea>
+<p>Move platforms by editing their coordinates, add additional <code>obby_tile(...)</code> calls, or extend the Runner class.</p></section>
+<section><h2>Live 3D obstacle course</h2><canvas id="game" width="960" height="540" tabindex="0" aria-label="3D game canvas"></canvas>
+<div class="keys">WASD / arrows to move · Space to jump · R to restart at checkpoint</div>
+<div class="controls"><button id="jump">Jump</button><button id="reset">Restart</button>
+<button data-move="left">←</button><button data-move="forward">↑</button>
+<button data-move="back">↓</button><button data-move="right">→</button></div>
+<p id="stats">Stage 0 · Deaths 0 · Time 0.0s</p><p id="status" role="status">Loading example…</p></section></div>
+</main>
+<script src="./runtime/scroll-runtime.js"></script>
+<script src="./runtime/canonical-runtime.js"></script>
+<script src="./runtime/obby-world.js"></script>
+<script src="./runtime/obby-canonical.js"></script>
+<script src="./runtime/canonical-blueprints.js"></script>
+<script src="./runtime/obby-babylon.js"></script>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script>
+(function(){
+ "use strict";
+ const el=id=>document.getElementById(id);
+ const pressed=new Set();let runtime,world,renderer,frame=0,running=false,unsubs=[];
+ const jumpAst=HiroCanonical.parseExpr("runner.leap()");
+ function status(message){el("status").textContent=message;}
+ function teardown(){
+   running=false;cancelAnimationFrame(frame);pressed.clear();
+   for(const unsub of unsubs)unsub();unsubs=[];
+   if(renderer)renderer.stop();renderer=null;
+   if(runtime)runtime.dispose();runtime=null;world=null;
+ }
+ async function build(){
+   teardown();
+   if(!window.BABYLON){status("Babylon.js failed to load. Check your internet connection.");return;}
+   try{
+     const rt=HiroObbyCanonical.install(new HiroCanonical.CanonicalRuntime());
+     const code=HiroBlueprints.install(rt,el("source").value);
+     await rt.execute(code);
+     const model=rt.get("world");
+     if(!model||!model.player)throw new Error("Course must create an obby world and player");
+     const engine=new HiroObbyBabylon.ObbyBabylonAdapter({BABYLON:window.BABYLON,canvas:el("game"),world:model});
+     engine.start();
+     runtime=rt;world=model;renderer=engine;
+     unsubs.push(model.on("finish",()=>status("Course complete! Edit the course to make it harder.")));
+     unsubs.push(model.on("checkpoint",({tile})=>status("Checkpoint reached: "+tile)));
+     unsubs.push(model.on("respawn",()=>status("Respawned at your latest checkpoint")));
+     running=true;status("Course ready. Reach the gold finish platform!");
+     frame=requestAnimationFrame(tick);el("game").focus();
+   }catch(error){teardown();status(error.message);}
+ }
+ function tick(){
+   if(!running||!world)return;
+   let x=0,z=0;
+   if(pressed.has("ArrowRight")||pressed.has("KeyD"))x++;
+   if(pressed.has("ArrowLeft")||pressed.has("KeyA"))x--;
+   if(pressed.has("ArrowUp")||pressed.has("KeyW"))z++;
+   if(pressed.has("ArrowDown")||pressed.has("KeyS"))z--;
+   const len=Math.hypot(x,z)||1;
+   world.setInput(x/len,z/len);
+   el("stats").textContent="Tiles: "+world.tiles.size+" · Deaths: "+world.dead+" · Time: "+world.elapsed.toFixed(1)+"s"+
+     (world.completed?" · FINISHED":"");
+   frame=requestAnimationFrame(tick);
+ }
+ function jump(){if(!runtime)return;runtime._evaluate(jumpAst).catch(e=>status(e.message));}
+ function reset(){if(world)world.reset();}
+ window.addEventListener("keydown",event=>{
+   if(document.activeElement===el("source"))return;
+   if(["Space","ArrowRight","ArrowLeft","ArrowUp","ArrowDown"].includes(event.code))event.preventDefault();
+   if(event.code==="Space"&&!event.repeat)jump();
+   if(event.code==="KeyR"&&!event.repeat)reset();
+   pressed.add(event.code);
+ });
+ window.addEventListener("keyup",event=>pressed.delete(event.code));
+ window.addEventListener("blur",()=>pressed.clear());
+ el("jump").onclick=jump;el("reset").onclick=reset;
+ el("build").onclick=build;
+ const controls={left:"ArrowLeft",right:"ArrowRight",forward:"ArrowUp",back:"ArrowDown"};
+ document.querySelectorAll("[data-move]").forEach(button=>{
+   const key=controls[button.dataset.move];
+   button.addEventListener("pointerdown",event=>{event.preventDefault();pressed.add(key);button.setPointerCapture(event.pointerId);});
+   button.addEventListener("pointerup",()=>pressed.delete(key));
+   button.addEventListener("pointercancel",()=>pressed.delete(key));
+   button.addEventListener("lostpointercapture",()=>pressed.delete(key));
+ });
+ fetch("./examples/obby-course.scroll").then(response=>{
+   if(!response.ok)throw new Error("Could not load example scroll");
+   return response.text();
+ }).then(text=>{el("source").value=text;return build();}).catch(error=>status(error.message));
+})();
+</script></body></html>
