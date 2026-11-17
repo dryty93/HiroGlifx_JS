@@ -17,6 +17,37 @@ node hiro.js dev my-app
 
 Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
 
+## Browser games, 3D scenes and video — Creative Studio
+
+Open `creative-studio.html` from a local static server to experiment with simple playable scenes, animation tracks and browser-recorded WebM videos. Choose **Canvas 2D**, **Phaser 4**, or **Babylon.js 3D**. The latter two are real browser engines loaded on demand.
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# open http://127.0.0.1:8000/creative-studio.html
+```
+
+2D game example:
+
+```scroll
+scene 640 360 "#101827"
+sprite player 30 165 42 42 "#60a5fa"
+sprite coin 550 165 35 35 "#facc15"
+control ArrowRight player 20 0
+control ArrowLeft player -20 0
+goal player coin
+tween coin y 70 2000 0
+```
+
+3D scene example:
+
+```scroll
+world 3d #101827
+cube hero 0 0 0 3 #60a5fa
+rotate hero y 1.5
+```
+
+Use **Play**, **Pause**, or scrub the timeline; **Record WebM** uses the browser's MediaRecorder API when available. This is an extensible foundation—not yet a complete game production pipeline, physics engine, multiplayer platform, cinematic editor or MP4 encoder. See [Creative Studio documentation](docs/creative-studio.md).
+
 ## Reusable `.scroll` packages (Phase 11)
 
 Developers can now distribute **pure HiroGlifx classes and abilities** as local libraries—no core compiler edits or JavaScript plugin code needed.
