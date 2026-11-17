@@ -51,6 +51,7 @@ async function run(){
   assert.match(await page.locator("#score").innerText(),/Black to move/);
   await clickSquare("e7");await clickSquare("e5");
   await page.waitForFunction(()=>window.HiroArcadeSnapshot?.()?.moves===2,null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector("#score")?.textContent.includes("White to move"),null,{timeout:5000});
   assert.match(await page.locator("#score").innerText(),/White to move/);
   await page.screenshot({path:path.join(out,"arcade-chess-desktop.png"),fullPage:true});
   await page.locator('[data-game="star-defense"]').click();
