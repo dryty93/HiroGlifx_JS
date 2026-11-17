@@ -61,7 +61,7 @@ app.whenReady().then(()=>{
  const ses=session.defaultSession;
  ses.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
  ses.setPermissionCheckHandler(()=>false);
- ses.webRequest.onBeforeRequest({urls:["http://*/*","https://*/*","file://*/*"]},
+ ses.webRequest.onBeforeRequest({urls:["http://*/*","https://*/*"]},
    (_details,callback)=>callback({cancel:true}));
  createWindow();
  app.on("activate",()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});
