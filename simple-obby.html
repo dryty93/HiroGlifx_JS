@@ -120,7 +120,7 @@ finish goal at 24 0 0 size 5</code><p>You can also change <strong>theme soda</st
  <p id="compileStatus" role="status" aria-live="polite">Your game is ready to edit.</p>
 </section>
 
-<details class="source-embed" id="skyboundSourcePanel"><summary>View Soda Splash’s complete HiroGlifx gameplay and course scripts</summary><p>The game’s scoring, stage difficulty and reward logic is now implemented in the gameplay file. The separate course file defines all platform geometry. Babylon and the generic physics engine remain JavaScript.</p><div class="source-actions"><button id="showSoda SplashRules">Full gameplay rules</button><button id="showSoda SplashCourse">Course / classes</button><a id="skyboundSourceLink" href="./examples/skybound-gameplay.scroll" target="_blank" rel="noopener">Open source</a></div><pre id="skyboundSourceCode">Loading HiroGlifx source…</pre></details>
+<details class="source-embed" id="skyboundSourcePanel"><summary>View Soda Splash’s complete HiroGlifx gameplay and course scripts</summary><p>The game’s scoring, stage difficulty and reward logic is now implemented in the gameplay file. The separate course file defines all platform geometry. Babylon and the generic physics engine remain JavaScript.</p><div class="source-actions"><button id="showSkyboundRules">Full gameplay rules</button><button id="showSkyboundCourse">Course / classes</button><a id="skyboundSourceLink" href="./examples/skybound-gameplay.scroll" target="_blank" rel="noopener">Open source</a></div><pre id="skyboundSourceCode">Loading HiroGlifx source…</pre></details>
 <footer>Built in HiroGlifx · Browser-first, responsive, original game prototype · No account required</footer>
 </div>
 <script src="./runtime/scroll-game-runtime.js"></script>
@@ -142,13 +142,13 @@ let segments=[...document.querySelectorAll(".stage-segment")];
 let cards=[...document.querySelectorAll(".stage-card")];
 let runtime=null,model=null,renderer=null,started=false,paused=true,ready=false,source=null,events=[],raf=0,lastStage=1,muted=false,audio=null;
 let rules=null,rulesSource=null,sourceMode="course",design=null;
-function showSoda SplashCode(mode){
+function showSkyboundCode(mode){
  sourceMode=mode;
  $("skyboundSourceCode").textContent=mode==="rules"?rulesSource:source;
  $("skyboundSourceLink").href=mode==="rules"?"./examples/skybound-gameplay.scroll":"./examples/simple-obby/soda-splash.scroll";
 }
-$("showSoda SplashRules").onclick=()=>showSoda SplashCode("rules");
-$("showSoda SplashCourse").onclick=()=>showSoda SplashCode("course");
+$("showSkyboundRules").onclick=()=>showSkyboundCode("rules");
+$("showSkyboundCourse").onclick=()=>showSkyboundCode("course");
 const bestKey="hiroglifx-simple-obby-v1";
 $("playDirections").addEventListener("click",async()=>{
  try{
@@ -267,7 +267,7 @@ async function build(){
    onBeforeStep:dt=>policy.tick(dt)
  });
  view.start();view.paused=true;
- runtime=rt;model=world;renderer=view;rules=policy;ready=true;lastStage=1;showSoda SplashCode(sourceMode);
+ runtime=rt;model=world;renderer=view;rules=policy;ready=true;lastStage=1;showSkyboundCode(sourceMode);
  events.push(world.on("jump",()=>{policy.run("onJump");sound(680,.085);}));
  events.push(world.on("checkpoint",({tile})=>{policy.run("onCheckpoint");sound(840,.2);announce("✓ Checkpoint saved: "+tile);}));
  events.push(world.on("stage",({stage,title})=>{policy.run("onStage",stage);lastStage=stage;sound(700+stage*80,.22);announce("STAGE "+stage+" — "+title);}));
