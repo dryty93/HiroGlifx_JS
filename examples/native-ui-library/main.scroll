@@ -721,3 +721,906 @@ ui library
         attr progress aria-hidden "true";
     ]
     break;
+
+
+// Experience Catalog v2: all visual templates below are native .scroll classes.
+
+.ExperienceBlock = (Component)
+    $ eyebrow = "EXPLORE";;
+    $ description = "Unforgettable experiences with native HiroGlifx.";;
+    $ action = "Discover more";;
+    $ href = "/experiences";;
+    $ src = "/assets/studio-placeholder.svg";;
+    $ alt = "Abstract studio visual";;
+    $ label = "Featured";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+    ]
+    break;
+
+.SplitHero = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-split-hero";
+        element copy div section;
+        motion copy rise;
+        element eyebrow p copy;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h1 copy;
+        class heading "hg-display";
+        text heading "{title}";
+        element description p copy;
+        class description "hg-lead";
+        text description "{description}";
+        element action a copy;
+        class action "hg-button hg-button-primary";
+        attr action href "{href}";
+        text action "{action}";
+        element art div section;
+        class art "hg-art-window";
+        motion art tilt;
+    ]
+    break;
+
+.GlassHero = (ExperienceBlock)
+    : render(self) = [
+        element hero section root;
+        class hero "hg-wrap hg-section";
+        element shell div hero;
+        class shell "hg-glass-hero";
+        element panel div shell;
+        class panel "hg-glass";
+        motion panel spotlight;
+        element eyebrow p panel;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h1 panel;
+        class heading "hg-display";
+        text heading "{title}";
+        element desc p panel;
+        class desc "hg-lead";
+        text desc "{description}";
+        element link a panel;
+        class link "hg-button hg-button-primary";
+        attr link href "{href}";
+        text link "{action}";
+    ]
+    break;
+
+.ProductHero = (SplitHero)
+    $ eyebrow = "DESIGNED FOR YOUR NEXT MOVE";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-split-hero";
+        element text div section;
+        element eyebrow p text;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h1 text;
+        class heading "hg-display";
+        text heading "{title}";
+        element description p text;
+        class description "hg-lead";
+        text description "{description}";
+        element link a text;
+        class link "hg-button hg-button-primary";
+        attr link href "{href}";
+        text link "{action}";
+        element device div section;
+        class device "hg-product-device";
+        motion device float;
+        element pill span device;
+        class pill "hg-pill";
+        text pill "LIVE PRODUCT";
+        element deviceTitle h2 device;
+        class deviceTitle "hg-title";
+        text deviceTitle "{label}";
+    ]
+    break;
+
+.PosterHero = (EditorialHero)
+    : render(self) = [
+        element hero section root;
+        class hero "hg-cinematic hg-experience";
+        element inner div hero;
+        class inner "hg-cinematic-inner";
+        motion inner blur-in;
+        element kicker p inner;
+        class kicker "hg-kicker";
+        text kicker "{eyebrow}";
+        element heading h1 inner;
+        class heading "hg-editorial";
+        text heading "{title}";
+        element body p inner;
+        class body "hg-lead";
+        text body "{description}";
+        element link a inner;
+        class link "hg-button hg-button-primary";
+        attr link href "{href}";
+        text link "{action}";
+    ]
+    break;
+
+.OrbitHero = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element eyebrow p section;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element title h2 section;
+        class title "hg-title";
+        text title "{title}";
+        element frame div section;
+        class frame "hg-orbit-frame";
+        element ring div frame;
+        class ring "hg-orbit-ring";
+        element dot1 span ring;
+        class dot1 "hg-orbit-dot";
+        element dot2 span ring;
+        class dot2 "hg-orbit-dot";
+        element dot3 span ring;
+        class dot3 "hg-orbit-dot";
+        element core div frame;
+        class core "hg-orbit-core";
+        text core "{label}";
+    ]
+    break;
+
+.VideoHero = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element desc p section;
+        class desc "hg-lead";
+        text desc "{description}";
+        element frame div section;
+        class frame "hg-video-frame";
+        element video video frame;
+        attr video controls "true";
+        attr video playsinline "true";
+        attr video poster "{src}";
+        attr video aria-label "Video showcase. Provide a media source in your application.";
+    ]
+    break;
+
+.CollagePortfolio = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element kicker p section;
+        class kicker "hg-kicker";
+        text kicker "{eyebrow}";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element grid div section;
+        class grid "hg-gallery";
+        element card0 article grid;
+        class card0 "hg-gallery-card";
+        motion card0 hover-rise;
+        element title0 h3 card0;
+        class title0 "hg-bento-title";
+        text title0 "Architecture";
+        element card1 article grid;
+        class card1 "hg-gallery-card";
+        motion card1 hover-rise;
+        element title1 h3 card1;
+        class title1 "hg-bento-title";
+        text title1 "Motion";
+        element card2 article grid;
+        class card2 "hg-gallery-card";
+        motion card2 hover-rise;
+        element title2 h3 card2;
+        class title2 "hg-bento-title";
+        text title2 "Editorial";
+        element card3 article grid;
+        class card3 "hg-gallery-card";
+        motion card3 hover-rise;
+        element title3 h3 card3;
+        class title3 "hg-bento-title";
+        text title3 "Identity";
+        element card4 article grid;
+        class card4 "hg-gallery-card";
+        motion card4 hover-rise;
+        element title4 h3 card4;
+        class title4 "hg-bento-title";
+        text title4 "Digital craft";
+    ]
+    break;
+
+.HorizontalPortfolio = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element kicker p section;
+        class kicker "hg-kicker";
+        text kicker "{eyebrow}";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element track div section;
+        class track "hg-horizontal";
+        element card0 article track;
+        class card0 "hg-gallery-card";
+        element text0 h3 card0;
+        class text0 "hg-bento-title";
+        text text0 "The beginning";
+        element card1 article track;
+        class card1 "hg-gallery-card";
+        element text1 h3 card1;
+        class text1 "hg-bento-title";
+        text text1 "Ideas in motion";
+        element card2 article track;
+        class card2 "hg-gallery-card";
+        element text2 h3 card2;
+        class text2 "hg-bento-title";
+        text text2 "A different perspective";
+        element card3 article track;
+        class card3 "hg-gallery-card";
+        element text3 h3 card3;
+        class text3 "hg-bento-title";
+        text text3 "Made to last";
+    ]
+    break;
+
+.EditorialPortfolio = (CollagePortfolio)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-editorial";
+        motion heading blur-in;
+        text heading "{title}";
+        component CollagePortfolio work section;
+        prop work eyebrow "SELECTED WORK";
+        prop work title "Crafted to stand apart.";
+    ]
+    break;
+
+.CaseStudyFeature = (ExperienceBlock)
+    : render(self) = [
+        element article article root;
+        class article "hg-wrap hg-section hg-product-row";
+        element art div article;
+        class art "hg-art-window";
+        motion art zoom-scroll;
+        element text div article;
+        element kicker p text;
+        class kicker "hg-kicker";
+        text kicker "{eyebrow}";
+        element heading h2 text;
+        class heading "hg-title";
+        text heading "{title}";
+        element desc p text;
+        class desc "hg-lead";
+        text desc "{description}";
+        element link a text;
+        class link "hg-button";
+        attr link href "{href}";
+        text link "{action}";
+    ]
+    break;
+
+.StickyScrollytelling = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section hg-sticky-story";
+        element pane aside section;
+        class pane "hg-sticky-pane";
+        motion pane spotlight;
+        element eyebrow p pane;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h2 pane;
+        class heading "hg-title";
+        text heading "{title}";
+        element story div section;
+        element chapter0 article story;
+        class chapter0 "hg-story-chapter";
+        motion chapter0 rise;
+        element index0 p chapter0;
+        class index0 "hg-kicker";
+        text index0 "CHAPTER 01";
+        element heading0 h3 chapter0;
+        class heading0 "hg-title";
+        text heading0 "Start with a spark";
+        element desc0 p chapter0;
+        class desc0 "hg-lead";
+        text desc0 "{description}";
+        element chapter1 article story;
+        class chapter1 "hg-story-chapter";
+        motion chapter1 rise;
+        element index1 p chapter1;
+        class index1 "hg-kicker";
+        text index1 "CHAPTER 02";
+        element heading1 h3 chapter1;
+        class heading1 "hg-title";
+        text heading1 "Find your own rhythm";
+        element desc1 p chapter1;
+        class desc1 "hg-lead";
+        text desc1 "{description}";
+        element chapter2 article story;
+        class chapter2 "hg-story-chapter";
+        motion chapter2 rise;
+        element index2 p chapter2;
+        class index2 "hg-kicker";
+        text index2 "CHAPTER 03";
+        element heading2 h3 chapter2;
+        class heading2 "hg-title";
+        text heading2 "Make an impact";
+        element desc2 p chapter2;
+        class desc2 "hg-lead";
+        text desc2 "{description}";
+    ]
+    break;
+
+.TimelineStory = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element line div section;
+        class line "hg-timeline";
+        element step0 article line;
+        class step0 "hg-timeline-item";
+        motion step0 rise;
+        element year0 span step0;
+        class year0 "hg-kicker";
+        text year0 "01";
+        element heading0 h3 step0;
+        class heading0 "hg-bento-title";
+        text heading0 "Discover";
+        element copy0 p step0;
+        class copy0 "hg-muted";
+        text copy0 "{description}";
+        element step1 article line;
+        class step1 "hg-timeline-item";
+        motion step1 rise;
+        element year1 span step1;
+        class year1 "hg-kicker";
+        text year1 "02";
+        element heading1 h3 step1;
+        class heading1 "hg-bento-title";
+        text heading1 "Create";
+        element copy1 p step1;
+        class copy1 "hg-muted";
+        text copy1 "{description}";
+        element step2 article line;
+        class step2 "hg-timeline-item";
+        motion step2 rise;
+        element year2 span step2;
+        class year2 "hg-kicker";
+        text year2 "03";
+        element heading2 h3 step2;
+        class heading2 "hg-bento-title";
+        text heading2 "Launch";
+        element copy2 p step2;
+        class copy2 "hg-muted";
+        text copy2 "{description}";
+    ]
+    break;
+
+.ProcessSteps = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element grid div section;
+        class grid "hg-steps";
+        element step0 article grid;
+        class step0 "hg-step";
+        motion step0 hover-rise;
+        element index0 span step0;
+        class index0 "hg-step-index";
+        text index0 "STEP 1";
+        element heading0 h3 step0;
+        text heading0 "Plan";
+        element copy0 p step0;
+        class copy0 "hg-muted";
+        text copy0 "{description}";
+        element step1 article grid;
+        class step1 "hg-step";
+        motion step1 hover-rise;
+        element index1 span step1;
+        class index1 "hg-step-index";
+        text index1 "STEP 2";
+        element heading1 h3 step1;
+        text heading1 "Build";
+        element copy1 p step1;
+        class copy1 "hg-muted";
+        text copy1 "{description}";
+        element step2 article grid;
+        class step2 "hg-step";
+        motion step2 hover-rise;
+        element index2 span step2;
+        class index2 "hg-step-index";
+        text index2 "STEP 3";
+        element heading2 h3 step2;
+        text heading2 "Launch";
+        element copy2 p step2;
+        class copy2 "hg-muted";
+        text copy2 "{description}";
+    ]
+    break;
+
+.StatsStrip = (ExperienceBlock)
+    $ metricOne = "98%";;
+    $ metricTwo = "24/7";;
+    $ metricThree = "4.9/5";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element row div section;
+        class row "hg-stat-row";
+        element stat0 div row;
+        class stat0 "hg-stat";
+        element value0 strong stat0;
+        text value0 "{metricOne}";
+        element label0 p stat0;
+        class label0 "hg-muted";
+        text label0 "Customer love";
+        element stat1 div row;
+        class stat1 "hg-stat";
+        element value1 strong stat1;
+        text value1 "{metricTwo}";
+        element label1 p stat1;
+        class label1 "hg-muted";
+        text label1 "Availability";
+        element stat2 div row;
+        class stat2 "hg-stat";
+        element value2 strong stat2;
+        text value2 "{metricThree}";
+        element label2 p stat2;
+        class label2 "hg-muted";
+        text label2 "Community rating";
+    ]
+    break;
+
+.BeforeAfterSlider = (ExperienceBlock)
+    # amount = 50;
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element desc p section;
+        class desc "hg-lead";
+        text desc "{description}";
+        element panel div section;
+        class panel "hg-compare";
+        stylevar panel --hg-wipe amount;
+        element after div panel;
+        class after "hg-compare-after";
+        element afterLabel span after;
+        class afterLabel "hg-kicker";
+        text afterLabel "AFTER";
+        element before div panel;
+        class before "hg-compare-before";
+        element beforeLabel span before;
+        class beforeLabel "hg-compare-label";
+        text beforeLabel "BEFORE";
+        element divider div panel;
+        class divider "hg-compare-divider";
+        attr divider aria-hidden "true";
+        element label label section;
+        text label "Slide to compare before and after";
+        element range input section;
+        class range "hg-slider";
+        attr range type "range";
+        attr range min "0";
+        attr range max "100";
+        attr range aria-label "Before and after comparison";
+        bind range amount;
+    ]
+    break;
+
+.ProductMockup = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section hg-product-row";
+        element text div section;
+        element eyebrow p text;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h2 text;
+        class heading "hg-title";
+        text heading "{title}";
+        element desc p text;
+        class desc "hg-lead";
+        text desc "{description}";
+        element device div section;
+        class device "hg-product-device";
+        motion device float;
+        element pill span device;
+        class pill "hg-pill";
+        text pill "{label}";
+        element screen h3 device;
+        class screen "hg-title";
+        text screen "{title}";
+    ]
+    break;
+
+.IntegrationCloud = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element grid div section;
+        class grid "hg-grid";
+        element badge0 div grid;
+        class badge0 "hg-glass";
+        motion badge0 hover-rise;
+        element text0 h3 badge0;
+        text text0 "API";
+        element badge1 div grid;
+        class badge1 "hg-glass";
+        motion badge1 hover-rise;
+        element text1 h3 badge1;
+        text text1 "AUTH";
+        element badge2 div grid;
+        class badge2 "hg-glass";
+        motion badge2 hover-rise;
+        element text2 h3 badge2;
+        text text2 "DATA";
+        element badge3 div grid;
+        class badge3 "hg-glass";
+        motion badge3 hover-rise;
+        element text3 h3 badge3;
+        text text3 "FILES";
+        element badge4 div grid;
+        class badge4 "hg-glass";
+        motion badge4 hover-rise;
+        element text4 h3 badge4;
+        text text4 "EVENTS";
+        element badge5 div grid;
+        class badge5 "hg-glass";
+        motion badge5 hover-rise;
+        element text5 h3 badge5;
+        text text5 "UI";
+    ]
+    break;
+
+.FeatureSpotlight = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element panel article section;
+        class panel "hg-cta-band";
+        motion panel spotlight;
+        element eyebrow p panel;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h2 panel;
+        class heading "hg-title";
+        text heading "{title}";
+        element copy p panel;
+        class copy "hg-lead";
+        text copy "{description}";
+        element link a panel;
+        class link "hg-button hg-button-primary";
+        attr link href "{href}";
+        text link "{action}";
+    ]
+    break;
+
+.QuoteWall = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element wall div section;
+        class wall "hg-quote-wall";
+        element quote0 blockquote wall;
+        class quote0 "hg-card hg-testimonial";
+        motion quote0 reveal;
+        text quote0 "It changed how we build.";
+        element quote1 blockquote wall;
+        class quote1 "hg-card hg-testimonial";
+        motion quote1 reveal;
+        text quote1 "Beautiful without the boilerplate.";
+        element quote2 blockquote wall;
+        class quote2 "hg-card hg-testimonial";
+        motion quote2 reveal;
+        text quote2 "Everything finally feels connected.";
+    ]
+    break;
+
+.MagazineGrid = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element grid div section;
+        class grid "hg-grid";
+        element article0 article grid;
+        class article0 "hg-card";
+        motion article0 hover-rise;
+        element number0 p article0;
+        class number0 "hg-kicker";
+        text number0 "ARTICLE 01";
+        element heading0 h3 article0;
+        class heading0 "hg-bento-title";
+        text heading0 "The new visual language";
+        element desc0 p article0;
+        class desc0 "hg-muted";
+        text desc0 "{description}";
+        element article1 article grid;
+        class article1 "hg-card";
+        motion article1 hover-rise;
+        element number1 p article1;
+        class number1 "hg-kicker";
+        text number1 "ARTICLE 02";
+        element heading1 h3 article1;
+        class heading1 "hg-bento-title";
+        text heading1 "A study in interaction";
+        element desc1 p article1;
+        class desc1 "hg-muted";
+        text desc1 "{description}";
+        element article2 article grid;
+        class article2 "hg-card";
+        motion article2 hover-rise;
+        element number2 p article2;
+        class number2 "hg-kicker";
+        text number2 "ARTICLE 03";
+        element heading2 h3 article2;
+        class heading2 "hg-bento-title";
+        text heading2 "Designing for feeling";
+        element desc2 p article2;
+        class desc2 "hg-muted";
+        text desc2 "{description}";
+    ]
+    break;
+
+.PeopleGrid = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element grid div section;
+        class grid "hg-grid";
+        element member0 article grid;
+        class member0 "hg-card";
+        motion member0 hover-rise;
+        element circle0 div member0;
+        class circle0 "hg-orb";
+        element title0 h3 member0;
+        text title0 "Design";
+        element description0 p member0;
+        class description0 "hg-muted";
+        text description0 "{description}";
+        element member1 article grid;
+        class member1 "hg-card";
+        motion member1 hover-rise;
+        element circle1 div member1;
+        class circle1 "hg-orb";
+        element title1 h3 member1;
+        text title1 "Engineering";
+        element description1 p member1;
+        class description1 "hg-muted";
+        text description1 "{description}";
+        element member2 article grid;
+        class member2 "hg-card";
+        motion member2 hover-rise;
+        element circle2 div member2;
+        class circle2 "hg-orb";
+        element title2 h3 member2;
+        text title2 "Storytelling";
+        element description2 p member2;
+        class description2 "hg-muted";
+        text description2 "{description}";
+    ]
+    break;
+
+.TabbedShowcase = (ExperienceBlock)
+    ? showFirst = true;
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element tabs div section;
+        class tabs "hg-actions";
+        attr tabs role "group";
+        attr tabs aria-label "Showcase views";
+        element toggle button tabs;
+        class toggle "hg-button hg-button-primary";
+        attr toggle type "button";
+        text toggle "Switch showcase view";
+        on toggle click switchView;
+        element panelOne article section;
+        class panelOne "hg-card";
+        show panelOne showFirst;
+        element firstHeading h3 panelOne;
+        text firstHeading "Design system";
+        element firstCopy p panelOne;
+        text firstCopy "{description}";
+        element panelTwo article section;
+        class panelTwo "hg-card";
+        hide panelTwo showFirst;
+        element secondHeading h3 panelTwo;
+        text secondHeading "Interaction system";
+        element secondCopy p panelTwo;
+        text secondCopy "Different content, same native component.";
+    ]
+    : switchView(self) = [
+        toggle showFirst;
+    ]
+    break;
+
+.ComparisonTable = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        element shell div section;
+        class shell "hg-comparison";
+        element table table shell;
+        attr table aria-label "Plan comparison";
+        element header thead table;
+        element headingRow tr header;
+        element th0 th headingRow;
+        text th0 "Capability";
+        element th1 th headingRow;
+        text th1 "Essential";
+        element th2 th headingRow;
+        text th2 "Studio";
+        element body tbody table;
+        element row0 tr body;
+        element c00 th row0;
+        text c00 "Reusable UI";
+        element c01 td row0;
+        text c01 "Included";
+        element c02 td row0;
+        text c02 "Included";
+        element row1 tr body;
+        element c10 th row1;
+        text c10 "Animations";
+        element c11 td row1;
+        text c11 "Basic";
+        element c12 td row1;
+        text c12 "Advanced";
+        element row2 tr body;
+        element c20 th row2;
+        text c20 "Accessibility";
+        element c21 td row2;
+        text c21 "Included";
+        element c22 td row2;
+        text c22 "Included";
+    ]
+    break;
+
+.NewsletterCTA = (ExperienceBlock)
+    $ email = "";
+    $ confirmation = "Join our newsletter.";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element panel form section;
+        class panel "hg-cta-band";
+        element eyebrow p panel;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h2 panel;
+        class heading "hg-title";
+        text heading "{title}";
+        element description p panel;
+        class description "hg-lead";
+        text description "{description}";
+        element input input panel;
+        class input "hg-input";
+        attr input type "email";
+        attr input name "email";
+        attr input required "true";
+        attr input aria-label "Email address";
+        bind input email;
+        element submit button panel;
+        class submit "hg-button hg-button-primary";
+        attr submit type "submit";
+        text submit "Join now";
+        element notice p panel;
+        attr notice role "status";
+        attr notice aria-live "polite";
+        text notice "{confirmation}";
+        on panel submit subscribe;
+    ]
+    : subscribe(self) = [
+        set confirmation "Thank you for your interest.";
+    ]
+    break;
+
+.MagneticCTA = (ExperienceBlock)
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element panel div section;
+        class panel "hg-cta-band";
+        motion panel spotlight;
+        element eyebrow p panel;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h2 panel;
+        class heading "hg-title";
+        text heading "{title}";
+        element action a panel;
+        class action "hg-button hg-button-primary";
+        motion action magnetic;
+        attr action href "{href}";
+        text action "{action}";
+    ]
+    break;
+
+.MegaFooter = (ExperienceBlock)
+    : render(self) = [
+        element footer footer root;
+        class footer "hg-footer";
+        element inner div footer;
+        class inner "hg-wrap hg-footer-grid";
+        element brand div inner;
+        element heading h2 brand;
+        class heading "hg-brand";
+        text heading "{title}";
+        element desc p brand;
+        class desc "hg-muted";
+        text desc "{description}";
+        element links nav inner;
+        class links "hg-links";
+        attr links aria-label "Footer links";
+        element link0 a links;
+        attr link0 href "/";
+        text link0 "Home";
+        element link1 a links;
+        attr link1 href "/experiences";
+        text link1 "Experiences";
+        element link2 a links;
+        attr link2 href "/catalog";
+        text link2 "Gallery";
+    ]
+    break;
+
+.NotFoundExperience = (ExperienceBlock)
+    : render(self) = [
+        element main main root;
+        class main "hg-404";
+        element code div main;
+        class code "hg-404-code";
+        text code "404";
+        element heading h1 main;
+        class heading "hg-title";
+        text heading "{title}";
+        element copy p main;
+        class copy "hg-muted";
+        text copy "{description}";
+        element link a main;
+        class link "hg-button hg-button-primary";
+        attr link href "{href}";
+        text link "{action}";
+    ]
+    break;
