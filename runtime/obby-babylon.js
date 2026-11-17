@@ -86,7 +86,7 @@
          const x=n*7-12,z=(n%2===0?-12:13)+(n%3-1)*2,y=-5+(n%4)*1.9;
          for(let k=0;k<3;k++){
            const cloud=B.MeshBuilder.CreateSphere("cloud-"+n+"-"+k,{diameter:4.5+(k%2)*1.8,segments:8},this.scene);
-           cloud.position=new B.Vector3(x+k*2.4,y+(k===1?.5:0),z+(k-1)*.7);
+           cloud.position=new B.Vector3(x+k*2.4,y+(k===1 ? .5 : 0),z+(k-1)*.7);
            cloud.scaling.y=.32;
            cloud.material=cloudMaterial;
            cloud.isPickable=false;
@@ -127,8 +127,8 @@
      for(const {mesh,dx,dy,dz} of this.limbs){
        // Small jump lift/swing makes the simple avatar feel less rigid.
        const jumping=!p.grounded;
-       mesh.position.set(p.x+dx,p.y+dy+(jumping?.09:0),p.z+dz);
-       if(mesh.rotation)mesh.rotation.z=jumping?(dx<0?.13:-.13):0;
+       mesh.position.set(p.x+dx,p.y+dy+(jumping ? .09 : 0),p.z+dz);
+       if(mesh.rotation)mesh.rotation.z=jumping?(dx<0 ? .13 : -.13):0;
      }
      const B=this.B;
      const goal=new B.Vector3(p.x+3,p.y+1.05,p.z);
