@@ -47,7 +47,7 @@ class NativeUIRuntime{
  render(obj,parent,depth){if(depth>30)throw Error("UI nesting limit");const wrapper=this.document.createElement("div");wrapper.style.display="contents";wrapper.dataset.hiroComponent=obj.type;parent.appendChild(wrapper);const refs=new Map([["root",wrapper]]);const children=[];const steps=this.call(obj,"render");
   for(const {op,args,line} of steps){const [a,b,c]=args;const node=id=>{if(!refs.has(id))throw Error("Unknown UI node "+id+" line "+line);return refs.get(id);};
    if(op==="element"){if(refs.has(a))throw Error("Duplicate UI id");const el=this.document.createElement(b);el.id="hg-"+obj.id+"-"+a;node(c).appendChild(el);refs.set(a,el);}
-   else if(op==="component"){let child=obj.children.get(b);if(!child){child=this.spawn(a);obj.children.set(b,child);}if(child.type!==a)throw Error("Child type changed");children.push({child,parent:node(c)});}
+   else if(op==="component"){let child=obj.children.get(b);if(!child){child=this.spawn(a);obj.children.set(b,child);}if(child.type!==a)throw Error("Child type changed");const slot=this.document.createElement("span");slot.style.display="contents";node(c).appendChild(slot);children.push({child,parent:slot});}
    else if(op==="prop"){const child=obj.children.get(a);if(!child)throw Error("Unknown child "+a);const decl=this.program.classes.get(child.type).fields.get(b);if(!decl)throw Error("Unknown child prop "+b);const str=this.tmpl(c,obj);this.assign(child,b,decl.kind==="#"?Number(str):decl.kind==="?"?str==="true":str);}
    else if(op==="text")node(a).textContent=this.tmpl(b,obj);
    else if(op==="class"){const cls=this.tmpl(b,obj);if(!/^[\w\s-]*$/.test(cls))throw Error("Bad CSS class");node(a).className=cls;}
