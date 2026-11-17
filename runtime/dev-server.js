@@ -2,6 +2,7 @@
 /** Zero-dependency local dev server: fixed runtime assets and project .scroll pages. */
 const fs=require("node:fs"),path=require("node:path"),http=require("node:http");
 const rootRuntime=path.resolve(__dirname);
+const {resolveSource}=require("./package-manager");
 const allowedRuntime=new Set(["scroll-runtime.js","app-runtime.js","expressive-runtime.js"]);
 const html=[
 '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
@@ -54,7 +55,7 @@ async function serveProject(project,port=3000,{watch=true}={}){
        const file=findPage(project,url.searchParams.get("path")||"/");
        if(!file||!fs.existsSync(file))return send(response,404,"Page not found");
        ensureSafeTarget(file,project);
-       return send(response,200,fs.readFileSync(file),"text/plain; charset=utf-8");
+       return send(response,200,resolveSource(project,fs.readFileSync(file,"utf8")),"text/plain; charset=utf-8");
      }
      if(url.pathname.startsWith("/__hiro/runtime/")){
        const filename=url.pathname.slice("/__hiro/runtime/".length);
@@ -70,9 +71,9 @@ async function serveProject(project,port=3000,{watch=true}={}){
  const watchers=[];
  if(watch){
    const signal=()=>{for(const client of clients)if(!client.destroyed)client.write("event: reload\ndata: changed\n\n");};
-   for(const dir of [project,path.join(project,"pages")]){
+   for(const dir of [project,path.join(project,"pages"),path.join(project,"packages")]){
      if(fs.existsSync(dir)&&fs.statSync(dir).isDirectory())watchers.push(fs.watch(dir,{persistent:false},(event,name)=>{
-       if(name&&String(name).endsWith(".scroll"))signal();
+       if(name&&(/\.scroll$/.test(String(name))||/\.json$/.test(String(name))))signal();
      }));
    }
  }
