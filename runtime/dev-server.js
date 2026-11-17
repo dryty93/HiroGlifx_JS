@@ -64,6 +64,16 @@ async function serveProject(project,port=3000,{watch=true}={}){
        if(!allowedRuntime.has(filename))return send(response,404,"Not found");
        return send(response,200,fs.readFileSync(path.join(rootRuntime,filename)),"text/javascript; charset=utf-8");
      }
+     if(/^\/assets\/[A-Za-z0-9_./-]+$/.test(url.pathname)&&!url.pathname.includes("..")&&!url.pathname.includes("//")){
+       const rel=url.pathname.slice(1);
+       const mime={".svg":"image/svg+xml",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".avif":"image/avif"};
+       const type=mime[path.extname(rel).toLowerCase()];
+       if(!type)return send(response,404,"Not found");
+       const file=path.resolve(project,rel);
+       if(!file.startsWith(project+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile())return send(response,404,"Not found");
+       ensureSafeTarget(file,project);
+       return send(response,200,fs.readFileSync(file),type);
+     }
      if(url.pathname==="/favicon.ico")return send(response,404,"Not found");
      if(!/^\/[a-zA-Z0-9/_-]*$/.test(url.pathname))return send(response,404,"Not found");
      return send(response,200,html,"text/html; charset=utf-8");
