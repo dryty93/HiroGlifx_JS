@@ -1,0 +1,97 @@
+// Arena: imports more than 140 lines of enemy AI and combat behavior.
+// This application only decides the roster, overrides Boss, and runs the game.
+import enemykit
+
+.Boss = (Brute)
+    # health = 400;
+    # maxHealth = 400;
+    # speed = 40;
+    # damage = 45;
+    $ color = "#ff8fba";
+    $ label = "Boss";
+
+    : update(self, dt) = [
+        put(self, "x", field(self, "x") + field(self, "speed") * dt);
+        put(self, "y", 215 + sin(field(self, "x") / 30) * 25);
+        if field(self, "x") > 780 [
+            put(self, "x", 20);
+        ]
+    ]
+    break;
+
+.Main = ()
+    & roster = array();
+    # score = 0;
+    # defeated = 0;
+    # elapsed = 0;
+    ? done = false;
+    $ message = "Click enemies to attack. Each class responds differently.";
+
+    : init() = [
+        let a = spawn("Scout");
+        put(a, "x", 80);
+        push(roster, a);
+
+        let b = spawn("Brute");
+        put(b, "x", 240);
+        push(roster, b);
+
+        let c = spawn("Medic");
+        put(c, "x", 415);
+        push(roster, c);
+
+        let d = spawn("Boss");
+        put(d, "x", 590);
+        push(roster, d);
+    ]
+
+    : click(x, y) = [
+        for i from 0 to len(roster) [
+            let entity = get(roster, i);
+            if field(entity, "alive") [
+                if abs(field(entity, "x") - x) <= 32 && abs(field(entity, "y") - y) <= 45 [
+                    // Dynamic dispatch: Brute/Boss absorb damage via their overrides.
+                    let hp = send(entity, "takeDamage", 40);
+                    if hp <= 0 [
+                        score = score + 100;
+                        defeated = defeated + 1;
+                    ]
+                    return true;
+                ]
+            ]
+        ]
+        return false;
+    ]
+
+    : tick(dt) = [
+        elapsed = elapsed + dt;
+        for i from 0 to len(roster) [
+            let entity = get(roster, i);
+            if field(entity, "alive") [
+                send(entity, "update", dt);
+            ]
+        ]
+        if defeated == len(roster) [
+            done = true;
+            message = "Arena cleared! Score: " + score;
+        ]
+    ]
+
+    : draw() = [
+        clear("#0b1730");
+        rect(0, 385, 800, 135, "#173557");
+        text("HIROGLIFX POLYMORPHIC ARENA", 400, 42, 25, "#e8f6ff");
+        for i from 0 to len(roster) [
+            let entity = get(roster, i);
+            send(entity, "draw");
+            if field(entity, "alive") [
+                text(field(entity, "label"), field(entity, "x"), field(entity, "y") - 29, 15, "#ecf6ff");
+            ]
+        ]
+        text("SCORE " + score + "    DEFEATED " + defeated + "/" + len(roster), 400, 472, 19, "#bcecff");
+        if done [
+            rect(160, 178, 480, 130, "#143151");
+            text(message, 400, 248, 25, "#fbe2a8");
+        ]
+    ]
+    break;
