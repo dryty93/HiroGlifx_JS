@@ -10,6 +10,7 @@ on:
       - 'tests/native-ui.test.js'
       - 'e2e/native-ui-smoke.js'
       - 'e2e/native-catalog-smoke.js'
+      - 'e2e/all-experiences-smoke.js'
       - '.github/workflows/native-ui.yml'
   push:
     branches: [feat/native-polymorphic-ui]
@@ -29,6 +30,7 @@ jobs:
           node --check tests/native-ui.test.js
           node --check e2e/native-ui-smoke.js
           node --check e2e/native-catalog-smoke.js
+          node --check e2e/all-experiences-smoke.js
           node --check hiro.js
       - name: Native UI and full regression suite
         run: node --test tests/*.test.js
@@ -53,6 +55,7 @@ jobs:
         run: |
           node e2e/native-ui-smoke.js
           node e2e/native-catalog-smoke.js
+          node e2e/all-experiences-smoke.js
       - name: Upload native screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -61,4 +64,5 @@ jobs:
           path: |
             artifacts/native-ui-*.png
             artifacts/native-catalog-*.png
+            artifacts/showcase-*.png
           if-no-files-found: error
