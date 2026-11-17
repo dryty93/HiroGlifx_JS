@@ -33,6 +33,7 @@ async function main(){
     }
     await page.screenshot({path:path.join(artifacts,"native-ui-"+(route==="/"?"landing":route.slice(1))+"-"+width+".png"),fullPage:true});
     if(route==="/experiences"){
+     assert(await page.locator("[data-hg-motion=reveal].hg-in-view").count()>0,"viewport reveal");
      const carousel=page.locator(".hg-track");
      assert.equal(await carousel.evaluate(el=>el.style.getPropertyValue("--hg-slide")),"0");
      await page.getByRole("button",{name:"Next experience"}).click();
@@ -40,7 +41,6 @@ async function main(){
      await page.getByRole("button",{name:"Next experience"}).click();
      await page.getByRole("button",{name:"Next experience"}).click();
      assert.equal(await carousel.evaluate(el=>el.style.getPropertyValue("--hg-slide")),"0");
-     assert(await page.locator("[data-hg-motion=reveal].hg-in-view").count()>0,"viewport reveal");
     }
     if(route==="/studio"){
      const faq=page.getByRole("button",{name:"Is the motion really native?"});
