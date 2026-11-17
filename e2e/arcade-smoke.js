@@ -20,8 +20,13 @@ async function run(){
   const page=await browser.newPage({viewport:{width:1400,height:950},deviceScaleFactor:1});
   const errors=[];page.on("pageerror",e=>errors.push(e.message));
   await page.goto(base+"/arcade.html",{waitUntil:"domcontentloaded"});
-  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes('arcade_game("pong")'));
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)") && window.HiroArcadeSnapshot?.()?.sourceMode==="native-scroll");
   assert.equal(await page.locator(".game-tab").count(),6);
+  await page.locator("#showEngine").click();
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes("class ScrollGame"));
+  assert.match(await page.locator("#sourceFile").getAttribute("href"),/scroll-game-runtime\.js/);
+  await page.locator("#showScroll").click();
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)"));
   await page.getByRole("button",{name:"Play",exact:false}).first().click();
   await page.keyboard.down("ArrowDown");await page.waitForTimeout(220);await page.keyboard.up("ArrowDown");
   await page.screenshot({path:path.join(out,"arcade-pong-desktop.png"),fullPage:true});
@@ -30,6 +35,9 @@ async function run(){
   assert.match(await page.locator("#gameTitle").innerText(),/Snake/);
   await page.locator('[data-game="chess"]').click();
   await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes('arcade_game("chess")'));
+  await page.locator("#showEngine").click();
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes("class ChessGame"));
+  await page.locator("#showScroll").click();
   const coord=(file,rank)=>{
    const rect=document.querySelector("#screen").getBoundingClientRect();
    const x=192+("abcdefgh".indexOf(file)+.5)*52;

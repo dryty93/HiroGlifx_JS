@@ -36,30 +36,35 @@ The **new canonical-expression subset** brings typed variable declarations back 
     break;
 ```
 
-**Rule:** `bounce(hero, 900);` plays at once. `& intro = bounce(hero, 900);` creates a reusable controller, but doesn't play until `intro.play()` is called. Symbol meanings: `#` number, `# HiroGlifx
-
-**A tiny, extensible language for interactive web apps, animations, and browser workflows.**
-
-HiroGlifx is a JavaScript-powered experimental language with a legacy symbolic VM and a newer beginner-friendly scroll runtime. It is a **local development preview**, not a production-hardened framework.
-
-## Quick start
-
-Requires Node.js 20+.
-
-~~~bash
-git clone https://github.com/dryty93/HiroGlifx_JS.git
-cd HiroGlifx_JS
-node hiro.js init my-app
-node hiro.js dev my-app
-~~~
-
-Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
-
- string, `?` boolean, `&` object.
+**Rule:** `bounce(hero, 900);` plays immediately. `& intro = bounce(hero, 900);` saves an animation controller and waits for `intro.play()`. Symbols: `#` number, `$` string, `?` boolean, `&` object.
 
 To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonical-playground.html](canonical-playground.html) locally. Alternatively replace your `app.scroll` with canonical `.Main = ()` code and run `node hiro.js check my-app` and `node hiro.js dev my-app`; the dev server now dispatches to the corresponding runtime.
 
 This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
+
+## Native HiroGlifx gameplay scripting (Phase 19)
+
+**Pong is now genuinely written in HiroGlifx** rather than just invoking `arcade_game("pong")`. Its complete gameplay source is [`examples/arcade/pong.scroll`](examples/arcade/pong.scroll): typed state, `: tick(dt) = [ ... ]` game loop, `if condition [ ... ]` branching, arithmetic, physics, computer opponent, collision tests, scoring, winning logic, and `: draw() = [ ... ]` browser Canvas instructions. The host JavaScript interpreter supplies safe arithmetic, inputs and rendering primitives; it does **not** implement Pong's rules. The [Arcade](arcade.html) shows the entire live `.scroll` program.
+
+```scroll
+.Main = ()
+    # player = 260;
+    # ballX = 400;
+    # velocityX = 260;
+    : tick(dt) = [
+        ballX = ballX + velocityX * dt;
+        if ballX > 800 [
+            ballX = 400;
+        ]
+    ]
+    : draw() = [
+        clear("#0b1730");
+        rect(18, player - 50, 15, 100, "#85e1ff");
+    ]
+    break;
+```
+
+The excerpt above is shortened for readability; the linked file contains the **complete** executable Pong game. The new `runtime/scroll-game-runtime.js` is a bounded, no-eval interpreter for this subset. It does not currently support arbitrary JS, object reflection, classes or unbounded loops. The **other five Arcade games still use JavaScript-backed host engines**; their source panel explicitly says so rather than falsely implying the three-line launcher contains their full game rules. The eventual goal is to port them into this game-script subset and unify it with the main HiroGlifx compiler.
 
 ## Play six browser arcade games and inspect the HiroGlifx source
 

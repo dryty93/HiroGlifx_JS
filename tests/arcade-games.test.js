@@ -5,15 +5,22 @@ const {ArcadeGame,GAME_IDS}=require("../runtime/arcade-games");
 const {ChessGame,legal,fenParse}=require("../runtime/arcade-chess");
 const {CanonicalRuntime}=require("../runtime/canonical-runtime");
 const {install,games}=require("../runtime/arcade-canonical");
+const {ScrollGame}=require("../runtime/scroll-game-runtime");
 function frame(game,seconds=1){for(let i=0;i<Math.round(seconds*60);i++)game.tick(1/60);}
 test("all six arcades are instantiable by canonical scroll source",async()=>{
  assert.equal(games.length,6);
  for(const id of games){
    const code=fs.readFileSync(path.join(__dirname,"../examples/arcade/"+id+".scroll"),"utf8");
-   const runtime=install(new CanonicalRuntime());
-   await runtime.execute(code);
-   assert.equal(runtime.get("game").name,id);
-   assert.equal(runtime.get("game").kind,"arcade-game");
+   if(id==="pong"){
+     const game=new ScrollGame(code,{name:"pong"});
+     assert.equal(game.name,id);
+     assert.equal(game.kind,"arcade-game");
+   }else{
+     const runtime=install(new CanonicalRuntime());
+     await runtime.execute(code);
+     assert.equal(runtime.get("game").name,id);
+     assert.equal(runtime.get("game").kind,"arcade-game");
+   }
  }
 });
 test("Pong has a playable ball, paddle control and score reset",()=>{
