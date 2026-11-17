@@ -1832,12 +1832,15 @@ ui library
         element result0 p panel;
         class result0 "hg-rain-command-result";
         text result0 "View projects";
+        filter result0 query;
         element result1 p panel;
         class result1 "hg-rain-command-result";
         text result1 "Open documentation";
+        filter result1 query;
         element result2 p panel;
         class result2 "hg-rain-command-result";
         text result2 "Search library";
+        filter result2 query;
         element close button panel;
         class close "hg-button";
         attr close type "button";
