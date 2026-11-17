@@ -112,7 +112,7 @@
  class PolymorphicGame extends base.ScrollGame{
    constructor(source,{name="polymorphic-game",libraries={}}={}){
      const result=compile(source,libraries);
-     super(result.source,{name});
+     super(result.source,{name,classes:result.classes});
      this.classes=result.classes;
      this.moduleSource=source;
      this.imports=Object.keys(libraries);
