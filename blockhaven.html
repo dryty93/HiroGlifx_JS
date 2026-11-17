@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1727"><meta name="description" content="Blockhaven is an original 3D browser voxel builder made with HiroGlifx.">
+<title>Blockhaven — Build your own world in HiroGlifx</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 75% 0%,#1b5a62,#081523 57%);color:#ecf6f8;font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1460px;margin:auto;padding:20px clamp(14px,3vw,46px) 40px}
+nav{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;gap:10px;align-items:center;font-weight:950;letter-spacing:.01em;font-size:18px}
+.icon{width:41px;height:41px;border-radius:11px;background:linear-gradient(130deg,#6ddb9a,#35a4b1);display:grid;place-items:center;font-size:22px;color:#11312d}
+nav a{color:#b6e1e7;font-size:13px;font-weight:750;text-decoration:none;margin-left:18px}
+nav a:hover{color:white}
+.headline{margin:38px 0 22px;display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}
+.kicker{font-size:12px;letter-spacing:.18em;color:#80e8bd;font-weight:950;text-transform:uppercase}
+h1{font-size:clamp(44px,5.5vw,76px);letter-spacing:-.065em;line-height:1.04;margin:5px 0}
+h1 span{background:linear-gradient(95deg,#89f4ae,#80cbf1);background-clip:text;-webkit-background-clip:text;color:transparent}
+p{color:#b4cfdb;line-height:1.6} .subtitle{max-width:750px;margin:10px 0 0}
+.game{border:1px solid #3c827c;border-radius:22px;overflow:hidden;position:relative;background:#132f37;box-shadow:0 24px 70px #0009}
+#viewport{width:100%;display:block;aspect-ratio:16/8.5;outline:none;touch-action:none}
+.crosshair{pointer-events:none;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;width:24px;height:24px}
+.crosshair:before,.crosshair:after{content:"";position:absolute;background:#fff;box-shadow:0 1px 4px #000a;border-radius:3px}
+.crosshair:before{height:2px;width:21px;top:11px;left:1px}.crosshair:after{width:2px;height:21px;left:11px;top:1px}
+.hud{position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:start;gap:10px;pointer-events:none;z-index:4}
+.chip{padding:9px 14px;border:1px solid #b7f1e744;border-radius:10px;background:#0b2128bc;backdrop-filter:blur(12px);color:#e6ffff;font-size:13px;font-weight:850}
+.hud>div{display:flex;gap:8px}
+.overlay{position:absolute;inset:0;z-index:8;background:linear-gradient(135deg,#0b1b29e9,#103c43c7);display:grid;place-items:center;padding:24px;text-align:center;backdrop-filter:blur(7px)}
+.overlay[hidden]{display:none}.overcard{max-width:560px}.overcard h2{font-size:clamp(31px,4vw,53px);letter-spacing:-.045em;margin:10px 0}
+.overcard p{color:#d0e8e8}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:12px 18px;font-weight:900}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.primary{background:linear-gradient(105deg,#8eecaa,#82dbf2);color:#0a2c31}
+.secondary{background:#234d55;color:#e5fcfc;border:1px solid #428381}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.hotbar{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:5;background:#0c222bc9;padding:9px;border:1px solid #81d8b755;border-radius:14px;backdrop-filter:blur(11px)}
+.slot{min-width:63px;min-height:64px;border:1px solid #7fc6b166;background:#193743;color:#ecffff;display:grid;place-items:center;gap:3px;padding:6px;border-radius:9px;cursor:pointer}
+.slot.selected{border:2px solid #e4ffd4;background:#3c745c;box-shadow:0 0 20px #a2f8ae66}
+.slot .swatch{width:25px;height:24px;border-radius:5px;background:var(--swatch);box-shadow:inset -5px -5px 0 #0002}
+.slot small{color:#c9e7dc;font-size:10px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:18px 4px}
+.group{display:flex;gap:8px;flex-wrap:wrap} .group button{background:#1d3b48;color:#dafaf5;border:1px solid #4e8284}
+#status{font-size:13px;font-weight:750;color:#8de9ce;min-height:20px}
+.bottom{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:20px}
+.panel{padding:23px;border-radius:17px;background:#122936c9;border:1px solid #315667}
+.panel h3{margin:0 0 8px;font-size:21px}.panel p{font-size:14px;margin:8px 0}
+kbd{display:inline-block;border:1px solid #577d87;background:#274451;border-bottom-width:3px;padding:4px 8px;border-radius:6px;font-weight:900;color:#e8fafa}
+.mobile{display:none;justify-content:center;flex-wrap:wrap;gap:8px;margin:10px 0}
+.mobile button{height:57px;min-width:60px;background:#255b62;color:white;border:1px solid #69bca7}
+footer{color:#84a9b1;text-align:center;margin-top:34px;font-size:12px}
+@media(max-width:760px){.wrap{padding:15px 13px 25px}.headline{margin-top:30px}#viewport{aspect-ratio:1/1.13}.hotbar{bottom:10px;gap:3px;padding:5px}.slot{min-width:43px;min-height:50px;padding:4px}.slot small{font-size:8px}.slot .swatch{width:18px;height:18px}
+.hud{inset:9px 9px auto}.chip{font-size:10px;padding:7px 8px}.bottom{grid-template-columns:1fr}.mobile{display:flex}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<div class="wrap">
+<nav><div class="brand"><span class="icon">▣</span> HIROGLIFX <span style="font-size:11px;letter-spacing:.14em;color:#8dd6c3">BLOCKHAVEN</span></div>
+<div><a href="./showcase.html">Explore projects</a><a href="./canonical-playground.html">Learn HiroGlifx</a><a href="https://github.com/dryty93/HiroGlifx_JS">Source code</a></div></nav>
+<div class="headline"><div><div class="kicker">Original voxel sandbox · built in the browser</div>
+<h1>BLOCK<span>HAVEN</span></h1>
+<p class="subtitle">Explore a world made of blocks. Shape the landscape, discover new places, and build something of your own—all with HiroGlifx.</p></div></div>
+<section class="game" aria-label="Blockhaven game">
+<canvas id="viewport" width="1200" height="680" tabindex="0" aria-label="Interactive voxel world"></canvas>
+<div class="crosshair" aria-hidden="true"></div>
+<div class="hud"><div><div class="chip">🌿 CREATIVE MODE</div><div id="look" class="chip">CLICK TO LOOK</div></div>
+<div><div class="chip" id="coords">X 0 · Y 0 · Z 0</div><div class="chip" id="blockCount">0 BLOCKS</div></div></div>
+<div class="hotbar" id="hotbar" aria-label="Build block selection"></div>
+<div class="overlay" id="overlay"><div class="overcard"><div class="kicker">WELCOME TO YOUR WORLD</div>
+<h2>Every block is yours to shape.</h2>
+<p>Use WASD to move, Space to jump, and your mouse to look. Left-click breaks blocks; right-click places your selected material. Select blocks using number keys or the hotbar.</p>
+<div class="actions"><button id="start" class="primary">▶ Enter Blockhaven</button><button id="load" class="secondary">Load saved world</button></div></div></div>
+</section>
+<div class="toolbar"><div class="group"><button id="save">Save world</button><button id="new">Generate new world</button><button id="fullscreen">Fullscreen</button></div>
+<div id="status" role="status">Preparing terrain…</div></div>
+<div class="mobile" aria-label="Mobile exploration controls"><button data-key="KeyA">←</button><button data-key="KeyW">↑</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button><button id="mobileJump">Jump</button><button id="mobileMine">Mine</button><button id="mobilePlace">Place</button></div>
+<div class="bottom"><section class="panel"><div class="kicker">CREATE &amp; EXPLORE</div><h3>A world built from HiroGlifx objects</h3><p>Blockhaven generates a reproducible world and lets you mine and place colored voxel blocks. Your edits can be saved to your browser and restored later.</p>
+<p><kbd>W A S D</kbd> Walk · <kbd>SPACE</kbd> Jump · <kbd>1–7</kbd> Select material · Mouse to look · <kbd>ESC</kbd> Release mouse</p></section>
+<section class="panel"><div class="kicker">OPEN SOURCE CREATIVE ENGINE</div><h3>Explore the code</h3><p>The world begins with a canonical <code>.Main = ()</code> program using <code>voxel_world()</code>, <code>voxel_generate()</code> and <code>voxel_player()</code>.</p><p>This original prototype is not affiliated with Minecraft or Mojang and is intended to grow into a richer HiroGlifx game engine.</p></section></div>
+<footer>Blockhaven · Powered by HiroGlifx + Babylon.js · Your world data stays in your browser</footer>
+</div>
+<script src="./runtime/scroll-runtime.js"></script>
+<script src="./runtime/canonical-runtime.js"></script>
+<script src="./runtime/voxel-world.js"></script>
+<script src="./runtime/voxel-canonical.js"></script>
+<script src="./runtime/voxel-babylon.js"></script>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id),types=HiroVoxel.BLOCKS,palette=HiroVoxelBabylon.COLORS;
+const saveKey="hiroglifx-blockhaven-v1";
+let runtime=null,model=null,view=null,playing=false,selected="grass",unsub=null,autosaveTimer=null;
+window.HiroBlockhavenSnapshot=()=>model?Object.freeze({x:model.player.x,y:model.player.y,z:model.player.z,blocks:model.blocks.size,edits:model.edits,playing,target:view?.aim()?.block||null}):null;
+function notify(text){$("status").textContent=text;}
+function select(type){
+ selected=type;document.querySelectorAll(".slot").forEach(s=>s.classList.toggle("selected",s.dataset.type===type));
+ notify("Selected "+type+". Mine with left-click; place with right-click.");
+}
+for(let i=0;i<types.length;i++){
+ const type=types[i],button=document.createElement("button");
+ button.className="slot";button.dataset.type=type;button.setAttribute("aria-label","Select "+type);
+ const swatch=document.createElement("span");swatch.className="swatch";swatch.style.setProperty("--swatch",palette[type]);
+ const label=document.createElement("small");label.textContent=(i+1)+" "+type;
+ button.append(swatch,label);button.addEventListener("click",()=>select(type));$("hotbar").appendChild(button);
+}
+select(selected);
+function save(){
+ if(!model)return false;
+ try{localStorage.setItem(saveKey,model.serialize());notify("World saved locally. "+model.blocks.size+" blocks.");return true;}
+ catch(error){notify("Save failed: "+error.message);return false;}
+}
+function setup(world,rt=null){
+ if(unsub)unsub();if(view)view.stop();if(runtime)runtime.dispose();
+ runtime=rt;model=world;
+ view=new HiroVoxelBabylon.VoxelBabylonAdapter({BABYLON:window.BABYLON,canvas:$("viewport"),world,onFrame:w=>{
+   $("coords").textContent="X "+w.player.x.toFixed(1)+" · Y "+w.player.y.toFixed(1)+" · Z "+w.player.z.toFixed(1);
+   $("blockCount").textContent=w.blocks.size+" BLOCKS";
+ }});
+ view.start();view.paused=!playing;
+ unsub=world.on("change",()=>{
+   clearTimeout(autosaveTimer);
+   autosaveTimer=setTimeout(()=>save(),700);
+ });
+ $("blockCount").textContent=world.blocks.size+" BLOCKS";
+ notify("Your world is ready. Select a block and start building.");
+}
+async function newWorld(seed=42){
+ if(!window.BABYLON)throw new Error("Babylon.js failed to load. Internet access is required.");
+ const response=await fetch("./examples/blockhaven.scroll",{cache:"no-store"});
+ if(!response.ok)throw new Error("Could not load voxel scroll");
+ const code=(await response.text()).replace("voxel_world(42)","voxel_world("+seed+")");
+ const rt=HiroVoxelCanonical.install(new HiroCanonical.CanonicalRuntime());
+ await rt.execute(code);
+ setup(rt.get("world"),rt);
+}
+function load(){
+ try{
+   const saved=localStorage.getItem(saveKey);
+   if(!saved){notify("No saved world found. Build something and press Save.");return false;}
+   setup(HiroVoxel.VoxelWorld.deserialize(saved));
+   notify("Saved world restored.");return true;
+ }catch(error){notify("Couldn't load save: "+error.message);return false;}
+}
+function start(){
+ if(!view){notify("World is still loading.");return;}
+ playing=true;view.paused=false;view.last=0;$("overlay").hidden=true;
+ $("viewport").focus();notify("Explore, mine, and build. Press Esc to unlock the mouse.");
+}
+$("start").onclick=start;$("load").onclick=()=>{if(load())start();};
+$("save").onclick=save;
+$("new").onclick=()=>{
+ const confirmed=window.confirm("Replace the current world? Save first if you want to keep it.");
+ if(!confirmed)return;
+ playing=false;
+ const seed=Math.floor(Math.random()*100000);
+ newWorld(seed).then(()=>{start();save();}).catch(e=>notify(e.message));
+};
+$("fullscreen").onclick=()=>{
+ const game=document.querySelector(".game");
+ if(!document.fullscreenElement)game.requestFullscreen?.().catch(e=>notify(e.message));
+ else document.exitFullscreen?.();
+};
+const canvas=$("viewport");
+canvas.addEventListener("click",()=>{
+ if(!playing){start();return;}
+ if(document.pointerLockElement!==canvas&&canvas.requestPointerLock){
+   canvas.requestPointerLock().catch(()=>{});
+   return;
+ }
+ const result=view.mine();notify(result?"Block mined.":"Aim at a block within reach to mine.");
+});
+canvas.addEventListener("contextmenu",e=>e.preventDefault());
+canvas.addEventListener("mousedown",e=>{
+ if(e.button!==2||!playing)return;
+ e.preventDefault();
+ const placed=view.place(selected);notify(placed?"Placed "+selected+".":"Choose a valid adjacent block face.");
+});
+document.addEventListener("pointerlockchange",()=>{
+ $("look").textContent=document.pointerLockElement===canvas?"LOOK ACTIVE":"CLICK TO LOOK";
+});
+window.addEventListener("keydown",e=>{
+ if(e.target.matches("input,textarea,select"))return;
+ if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
+ if(e.code.startsWith("Digit")){
+   const i=Number(e.code.slice(5))-1;if(types[i])select(types[i]);
+ }
+ if(e.code==="Space"&&!e.repeat&&playing)view?.jump();
+ if(playing)view?.keydown(e.code);
+});
+window.addEventListener("keyup",e=>view?.keyup(e.code));
+window.addEventListener("blur",()=>view?.keys.clear());
+document.querySelectorAll("[data-key]").forEach(button=>{
+ const code=button.dataset.key;
+ button.addEventListener("pointerdown",e=>{e.preventDefault();view?.keydown(code);button.setPointerCapture(e.pointerId);});
+ for(const event of ["pointerup","pointercancel","lostpointercapture"])button.addEventListener(event,()=>view?.keyup(code));
+});
+$("mobileJump").onclick=()=>view?.jump();
+$("mobileMine").onclick=()=>notify(view?.mine()?"Block mined.":"Aim at a nearby block.");
+$("mobilePlace").onclick=()=>notify(view?.place(selected)?"Block placed.":"Aim at a nearby block.");
+newWorld().catch(e=>notify(e.message));
+})();
+</script></body></html>

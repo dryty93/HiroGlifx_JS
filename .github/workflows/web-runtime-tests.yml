@@ -20,6 +20,11 @@ jobs:
           node --check runtime/canonical-blueprints.js
           node --check runtime/obby-world.js
           node --check runtime/skybound-world.js
+          node --check runtime/voxel-world.js
+          node --check runtime/voxel-canonical.js
+          node --check runtime/voxel-babylon.js
+          node --check tests/voxel-world.test.js
+          node --check e2e/blockhaven-smoke.js
           node --check tests/skybound.test.js
           node --check tests/skybound-physics-feel.test.js
           node --check tests/skybound-course-path.test.js
@@ -104,4 +109,26 @@ jobs:
         with:
           name: skybound-browser-screenshots
           path: artifacts/*.png
+          if-no-files-found: warn
+
+  blockhaven-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test Blockhaven in real Chromium
+        run: node e2e/blockhaven-smoke.js
+      - name: Upload voxel desktop/mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blockhaven-browser-screenshots
+          path: artifacts/blockhaven-*.png
           if-no-files-found: warn

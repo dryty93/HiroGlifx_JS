@@ -1,0 +1,5 @@
+.Main = ()
+    & world = voxel_world(42);
+    & terrain = voxel_generate(world, 10);
+    & explorer = voxel_player(world, 0, 0);
+    break;

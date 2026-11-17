@@ -28,7 +28,7 @@ async function main(){
    const errors=[];
    page.on("pageerror",e=>errors.push(e.message));
    await page.goto(base+"/showcase.html",{waitUntil:"domcontentloaded"});
-   assert.equal(await page.locator(".card").count(),5);
+   assert.equal(await page.locator(".card").count(),6);
    await page.screenshot({path:path.join(captures,"hiroglifx-showcase-desktop.png"),fullPage:true});
    await page.goto(base+"/skybound.html",{waitUntil:"domcontentloaded"});
    await page.waitForFunction(()=>{
@@ -43,10 +43,14 @@ async function main(){
    const initialX=await page.evaluate(()=>window.HiroSkyboundSnapshot()?.x);
    assert.equal(typeof initialX,"number");
    await page.keyboard.down("KeyW");
-   await page.waitForTimeout(1150);
-   await page.keyboard.up("KeyW");
+   try {
+     await page.waitForFunction(startX=>window.HiroSkyboundSnapshot()?.x>startX+.15,
+       initialX,{timeout:4000,polling:50});
+   } finally {
+     await page.keyboard.up("KeyW");
+   }
    const forwardX=await page.evaluate(()=>window.HiroSkyboundSnapshot()?.x);
-   assert.ok(forwardX>initialX+.15,"W should move the player forward down the course");
+   assert.ok(forwardX>initialX+.15,"W should move the player forward before the first gap");
    await page.keyboard.press("Space");
    await page.waitForTimeout(900);
    assert.notEqual(await page.locator("#timer").textContent(),"0:00.0","Timer should advance during gameplay");

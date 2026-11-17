@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720"><defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#68b8df"/><stop offset="1" stop-color="#acd9c8"/></linearGradient><linearGradient id="dirt" x2="0" y2="1"><stop stop-color="#a67a50"/><stop offset="1" stop-color="#5b483e"/></linearGradient></defs><rect width="1280" height="720" fill="#071322"/>
+<text x="54" y="63" font-family="Arial" font-size="34" font-weight="bold" fill="#e8fcf2">BLOCKHAVEN</text><text x="300" y="62" font-family="Arial" font-size="16" fill="#8ce9c0">ORIGINAL HIROGLIFX VOXEL SANDBOX</text>
+<rect x="48" y="97" width="1184" height="520" rx="22" fill="url(#sky)" stroke="#6de3c3" stroke-width="3"/>
+<circle cx="970" cy="215" r="65" fill="#fff2c3" opacity=".8"/>
+<g opacity=".45" fill="#fff"><ellipse cx="242" cy="196" rx="134" ry="26"/><ellipse cx="887" cy="320" rx="90" ry="20"/></g>
+<path d="M76 444L430 315L741 433L386 586Z" fill="#6dd58b"/><path d="M386 586L741 433L741 531L386 685Z" fill="#94704d"/><path d="M76 444L386 586L386 685L76 540Z" fill="#6a5549"/>
+<path d="M492 358L694 276L883 353L673 434Z" fill="#7cdc8a"/><path d="M673 434L883 353L883 438L673 522Z" fill="#997956"/><path d="M492 358L673 434L673 522L492 445Z" fill="#775c46"/>
+<path d="M852 399L1029 326L1183 394L999 476Z" fill="#6cc783"/><path d="M999 476L1183 394L1183 494L999 568Z" fill="#9d7550"/>
+<path d="M852 399L999 476L999 568L852 484Z" fill="#705c43"/>
+<path d="M596 244L642 226L687 245L638 268Z" fill="#418c55"/><path d="M638 268L687 245L687 321L638 341Z" fill="#2f6948"/><path d="M596 244L638 268L638 341L596 316Z" fill="#3c7549"/>
+<path d="M626 324L647 316L668 325L647 333Z" fill="#a37a4e"/><path d="M647 333L668 325L668 387L647 396Z" fill="#816044"/><path d="M626 324L647 333L647 396L626 385Z" fill="#72553e"/>
+<g fill="#14384a" opacity=".83"><rect x="72" y="114" width="225" height="42" rx="12"/><rect x="1029" y="114" width="180" height="42" rx="12"/></g>
+<text x="90" y="143" fill="#e6fff0" font-family="Arial" font-size="18" font-weight="bold">CREATIVE MODE</text><text x="1049" y="143" fill="#e6fff0" font-family="Arial" font-size="17">BUILD · EXPLORE</text>
+<path d="M627 358H653M640 345V371" fill="none" stroke="#fff" stroke-width="3"/>
+<rect x="324" y="556" width="632" height="71" rx="17" fill="#0b2730" opacity=".93" stroke="#85e3bf"/>
+<g><rect x="340" y="566" width="73" height="52" rx="10" fill="#3c7957" stroke="#e2ffe2" stroke-width="3"/><rect x="354" y="579" width="40" height="25" rx="4" fill="#63b877"/><rect x="422" y="566" width="73" height="52" rx="10" fill="#275361"/><rect x="436" y="579" width="40" height="25" rx="4" fill="#a17d5f"/><rect x="504" y="566" width="73" height="52" rx="10" fill="#275361"/><rect x="518" y="579" width="40" height="25" rx="4" fill="#8899b3"/><rect x="586" y="566" width="73" height="52" rx="10" fill="#275361"/><rect x="600" y="579" width="40" height="25" rx="4" fill="#896746"/><rect x="668" y="566" width="73" height="52" rx="10" fill="#275361"/><rect x="682" y="579" width="40" height="25" rx="4" fill="#34955e"/><rect x="750" y="566" width="73" height="52" rx="10" fill="#275361"/><rect x="764" y="579" width="40" height="25" rx="4" fill="#e6ca83"/><rect x="832" y="566" width="73" height="52" rx="10" fill="#275361"/><rect x="846" y="579" width="40" height="25" rx="4" fill="#8bd5ed"/></g>
+<rect x="48" y="647" width="1184" height="48" rx="12" fill="#163342"/><text x="640" y="677" font-family="Arial" font-size="17" text-anchor="middle" fill="#c6f1e3">Procedural terrain · Mine and place blocks · First-person controls · Local saves · Canonical .scroll</text>
+</svg>

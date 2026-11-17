@@ -61,6 +61,25 @@ To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonica
 
 This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
 
+## Blockhaven — original 3D voxel sandbox (browser)
+
+**[Play Blockhaven](blockhaven.html)** to explore a finite, procedurally generated world, mine and place blocks, switch materials and save the world in your browser. It uses Babylon.js for first-person WebGL rendering and canonical HiroGlifx variables to create the world.
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# open http://127.0.0.1:8000/blockhaven.html
+```
+
+```scroll
+.Main = ()
+    & world = voxel_world(42);
+    & terrain = voxel_generate(world, 10);
+    & explorer = voxel_player(world, 0, 0);
+    break;
+```
+
+Use WASD/arrows, Space to jump, mouse look, left click to mine, right click to place, and 1–7 to select a material. Local save/load uses browser storage. The original game has no connection to Minecraft or Mojang. The limited world and per-voxel meshes are an initial creative sandbox, **not** a feature-complete survival/crafting game or an optimized chunked voxel renderer. See [Blockhaven docs](docs/blockhaven.md).
+
 ## Skybound Obby — flagship browser experience
 
 **[Play Skybound](skybound.html)** or explore the **[HiroGlifx Showcase](showcase.html)** to discover browser projects. Skybound is an original five-stage single-player obstacle course made with canonical `.Main = ()` HiroGlifx classes and a Babylon.js renderer, and includes a polished UI with a timer, deaths, checkpoint feedback, personal bests, sound cues, touch buttons and restart.
