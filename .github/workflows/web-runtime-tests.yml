@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground]
   pull_request:
 jobs:
   node:
@@ -15,6 +15,8 @@ jobs:
         run: |
           node --check runtime/scroll-runtime.js
           node --check runtime/app-runtime.js
+          node --check runtime/preview-policy.js
+          node --check tests/preview-policy.test.js
           node --check runtime/data-server.js
           node --check runtime/auth-server.js
           node --check runtime/browser-policy.js
