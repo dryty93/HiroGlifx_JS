@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HiroGlifx Reactive App Playground</title>
+<style>
+*{box-sizing:border-box}body{font:15px system-ui;background:#0c1220;color:#e2e8f0;margin:0;padding:24px}
+main{max-width:1100px;margin:auto}.layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+textarea{width:100%;height:465px;resize:vertical;background:#121e31;color:#c4f1fd;border:1px solid #45546e;border-radius:14px;padding:16px;font:13px/1.8 monospace}
+#stage{min-height:465px;border:1px solid #45546e;border-radius:14px;padding:25px;text-align:center}
+#stage button{padding:10px 18px;background:#60a5fa;color:#101828;border:0;border-radius:10px;cursor:pointer;margin:12px}
+#stage input{display:block;margin:12px auto;padding:10px;border-radius:8px;border:1px solid #64748b}
+#stage p{font-size:19px}#stage div{margin:12px auto}
+button.run{background:#60a5fa;color:#101828;padding:12px 23px;border-radius:9px;border:0;font-weight:700;cursor:pointer;margin-bottom:14px}
+#error{color:#fda4af;white-space:pre-wrap;min-height:24px}
+@media(max-width:720px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<h1>HiroGlifx · Reactive Apps</h1>
+<p>Reusable components, live state, and interactive forms using simple .scroll commands.</p>
+<button id="run" class="run">Run scroll</button><div id="error" role="alert"></div>
+<div class="layout"><textarea id="source" aria-label="HiroGlifx source" spellcheck="false">.Main = [
+  page "HiroGlifx Reactive App";
+  background "#101827";
+  state count 0;
+  state name "friend";
+  use Heading hero;
+  text tally "";
+  bind text tally "Clicked {count} times";
+  button increase "Add one";
+  on click increase => increment count;
+  input nameField "Your name";
+  bind input nameField name;
+  on input nameField => set name @value;
+  text greeting "";
+  bind text greeting "Hello, {name}!";
+]
+.Heading = [
+  text heading "Welcome to HiroGlifx";
+  box accent 64 64 blue;
+  animate accent pulse 1200 infinite;
+]</textarea><div id="stage" aria-label="Interactive app preview"></div></div>
+</main>
+<script src="./runtime/scroll-runtime.js"></script>
+<script src="./runtime/app-runtime.js"></script>
+<script>
+let runtime;
+document.querySelector("#run").addEventListener("click",async()=>{
+  const stage=document.querySelector("#stage"),error=document.querySelector("#error");
+  error.textContent="";
+  if(runtime)runtime.dispose();
+  stage.replaceChildren();
+  runtime=new HiroGlifxApp.AppRuntime({document,mount:stage});
+  try{await runtime.execute(document.querySelector("#source").value);}
+  catch(e){error.textContent=e.message;}
+});
+document.querySelector("#run").click();
+</script>
+</body></html>
