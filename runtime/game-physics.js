@@ -45,6 +45,11 @@
      const actor=new CharacterController({BABYLON:this.B,controller,speed,jump,gravity:this.gravity});
      this.controllers.push(actor);return actor;
    }
+   releaseAggregate(aggregate){
+     const index=this.aggregates.indexOf(aggregate);
+     if(index<0)return false;
+     this.aggregates.splice(index,1);aggregate.dispose?.();return true;
+   }
    dispose(){
      for(const controller of this.controllers)controller.dispose();
      for(const aggregate of this.aggregates)aggregate.dispose?.();
