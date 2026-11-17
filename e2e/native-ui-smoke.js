@@ -23,7 +23,8 @@ async function main(){
     await page.getByText(title,{exact:false}).waitFor();
     assert.equal(await page.locator("h1").count(),1);
     assert.equal(await page.getByRole("main").count(),1,"one semantic main landmark");
-    assert.equal(await page.locator("body").evaluate(el=>el.scrollWidth<=innerWidth+2),true,"horizontal overflow");
+    const overflow=await page.evaluate(()=>({body:document.body.scrollWidth,viewport:innerWidth,offenders:[...document.querySelectorAll("body *")].filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&(r.right>innerWidth+4||r.left< -4);}).slice(0,8).map(el=>({tag:el.tagName,cls:el.className,id:el.id,right:Math.round(el.getBoundingClientRect().right)}))}));
+    assert.equal(overflow.body<=overflow.viewport+2,true,"horizontal overflow "+route+" "+width+" "+JSON.stringify(overflow));
     if(route==="/experiences"||route==="/studio"){
      for(let y=0;y<await page.evaluate(()=>document.body.scrollHeight);y+=650){
       await page.evaluate(scrollY=>window.scrollTo(0,scrollY),y);
