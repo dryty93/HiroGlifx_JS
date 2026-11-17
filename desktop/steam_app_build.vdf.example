@@ -1,0 +1,22 @@
+// Example SteamPipe descriptor. Do NOT commit actual credentials or real AppID.
+// Replace placeholders only in your private authenticated Steamworks setup.
+"AppBuild"
+{
+    "AppID" "<STEAM_APP_ID>"
+    "Desc" "Riftfall HiroGlifx development build"
+    "BuildOutput" "./steam-build-output"
+    "ContentRoot" "./release"
+    "SetLive" ""
+    "Depots"
+    {
+        "<STEAM_DEPOT_ID>"
+        {
+            "FileMapping"
+            {
+                "LocalPath" "Riftfall-HiroGlifx-*"
+                "DepotPath" "."
+                "recursive" "1"
+            }
+        }
+    }
+}
