@@ -25,7 +25,7 @@ test("stream staging is atomic on missing physics aggregates",()=>{
  const manager=new PhysicsRegionStream({regions,entries,create:mesh=>{
   if(mesh.name==="b")throw Error("Havok creation error");
   return {dispose(){released++;}};
- },release:a=>a.dispose(),maxRegions:2,radius:0});
+ },release:a=>a.dispose(),maxRegions:2,radius:3});
  manager.update({x:0,z:0});
  assert.throws(()=>manager.update({x:0,z:-12.5}),/Havok creation error/);
  assert.deepEqual(manager.snapshot().regions,["a"]);
