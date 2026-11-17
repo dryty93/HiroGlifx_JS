@@ -6,7 +6,7 @@ const CLASS=/^\.([A-Za-z_]\w*)\s*=\s*\(([A-Za-z_]\w*)?\)$/;
 const FIELD=/^([#$?])\s*([A-Za-z_]\w*)\s*=\s*(.+);$/;
 const METHOD=/^:\s*([A-Za-z_]\w*)\s*\(self\)\s*=\s*\[$/;
 const TAGS=new Set("main header footer nav section article aside div h1 h2 h3 h4 p span small strong em ul li a button form label input textarea select option figure figcaption img picture video blockquote details summary".split(" "));
-const ATTRS=new Set("href type name placeholder required disabled value autocomplete role aria-label aria-modal aria-expanded aria-current aria-live aria-describedby aria-hidden for title tabindex min max src alt loading decoding width height poster controls autoplay muted loop playsinline".split(" "));
+const ATTRS=new Set("href type name placeholder required disabled value autocomplete role aria-label aria-modal aria-pressed aria-expanded aria-current aria-live aria-describedby aria-hidden for title tabindex min max src alt loading decoding width height poster controls autoplay muted loop playsinline".split(" "));
 const EVENT=new Set(["click","input","change","submit"]);
 const EFFECTS=new Set(["reveal","rise","scale","float","glow","marquee","hover-rise","spotlight","parallax"]);
 const SAFE_MEDIA=/^(?:https:\/\/[^\s<>"\x00-\x1f]+|\/(?!\/)[A-Za-z0-9_\-./%]+)$/;
