@@ -30,7 +30,19 @@ node hiro.js dev my-studio 3000
 node hiro.js build my-studio
 ~~~
 
-Open **http://127.0.0.1:3000/showcase** to explore 66 class previews, grouped across seven categories, each with its own copyable `.scroll` snippet. The `hiro showcase` command installs an isolated temporary preview automatically, avoiding local lockfile setup errors. The --ui starter includes 11 live examples, including /showcase and /catalog and the hero, portfolio, storytelling and conversion collections. It provides 28 additional high-level experience classes. See [the complete native experience catalog](docs/native-experience-catalog.md) and [the native UI guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
+Open **http://127.0.0.1:3000/showcase** to explore 84 class previews, grouped across eight categories, each with its own copyable `.scroll` snippet. The `hiro showcase` command installs an isolated temporary preview automatically, avoiding local lockfile setup errors. The --ui starter includes 11 live examples, including /showcase and /catalog and the hero, portfolio, storytelling and conversion collections. It provides 28 additional high-level experience classes. See [the complete native experience catalog](docs/native-experience-catalog.md) and [the native UI guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
+
+## Native UI patterns from the Raindrop Design Inspiration collection
+
+The public [Design Inspiration collection](https://dryden-inc718.raindrop.page/design-inspiration-77211371) contains 40 saved references covering page sections, design galleries, animations, component libraries, and two named character/reward-motion examples.
+
+18 **original, reusable HiroGlifx `.scroll` classes** now cover navigation, full-screen menus, notification toasts, an interactive reward pack, an animated sheep idle scene, a searchable command palette, tabs, star ratings, analytics, skeleton loading, gradient hero backgrounds, and success animations. The native package now totals **84 classes**.
+
+~~~bash
+node hiro.js showcase 3000
+~~~
+
+Open **http://127.0.0.1:3000/raindrop-inspiration** for the 18 new demos, or **http://127.0.0.1:3000/showcase** to see all 84 classes. See [design source evaluation, component mapping and limitations](docs/raindrop-design-inspiration.md). The specific Inspora post pages were rate-limited, so the original reward and sheep components reflect the public bookmark notes, not a claimed exact recreation of proprietary effects.
 
 ## Build a playable 3D game with simple HiroGlifx directions
 
