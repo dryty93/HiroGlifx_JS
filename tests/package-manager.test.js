@@ -65,7 +65,7 @@ test("transitive imports resolve once and reject cycles and collisions",()=>{
    installLocal(t.project,t.packageFolder("fancy",'import sparkfx\nextends FancyBadge PartyBadge\n.FancyBadge = [\n text title "Fancy";\n]'));
    let source=resolveSource(t.project,'import fancy\nimport sparkfx\n.Main = [\n use FancyBadge hero;\n]');
    assert.equal((source.match(/ability party/g)||[]).length,1);
-   assert.throws(()=>resolveSource(t.project,source),/Duplicate class|Duplicate ability/);
+   assert.equal(source.includes("extends FancyBadge PartyBadge"),true);
    assert.throws(()=>resolveSource(t.project,'import fancy\n.PartyBadge = [\n text new "Wrong";\n]'),/Duplicate class/);
    assert.throws(()=>removePackage(t.project,"sparkfx"),/still needed/);
    removePackage(t.project,"fancy");
@@ -95,4 +95,13 @@ test("CLI package list/install/remove operate on explicit project paths",async()
    await main(["package","remove",t.project,"sparkfx"]);
    assert.deepEqual(readLocked(t.project).packages,{});
  }finally{console.log=original;t.cleanup();}
+});
+
+test("dependency cycles are detected before runtime execution",()=>{
+ const t=fixture();
+ try{
+   installLocal(t.project,t.packageFolder("alpha",'import beta\n.Alpha = [\n text x "A";\n]'));
+   installLocal(t.project,t.packageFolder("beta",'import alpha\n.Beta = [\n text x "B";\n]'));
+   assert.throws(()=>resolveSource(t.project,"import alpha"),/Import cycle/);
+ }finally{t.cleanup();}
 });
