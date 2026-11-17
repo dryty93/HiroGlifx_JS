@@ -1,6 +1,116 @@
-// HiroGlifx Arcade — star-defense
-// Replace the game type or customize its engine to make your own edition.
+// Star Defense — original fixed-screen space shooter, fully scripted in HiroGlifx.
 .Main = ()
-    $ title = "Star Defense";
-    & game = arcade_game("star-defense");
+    & enemies = filled(27, 1);
+    & shots = array();
+    # ship = 400;
+    # enemyOffset = 0;
+    # enemyDirection = 1;
+    # enemyDrop = 0;
+    # remaining = 27;
+    # shotCooldown = 0;
+    # score = 0;
+    ? done = false;
+    $ message = "";
+
+    : tick(dt) = [
+        ship = clamp(ship + (key("ArrowRight") + key("KeyD") - key("ArrowLeft") - key("KeyA")) * 470 * dt, 30, 770);
+        if pointer("x") >= 0 [
+            ship = clamp(pointer("x"), 30, 770);
+        ]
+
+        shotCooldown = max(0, shotCooldown - dt);
+        if (key("Space") || key("Enter")) && shotCooldown <= 0 [
+            if len(shots) < 64 [
+                push(shots, array(ship, 443));
+                shotCooldown = 0.22;
+            ]
+        ]
+
+        for i from 0 to len(shots) [
+            let shot = get(shots, i);
+            set(shot, 1, get(shot, 1) - 490 * dt);
+        ]
+
+        let touchesEdge = false;
+        for i from 0 to 27 [
+            if get(enemies, i) == 1 [
+                let enemyX = 125 + (i % 9) * 68 + enemyOffset;
+                if enemyX <= 30 || enemyX >= 770 [
+                    touchesEdge = true;
+                ]
+            ]
+        ]
+        if touchesEdge [
+            enemyDirection = -enemyDirection;
+            enemyDrop = enemyDrop + 12;
+        ]
+
+        enemyOffset = enemyOffset + enemyDirection * (34 + (27 - remaining) * 2.4) * dt;
+
+        for s from 0 to len(shots) [
+            let shot = get(shots, s);
+            if get(shot, 1) >= 0 [
+                for i from 0 to 27 [
+                    if get(enemies, i) == 1 [
+                        let enemyX = 125 + (i % 9) * 68 + enemyOffset;
+                        let enemyY = 78 + floor(i / 9) * 52 + enemyDrop;
+                        if abs(enemyX - get(shot, 0)) < 20 && abs(enemyY - get(shot, 1)) < 22 [
+                            set(enemies, i, 0);
+                            set(shot, 1, -100);
+                            score = score + 100;
+                            remaining = remaining - 1;
+                        ]
+                    ]
+                ]
+            ]
+        ]
+
+        for j from 0 to len(shots) [
+            let index = len(shots) - 1 - j;
+            if index >= 0 && index < len(shots) [
+                if get(get(shots, index), 1) < -10 [
+                    removeAt(shots, index);
+                ]
+            ]
+        ]
+
+        if enemyDrop > 310 [
+            done = true;
+            message = "Invaders reached Earth";
+        ]
+        if remaining == 0 [
+            done = true;
+            message = "Sector defended!";
+        ]
+    ]
+
+    : draw() = [
+        clear("#0b1730");
+        for i from 0 to 80 [
+            let starX = (i * 97 + 19) % 800;
+            let starY = (i * 53 + 71 + round(enemyDrop)) % 520;
+            rect(starX, starY, 2, 2, "#305679");
+        ]
+        for i from 0 to 27 [
+            if get(enemies, i) == 1 [
+                let x = 125 + (i % 9) * 68 + enemyOffset;
+                let y = 78 + floor(i / 9) * 52 + enemyDrop;
+                rect(x - 15, y - 12, 30, 24, "#aa9dff");
+                rect(x - 21, y + 7, 10, 9, "#deccff");
+                rect(x + 11, y + 7, 10, 9, "#deccff");
+            ]
+        ]
+        rect(ship - 23, 460, 46, 19, "#68deec");
+        rect(ship - 10, 448, 20, 14, "#99f4ff");
+        for i from 0 to len(shots) [
+            let shot = get(shots, i);
+            rect(get(shot, 0) - 3, get(shot, 1), 6, 14, "#ffe391");
+        ]
+        text("SCORE " + score, 400, 30, 20, "#e6f7ff");
+        if done [
+            rect(145, 193, 510, 136, "#122747");
+            text(message, 400, 251, 29, "#f4df9a");
+            text("Select Restart to play again", 400, 294, 16, "#d6eaff");
+        ]
+    ]
     break;
