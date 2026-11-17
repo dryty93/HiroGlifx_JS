@@ -1,0 +1,56 @@
+name: Native HiroGlifx UI
+on:
+  pull_request:
+    paths:
+      - 'runtime/native-ui.js'
+      - 'runtime/package-manager.js'
+      - 'runtime/dev-server.js'
+      - 'examples/native-ui/**'
+      - 'examples/native-ui-library/**'
+      - 'tests/native-ui.test.js'
+      - 'e2e/native-ui-smoke.js'
+      - '.github/workflows/native-ui.yml'
+  push:
+    branches: [feat/native-polymorphic-ui]
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check runtime/native-ui.js
+          node --check runtime/package-manager.js
+          node --check runtime/dev-server.js
+          node --check tests/native-ui.test.js
+          node --check e2e/native-ui-smoke.js
+      - name: Native UI and full regression suite
+        run: node --test tests/*.test.js
+      - name: Validate imported native UI project
+        run: |
+          node hiro.js package add examples/native-ui examples/native-ui-library
+          node hiro.js check examples/native-ui
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test real browser behavior and screenshot desktop/mobile
+        run: node e2e/native-ui-smoke.js
+      - name: Upload native screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-ui-chromium-screenshots
+          path: artifacts/native-ui-*.png
+          if-no-files-found: error
