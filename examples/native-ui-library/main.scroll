@@ -873,6 +873,7 @@ ui library
     break;
 
 .VideoHero = (ExperienceBlock)
+    $ videoSrc = "";
     : render(self) = [
         element section section root;
         class section "hg-wrap hg-section";
@@ -888,6 +889,7 @@ ui library
         attr video controls "true";
         attr video playsinline "true";
         attr video poster "{src}";
+        attr video src "{videoSrc}";
         attr video aria-label "Video showcase. Provide a media source in your application.";
     ]
     break;
