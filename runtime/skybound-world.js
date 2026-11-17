@@ -44,21 +44,24 @@
    }
    moving(id,x,y,z,size,axis,range,period,stage=3){
      if(!["x","z"].includes(axis))throw new Error("Moving platforms require x or z axis");
+     const checkedRange=valid(range,.1,8,"range"),checkedPeriod=valid(period,.5,30,"period");
      const tile=this.tile(id,x,y,z,size,"solid",stage);
      this.modifiers.set(id,{type:"moving",axis,origin:tile[axis],
-       range:valid(range,.1,8,"range"),period:valid(period,.5,30,"period")});
+       range:checkedRange,period:checkedPeriod});
      return tile;
    }
    vanishing(id,x,y,z,size,delay,stage=4){
+     const checkedDelay=valid(delay,.15,5,"delay");
      const tile=this.tile(id,x,y,z,size,"solid",stage);
-     this.modifiers.set(id,{type:"vanishing",delay:valid(delay,.15,5,"delay"),
+     this.modifiers.set(id,{type:"vanishing",delay:checkedDelay,
        started:null,inactiveUntil:0});
      return tile;
    }
    spinner(id,x,y,z,size,range,period,stage=5){
+     const checkedRange=valid(range,.1,5,"range"),checkedPeriod=valid(period,.5,15,"period");
      const tile=this.tile(id,x,y,z,size,"lava",stage);
      this.modifiers.set(id,{type:"spinner",centerX:tile.x,centerZ:tile.z,
-       range:valid(range,.1,5,"range"),period:valid(period,.5,15,"period")});
+       range:checkedRange,period:checkedPeriod});
      return tile;
    }
    jump(){
