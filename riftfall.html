@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b132a"><meta name="description" content="HiroGlifx action RPG vertical slice: Havok physics, animated glTF hero, scripted combat, and pathfinding enemies.">
+<title>Riftfall — HiroGlifx Action RPG Foundations</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#ecf6ff;background:radial-gradient(circle at 74% -25%,#3b4a83,transparent 59%),#08111f;font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:#9ddfff}.shell{max-width:1460px;margin:auto;padding:22px clamp(15px,3vw,50px) 42px}
+nav{display:flex;gap:15px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.logo{font-weight:950;font-size:20px;text-decoration:none;color:white}.logo b{padding:8px 11px;border-radius:12px;margin-right:10px;background:linear-gradient(120deg,#9b73ff,#76deff);color:#131c31}
+nav a:not(.logo){font-size:13px;margin-left:16px;font-weight:800;text-decoration:none}
+.eyebrow{color:#8bdefb;font-size:12px;letter-spacing:.2em;font-weight:900}
+h1{font-size:clamp(43px,5.4vw,76px);letter-spacing:-.065em;line-height:1.05;margin:11px 0}
+h1 span{color:#b3a2ff}
+p{color:#acc5e3;line-height:1.6}.lede{max-width:730px;margin:12px 0 26px;font-size:16px}
+.stage{border-radius:23px;border:1px solid #536ba6;overflow:hidden;position:relative;background:#172948;box-shadow:0 25px 80px #0008}
+canvas{display:block;width:100%;aspect-ratio:16/8.3;outline:none;touch-action:none}
+.hud{position:absolute;inset:16px 16px auto;display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;pointer-events:none}
+.chip{font-size:13px;font-weight:900;background:#091931db;color:#dff7ff;backdrop-filter:blur(13px);border:1px solid #9fceff53;border-radius:12px;padding:9px 14px}
+.chip strong{color:#9ae5c4}
+.overlay{position:absolute;inset:0;z-index:4;display:grid;place-items:center;text-align:center;background:#081729e8;backdrop-filter:blur(9px);padding:24px}
+.overlay[hidden]{display:none}.intro{max-width:530px}.intro h2{font-size:clamp(28px,3.5vw,45px);letter-spacing:-.045em;margin:8px}
+button{font:inherit;cursor:pointer;padding:11px 16px;border-radius:11px;border:1px solid #647dab;background:#263d60;color:#edfbff;font-weight:850}
+button.primary{background:linear-gradient(130deg,#92d8ff,#b39dff);color:#111a2e;border:0;padding:15px 23px}
+button:focus-visible,a:focus-visible{outline:3px solid #9bdffd;outline-offset:3px}
+button:disabled{opacity:.5}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:15px 0}
+#status{color:#acf2d4;font-weight:750;font-size:13px}
+.keyboard{display:flex;gap:14px;flex-wrap:wrap;color:#b6c9e0;font-size:13px}
+kbd{background:#243e61;border:1px solid #5f85aa;border-bottom-width:3px;color:#f1f8ff;border-radius:6px;padding:3px 7px;font-weight:900}
+.touch{display:none;justify-content:center;gap:8px;margin:12px 0;flex-wrap:wrap}
+.touch button{min-width:60px;min-height:54px;touch-action:none}
+.grid{display:grid;grid-template-columns:1.05fr 1fr;gap:16px;margin-top:22px}
+.panel{padding:22px;background:#14243e;border:1px solid #375579;border-radius:19px;min-width:0}
+.panel h3{margin:0;font-size:20px}.panel p{font-size:14px}
+pre{white-space:pre-wrap;overflow:auto;max-height:450px;background:#07162a;color:#c3f4dc;padding:17px;border-radius:11px;font:12px/1.7 ui-monospace,monospace}
+.links{display:flex;gap:15px;flex-wrap:wrap;font-size:13px;margin-top:12px}
+footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+@media(max-width:650px){canvas{aspect-ratio:1/1.05}.shell{padding:14px 12px 28px}.hud{inset:8px 8px auto}.chip{font-size:10px;padding:6px 9px}.keyboard{display:none}.touch{display:flex}}
+</style></head><body><div class="shell">
+<nav><a class="logo" href="./showcase.html"><b>✦</b> HIROGLIFX <span style="font-size:11px;color:#a6c7ff;letter-spacing:.12em">RIFTFALL</span></a>
+<div><a href="./showcase.html">Project showcase</a><a href="./polymorphism.html">Polymorphism</a><a href="https://github.com/dryty93/HiroGlifx_JS">Source</a></div></nav>
+<header><div class="eyebrow">PHASES 23–26 · ACTION RPG VERTICAL SLICE</div><h1>RIFT<span>FALL</span></h1>
+<p class="lede">A small third-person combat arena showing four reusable game-engine capabilities working together: Havok rigid-body physics, a glTF animated avatar, combat with equipment and stamina, and enemies navigating around obstacles.</p></header>
+<section class="stage" aria-label="Playable 3D action RPG encounter">
+<canvas id="game" width="1280" height="690" tabindex="0" aria-label="Riftfall third-person game"></canvas>
+<div class="hud"><div class="chip">⚔ <strong id="health">145</strong> HP</div>
+<div class="chip">✦ <strong id="stamina">110</strong> STAMINA</div>
+<div class="chip">☠ <strong id="enemies">3</strong> RAIDERS LEFT</div>
+<div class="chip"><strong id="mode">HAVOK</strong> · <span id="clip">idle</span></div></div>
+<div class="overlay" id="overlay"><div class="intro"><div class="eyebrow">A HIROGLIFX GAME</div>
+<h2 id="overlayTitle">Enter the Riftfall arena</h2>
+<p id="overlayText">Defeat three raiders using a training sword. Move with WASD, jump with Space, and attack with J or the Attack button. Their navigation and combat decisions are powered by reusable engine modules and HiroGlifx encounter rules.</p>
+<button id="start" class="primary" disabled>Initializing Havok...</button></div></div></section>
+<div class="toolbar"><button id="attack">⚔ Attack</button><button id="jump">↑ Jump</button><button id="restart">↻ Restart</button>
+<div id="status" role="status">Loading physics, the original glTF avatar and gameplay source…</div></div>
+<div class="keyboard"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump</span><span><kbd>J</kbd> Attack</span><span>Drag to rotate camera</span></div>
+<div class="touch" aria-label="Touch controls"><button data-key="KeyA">←</button><button data-key="KeyW">↑</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button><button id="touchJump">Jump</button><button id="touchAttack">Attack</button></div>
+<div class="grid">
+<section class="panel"><h3>What is actually working?</h3><p><strong>23 · Physics:</strong> Havok V2 handles rigid bodies and character collision using a capsule controller, with camera obstruction checks.</p>
+<p><strong>24 · Assets and animation:</strong> a local original glTF file provides idle, walk, run, jump, attack and death clips. If loading fails, the scene explicitly reports a procedural placeholder.</p>
+<p><strong>25 · Combat:</strong> health, armor, stamina, attack ranges, weapon damage, cooldowns, statuses and hit events share a reusable engine.</p>
+<p><strong>26 · NPCs:</strong> A* grid navigation and behavior trees choose chase, attack or idle based on HiroGlifx rules.</p></section>
+<section class="panel"><h3>Complete executable HiroGlifx rules</h3><p>These rules tune attack damage, combo bonuses, enemy aggression and victory handling. JS supplies the engine, not game-specific balancing decisions.</p>
+<pre id="source">Loading original .scroll…</pre><div class="links"><a href="./examples/steam-rpg-combat.scroll" target="_blank" rel="noopener">Open .scroll source</a>
+<a href="./runtime/game-physics.js" target="_blank" rel="noopener">Physics engine</a>
+<a href="./runtime/game-assets.js" target="_blank" rel="noopener">Asset loader</a>
+<a href="./runtime/game-combat.js" target="_blank" rel="noopener">Combat engine</a>
+<a href="./runtime/game-ai.js" target="_blank" rel="noopener">NPC engine</a></div></section></div>
+<footer>Riftfall · Original HiroGlifx prototype · Local browser and Havok WASM required · No account or multiplayer</footer></div>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+<script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
+<script src="./runtime/scroll-game-runtime.js"></script>
+<script src="./runtime/scroll-world-rules.js"></script>
+<script src="./runtime/game-physics.js"></script>
+<script src="./runtime/game-assets.js"></script>
+<script src="./runtime/game-combat.js"></script>
+<script src="./runtime/game-ai.js"></script>
+<script src="./runtime/steam-rpg-demo.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+let demo=null,started=false;
+window.HiroRiftfallSnapshot=()=>demo?.ready?demo.snapshot():null;
+function status(message){$("status").textContent=message;}
+function showOverlay(title,description,button){
+ $("overlayTitle").textContent=title;$("overlayText").textContent=description;
+ $("start").textContent=button;$("overlay").hidden=false;
+}
+async function initialize(){
+ $("start").disabled=true;status("Loading Havok and local glTF...");
+ try{
+   const response=await fetch("./examples/steam-rpg-combat.scroll",{cache:"no-store"});
+   if(!response.ok)throw Error("HiroGlifx source not available");
+   const source=await response.text();$("source").textContent=source;
+   if(demo)demo.dispose();
+   demo=new HiroRPGDemo.RPGDemo({canvas:$("game"),BABYLON:window.BABYLON,HavokPhysics:window.HavokPhysics,source,
+     onEvent:message=>status(message),
+     onUpdate:s=>{
+       $("health").textContent=s.health;$("stamina").textContent=s.stamina;
+       $("enemies").textContent=s.enemies;$("mode").textContent=s.physics.toUpperCase();$("clip").textContent=s.animation;
+       if(s.done||s.health<=0){demo.pause();started=false;
+         showOverlay(s.done?"Raiders defeated!":"You were defeated",
+           s.done?"Your HiroGlifx combat logic completed the encounter. Restart to fight again.":"The raiders overwhelmed you. Restart to retry.",
+           "↻ Play again");}
+     }});
+   await demo.initialize();$("start").disabled=false;$("start").textContent="▶ Enter the arena";
+   status("Ready. "+demo.assetStatus);
+ }catch(error){
+   status("Initialization failed: "+error.message);
+   $("start").disabled=true;
+   showOverlay("Could not start Riftfall",error.message+" Havok requires modern WebAssembly SIMD support and network access to the development CDN.","Initialization unavailable");
+ }
+}
+$("start").onclick=()=>{if(!demo?.ready)return;demo.start();started=true;$("overlay").hidden=true;$("game").focus();status("Defeat the raiders. "+demo.assetStatus);};
+$("attack").onclick=()=>demo?.attack();
+$("jump").onclick=()=>demo?.character.jump();
+$("restart").onclick=()=>{started=false;showOverlay("Rebuilding the arena","Reloading the original HiroGlifx combat rules, characters and physics.","Loading...");initialize();};
+$("touchJump").onclick=()=>demo?.character.jump();$("touchAttack").onclick=()=>demo?.attack();
+window.addEventListener("keydown",e=>{
+ if(e.target.matches("input,textarea,select"))return;
+ if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
+ if(e.code==="Space"&&!e.repeat)demo?.character.jump();
+ if(e.code==="KeyJ"&&!e.repeat)demo?.attack();
+ demo?.press(e.code,true);
+});
+window.addEventListener("keyup",e=>demo?.press(e.code,false));
+window.addEventListener("blur",()=>demo?.keys.clear());
+document.querySelectorAll("[data-key]").forEach(button=>{
+ const code=button.dataset.key;
+ button.addEventListener("pointerdown",e=>{e.preventDefault();demo?.press(code,true);button.setPointerCapture(e.pointerId);});
+ for(const type of ["pointerup","pointercancel","lostpointercapture"])
+   button.addEventListener(type,()=>demo?.press(code,false));
+});
+initialize();
+})();
+</script></body></html>
