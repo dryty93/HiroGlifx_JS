@@ -123,3 +123,17 @@ test("static build includes verified local showcase imagery",()=>{
   assert(fs.existsSync(path.join(dir,"dist/assets/studio-placeholder.svg")));
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+
+test("one-command UI starter installs the experience package and all preview routes",()=>{
+ const {makeNativeProject,validateProject,buildProject}=require("../hiro");
+ const parent=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-starter-")),dir=path.join(parent,"new-studio");
+ try{
+  makeNativeProject(dir);
+  assert.equal(validateProject(dir),5);
+  assert(fs.existsSync(path.join(dir,"hiro.lock.json")));
+  assert(fs.existsSync(path.join(dir,"packages/native-ui/main.scroll")));
+  assert(fs.existsSync(path.join(dir,"assets/studio-placeholder.svg")));
+  assert.equal(buildProject(dir).length,5);
+ }finally{fs.rmSync(parent,{recursive:true,force:true});}
+});
