@@ -35,6 +35,27 @@
         world_configure(runSpeed, jumpForce);
     ]
 
+    // Moving platform and rotating obstacle motion is authored in HiroGlifx.
+    : movingOffset(time, range, period) = [
+        return sin(time * 6.28318530718 / period) * range;
+    ]
+
+    : spinnerX(time, range, period) = [
+        return sin(time * 6.28318530718 / period) * range;
+    ]
+
+    : spinnerZ(time, range, period) = [
+        return cos(time * 6.28318530718 / period) * range;
+    ]
+
+    : shouldVanish(time, started, delay) = [
+        return time - started >= delay;
+    ]
+
+    : respawnDelay() = [
+        return 2.3;
+    ]
+
     : onStage(nextStage) = [
         if nextStage > stage [
             score = score + nextStage * 100;
