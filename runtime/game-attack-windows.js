@@ -13,7 +13,7 @@
       windup+recovery<=0||typeof onImpact!=="function"||typeof onEnd!=="function")
     throw Error("Invalid attack window");
    if(this.active.has(id)||this.active.size>=this.maxActors)return false;
-   this.active.set(id,{remaining:windup+recovery,windup,impacted:false,onImpact,onEnd});
+   this.active.set(id,{remaining:windup+recovery,windup,recovery,impacted:false,onImpact,onEnd});
    return true;
   }
   tick(dt){
