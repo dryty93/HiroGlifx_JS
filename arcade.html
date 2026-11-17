@@ -88,6 +88,7 @@ const config={
  "tic-tac-toe":["Tic-Tac-Toe","A quick local two-player strategy game.","Tap an empty square. Players alternate X and O. Three in a line wins."]
 };
 let runtime=null,game=null,paused=true,previous=0,raf=0,loadId=0,source="";
+window.HiroArcadeSnapshot=()=>game?Object.freeze({name:game.name,turn:game.name==="chess"?game.s.t:null,moves:game.name==="chess"?game.moves.length:null,score:game.score,done:game.done}):null;
 const gameName=()=>new URL(location.href).searchParams.get("game")||"pong";
 function setStatus(message){$("status").textContent=message;}
 function draw(){if(game)game.render(ctx);}
