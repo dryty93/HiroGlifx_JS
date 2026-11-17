@@ -40,9 +40,13 @@ async function main(){
    assert.equal(await page.locator("#overlay").isVisible(),true);
    await page.getByRole("button",{name:/Start adventure/}).click();
    assert.equal(await page.locator("#overlay").isVisible(),false);
-   await page.keyboard.down("ArrowRight");
+   const initialX=await page.evaluate(()=>window.HiroSkyboundSnapshot()?.x);
+   assert.equal(typeof initialX,"number");
+   await page.keyboard.down("KeyW");
    await page.waitForTimeout(450);
-   await page.keyboard.up("ArrowRight");
+   await page.keyboard.up("KeyW");
+   const forwardX=await page.evaluate(()=>window.HiroSkyboundSnapshot()?.x);
+   assert.ok(forwardX>initialX+.3,"W should move the player forward down the course");
    await page.keyboard.press("Space");
    await page.waitForTimeout(900);
    assert.notEqual(await page.locator("#timer").textContent(),"0:00.0","Timer should advance during gameplay");
