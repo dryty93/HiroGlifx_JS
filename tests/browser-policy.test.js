@@ -20,7 +20,7 @@ function fixture() {
 test("blocks domains outside the allowlist and denies clicks by default",async()=>{
   const {page,calls}=fixture();
   const adapter=createPolicyAdapter(page,{allowedDomains:["example.com"]});
-  await assert.rejects(adapter.open("https://invalid.example/"),/Domain not allowed/);
+  assert.throws(()=>adapter.open("https://invalid.example/"),/Domain not allowed/);
   await adapter.open("https://example.com/");
   await assert.rejects(adapter.click("#purchase"),/requires approval/);
   assert.deepEqual(calls,["open"]);
