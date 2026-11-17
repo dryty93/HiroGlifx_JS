@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620"><rect width="1100" height="620" fill="#0c1220"/>
+<text x="48" y="58" fill="#f0f5ff" font-family="Arial" font-size="30" font-weight="bold">HiroGlifx · Phase 4 — Auth &amp; Permissions</text>
+<text x="48" y="91" fill="#99afca" font-family="Arial" font-size="16">Visual feature guide from committed implementation · not a screenshot</text>
+<rect x="48" y="132" width="440" height="430" rx="15" fill="#172238" stroke="#445873"/>
+<text x="78" y="175" fill="#a6caff" font-family="Arial" font-size="20" font-weight="bold">Login API</text>
+<rect x="80" y="203" width="375" height="62" rx="9" fill="#263750"/><text x="101" y="242" fill="#daf0ff" font-family="monospace" font-size="18">POST /auth/login</text>
+<text x="81" y="305" fill="#c9d7ea" font-family="Arial" font-size="16">Password checked with scrypt</text>
+<text x="81" y="341" fill="#c9d7ea" font-family="Arial" font-size="16">One-hour in-memory token</text>
+<text x="81" y="377" fill="#c9d7ea" font-family="Arial" font-size="16">Logout revokes token</text>
+<rect x="80" y="430" width="375" height="86" rx="11" fill="#243d58"/>
+<text x="100" y="464" fill="#91f3bc" font-family="Arial" font-size="17">Bearer token returned</text>
+<text x="100" y="493" fill="#d6e3f5" font-family="Arial" font-size="15">For authorized API calls</text>
+<path d="M493 343H594" stroke="#60a5fa" stroke-width="4"/><path d="M581 331l16 12-16 12" fill="none" stroke="#60a5fa" stroke-width="4"/>
+<rect x="610" y="132" width="440" height="430" rx="15" fill="#172238" stroke="#445873"/>
+<text x="638" y="175" fill="#a6caff" font-family="Arial" font-size="20" font-weight="bold">Data access policy</text>
+<rect x="638" y="212" width="382" height="90" rx="10" fill="#233850"/>
+<text x="663" y="243" fill="#9df1c0" font-family="Arial" font-size="20" font-weight="bold">Reader</text>
+<text x="663" y="275" fill="#d3e3f5" font-family="Arial" font-size="16">GET /api/notes</text>
+<rect x="638" y="322" width="382" height="110" rx="10" fill="#233850"/>
+<text x="663" y="353" fill="#9df1c0" font-family="Arial" font-size="20" font-weight="bold">Writer / Admin</text>
+<text x="663" y="383" fill="#d3e3f5" font-family="Arial" font-size="16">GET · POST · DELETE</text>
+<text x="663" y="410" fill="#a9c0dd" font-family="Arial" font-size="14">Write access to collections</text>
+<text x="638" y="492" fill="#ffd19a" font-family="Arial" font-size="15">Local development only · not internet-facing</text>
+</svg>
