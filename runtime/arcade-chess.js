@@ -10,7 +10,7 @@
  "use strict";
  const FEN="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
  const glyph={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"};
- const offsets={n:[-33,-31,-18,-14,14,18,31,33],b:[-17,-15,15,17],r:[-16,-1,1,16],k:[-17,-16,-15,-1,1,15,16,17]};
+ const offsets={n:[-33,-31,-18,-14,14,18,31,33],b:[-17,-15,15,17],r:[-16,-1,1,16],k:[-17,-16,-15,-1,1,15,16,17],q:[-17,-16,-15,-1,1,15,16,17]};
  const on=i=>i>=0&&i<128&&!(i&0x88);
  const side=p=>!p||p==="."?0:p===p.toUpperCase()?1:-1;
  const square=i=>"abcdefgh"[i&7]+(8-(i>>4));
