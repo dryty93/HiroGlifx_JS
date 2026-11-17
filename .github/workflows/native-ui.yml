@@ -9,6 +9,7 @@ on:
       - 'examples/native-ui-library/**'
       - 'tests/native-ui.test.js'
       - 'e2e/native-ui-smoke.js'
+      - 'e2e/native-catalog-smoke.js'
       - '.github/workflows/native-ui.yml'
   push:
     branches: [feat/native-polymorphic-ui]
@@ -27,6 +28,7 @@ jobs:
           node --check runtime/dev-server.js
           node --check tests/native-ui.test.js
           node --check e2e/native-ui-smoke.js
+          node --check e2e/native-catalog-smoke.js
           node --check hiro.js
       - name: Native UI and full regression suite
         run: node --test tests/*.test.js
@@ -48,11 +50,15 @@ jobs:
           npm install --no-save --ignore-scripts playwright@1.56.1
           npx playwright install --with-deps chromium
       - name: Test real browser behavior and screenshot desktop/mobile
-        run: node e2e/native-ui-smoke.js
+        run: |
+          node e2e/native-ui-smoke.js
+          node e2e/native-catalog-smoke.js
       - name: Upload native screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: native-ui-chromium-screenshots
-          path: artifacts/native-ui-*.png
+          path: |
+            artifacts/native-ui-*.png
+            artifacts/native-catalog-*.png
           if-no-files-found: error
