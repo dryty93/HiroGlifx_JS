@@ -31,19 +31,17 @@ async function run(){
   await page.keyboard.down("ArrowDown");await page.waitForTimeout(220);await page.keyboard.up("ArrowDown");
   await page.screenshot({path:path.join(out,"arcade-pong-desktop.png"),fullPage:true});
   await page.locator('[data-game="snake"]').click();
-  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes('arcade_game("snake")'));
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)") && window.HiroArcadeSnapshot?.()?.sourceMode==="native-scroll");
   assert.match(await page.locator("#gameTitle").innerText(),/Snake/);
+  await page.locator("#pause").click();
+  await page.keyboard.press("ArrowUp");
+  await page.waitForFunction(()=>window.HiroArcadeSnapshot?.()?.snakeHead!==189,null,{timeout:5000});
+  await page.screenshot({path:path.join(out,"arcade-snake-desktop.png"),fullPage:true});
   await page.locator('[data-game="chess"]').click();
-  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes('arcade_game("chess")'));
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)") && window.HiroArcadeSnapshot?.()?.sourceMode==="native-scroll");
   await page.locator("#showEngine").click();
-  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes("class ChessGame"));
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes("class ScrollGame"));
   await page.locator("#showScroll").click();
-  const coord=(file,rank)=>{
-   const rect=document.querySelector("#screen").getBoundingClientRect();
-   const x=192+("abcdefgh".indexOf(file)+.5)*52;
-   const y=52+(8-rank+.5)*52;
-   return {x:rect.left+x*rect.width/800,y:rect.top+y*rect.height/520};
-  };
   // Click two legal white and black chess moves using responsive canvas positions.
   const clickSquare=async(square)=>{
    const pos=await page.evaluate(([f,r])=>{
@@ -62,10 +60,35 @@ async function run(){
   await page.waitForFunction(()=>document.querySelector("#score")?.textContent.includes("White to move"),null,{timeout:5000});
   assert.match(await page.locator("#score").innerText(),/White to move/);
   await page.screenshot({path:path.join(out,"arcade-chess-desktop.png"),fullPage:true});
+  await page.locator("#undo").click();
+  await page.waitForFunction(()=>window.HiroArcadeSnapshot?.()?.moves===1,null,{timeout:5000});
   await page.locator('[data-game="star-defense"]').click();
-  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes('arcade_game("star-defense")'));
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)") && window.HiroArcadeSnapshot?.()?.sourceMode==="native-scroll");
+  await page.locator("#pause").click();
+  await page.keyboard.down("Space");
+  try{await page.waitForFunction(()=>window.HiroArcadeSnapshot?.()?.shots>0,null,{timeout:5000});}
+  finally{await page.keyboard.up("Space");}
+  await page.screenshot({path:path.join(out,"arcade-star-defense-desktop.png"),fullPage:true});
+  await page.locator('[data-game="breakout"]').click();
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)") && window.HiroArcadeSnapshot?.()?.name==="breakout");
+  await page.locator("#pause").click();
+  await page.keyboard.down("ArrowRight");
+  try{await page.waitForFunction(()=>window.HiroArcadeSnapshot?.()?.paddle>405,null,{timeout:5000});}
+  finally{await page.keyboard.up("ArrowRight");}
+  await page.screenshot({path:path.join(out,"arcade-breakout-desktop.png"),fullPage:true});
   await page.locator('[data-game="tic-tac-toe"]').click();
-  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes('arcade_game("tic-tac-toe")'));
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": tick(dt)") && window.HiroArcadeSnapshot?.()?.sourceMode==="native-scroll");
+  const playCell=async(index)=>{
+    const point=await page.evaluate(i=>{
+      const rect=document.querySelector("#screen").getBoundingClientRect();
+      return {x:rect.left+(205+(i%3)*130+26)*rect.width/800,
+        y:rect.top+(65+Math.floor(i/3)*130+26)*rect.height/520};
+    },index);
+    await page.mouse.click(point.x,point.y);
+  };
+  await playCell(0);await playCell(4);
+  await page.waitForFunction(()=>window.HiroArcadeSnapshot?.()?.moves===2,null,{timeout:5000});
+  await page.screenshot({path:path.join(out,"arcade-tic-tac-toe-desktop.png"),fullPage:true});
   await page.setViewportSize({width:390,height:844});
   await page.screenshot({path:path.join(out,"arcade-mobile.png"),fullPage:true});
   // Blockhaven must expose the actual loaded .scroll, not a fabricated sample.

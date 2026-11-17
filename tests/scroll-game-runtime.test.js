@@ -68,9 +68,10 @@ test("draw method performs native scroll Canvas instructions",()=>{
  assert.ok(operations.some(x=>x[0]==="circle"));
  assert.ok(operations.some(x=>x[0]==="text"));
 });
-test("native scroll forbids unsafe property access, unknown functions, loops and undeclared assignment",()=>{
+test("native scroll forbids unsafe property access, unknown functions, runaway loops and undeclared assignment",()=>{
  assert.throws(()=>expression("window.alert(1)"),/Unsupported character/);
- assert.throws(()=>parseProgram(".Main = ()\n: tick(dt) = [\nwhile true [\n]\n]\n: draw() = [\n]\nbreak;"),/Unsupported/);
+ const bounded=new ScrollGame(".Main = ()\n: tick(dt) = [\nwhile true [\n]\n]\n: draw() = [\n]\nbreak;");
+ assert.throws(()=>bounded.tick(.01),/Loop budget exceeded/);
  const bad='.Main = ()\n# x = 1;\n: tick(dt) = [\ny = 2;\n]\n: draw() = [\nclear("#000000");\n]\nbreak;';
  assert.throws(()=>new ScrollGame(bad).tick(.01),/undeclared variable/);
 });

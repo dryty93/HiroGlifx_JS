@@ -1,6 +1,515 @@
-// HiroGlifx Arcade — chess
-// Replace the game type or customize its engine to make your own edition.
+// Chess — rules-aware local two-player chess implemented in HiroGlifx.
+// Board is a 64-square array: a8=0, h8=7, a1=56, h1=63.
+// Rights use bit flags: K=1, Q=2, k=4, q=8.
 .Main = ()
-    $ title = "Chess";
-    & game = arcade_game("chess");
+    & board = chars("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR");
+    & history = array();
+    & validTargets = array();
+    # turn = 1;
+    # rights = 15;
+    # ep = -1;
+    # half = 0;
+    # full = 1;
+    # moves = 0;
+    # selected = -1;
+    # score = 0;
+    ? done = false;
+    $ promotion = "q";
+    $ message = "White to move";
+
+    : side(piece) = [
+        if piece == "." [
+            return 0;
+        ]
+        if upper(piece) == piece [
+            return 1;
+        ]
+        return -1;
+    ]
+
+    : hasBit(mask, bit) = [
+        return floor(mask / bit) % 2 == 1;
+    ]
+
+    : clearBit(mask, bit) = [
+        if hasBit(mask, bit) [
+            return mask - bit;
+        ]
+        return mask;
+    ]
+
+    : pathClear(b, f, t) = [
+        let fr = floor(f / 8);
+        let fc = f % 8;
+        let tr = floor(t / 8);
+        let tc = t % 8;
+        let dr = sign(tr - fr);
+        let dc = sign(tc - fc);
+        let row = fr + dr;
+        let col = fc + dc;
+        while row != tr || col != tc [
+            if get(b, row * 8 + col) != "." [
+                return false;
+            ]
+            row = row + dr;
+            col = col + dc;
+        ]
+        return true;
+    ]
+
+    : attacks(b, f, t) = [
+        if f == t || f < 0 || f >= 64 || t < 0 || t >= 64 [
+            return false;
+        ]
+        let piece = get(b, f);
+        let color = side(piece);
+        if color == 0 [
+            return false;
+        ]
+        let kind = lower(piece);
+        let dr = floor(t / 8) - floor(f / 8);
+        let dc = (t % 8) - (f % 8);
+        if kind == "p" [
+            return dr == -color && abs(dc) == 1;
+        ]
+        if kind == "n" [
+            return (abs(dr) == 2 && abs(dc) == 1) || (abs(dr) == 1 && abs(dc) == 2);
+        ]
+        if kind == "k" [
+            return max(abs(dr), abs(dc)) == 1;
+        ]
+        if kind == "b" || kind == "q" [
+            if abs(dr) == abs(dc) && dr != 0 [
+                return pathClear(b, f, t);
+            ]
+        ]
+        if kind == "r" || kind == "q" [
+            if (dr == 0 && dc != 0) || (dc == 0 && dr != 0) [
+                return pathClear(b, f, t);
+            ]
+        ]
+        return false;
+    ]
+
+    : attacked(b, target, attacker) = [
+        if target < 0 [
+            return false;
+        ]
+        for i from 0 to 64 [
+            if side(get(b, i)) == attacker && attacks(b, i, target) [
+                return true;
+            ]
+        ]
+        return false;
+    ]
+
+    : kingAt(b, color) = [
+        let piece = "K";
+        if color == -1 [
+            piece = "k";
+        ]
+        for i from 0 to 64 [
+            if get(b, i) == piece [
+                return i;
+            ]
+        ]
+        return -1;
+    ]
+
+    : inCheck(b, color) = [
+        return attacked(b, kingAt(b, color), -color);
+    ]
+
+    : castleAllowed(f, t) = [
+        if inCheck(board, turn) [
+            return false;
+        ]
+        if turn == 1 && f == 60 [
+            if t == 62 && hasBit(rights, 1) && get(board, 63) == "R" && get(board, 61) == "." && get(board, 62) == "." [
+                return !attacked(board, 61, -1) && !attacked(board, 62, -1);
+            ]
+            if t == 58 && hasBit(rights, 2) && get(board, 56) == "R" && get(board, 59) == "." && get(board, 58) == "." && get(board, 57) == "." [
+                return !attacked(board, 59, -1) && !attacked(board, 58, -1);
+            ]
+        ]
+        if turn == -1 && f == 4 [
+            if t == 6 && hasBit(rights, 4) && get(board, 7) == "r" && get(board, 5) == "." && get(board, 6) == "." [
+                return !attacked(board, 5, 1) && !attacked(board, 6, 1);
+            ]
+            if t == 2 && hasBit(rights, 8) && get(board, 0) == "r" && get(board, 3) == "." && get(board, 2) == "." && get(board, 1) == "." [
+                return !attacked(board, 3, 1) && !attacked(board, 2, 1);
+            ]
+        ]
+        return false;
+    ]
+
+    : legalMove(f, t, promo, commit) = [
+        if f < 0 || f >= 64 || t < 0 || t >= 64 || f == t [
+            return false;
+        ]
+        let piece = get(board, f);
+        let target = get(board, t);
+        if side(piece) != turn || side(target) == turn || lower(target) == "k" [
+            return false;
+        ]
+        let kind = lower(piece);
+        let dr = floor(t / 8) - floor(f / 8);
+        let dc = (t % 8) - (f % 8);
+        let valid = false;
+        let enpassant = false;
+        let castle = false;
+
+        if kind == "p" [
+            if dc == 0 && dr == -turn && target == "." [
+                valid = true;
+            ]
+            if dc == 0 && dr == -2 * turn && target == "." [
+                if (turn == 1 && floor(f / 8) == 6) || (turn == -1 && floor(f / 8) == 1) [
+                    if get(board, f - 8 * turn) == "." [
+                        valid = true;
+                    ]
+                ]
+            ]
+            if abs(dc) == 1 && dr == -turn [
+                if side(target) == -turn [
+                    valid = true;
+                ]
+                if target == "." && t == ep && get(board, t + 8 * turn) != "." [
+                    if side(get(board, t + 8 * turn)) == -turn && lower(get(board, t + 8 * turn)) == "p" [
+                        valid = true;
+                        enpassant = true;
+                    ]
+                ]
+            ]
+        ]
+        if kind != "p" [
+            valid = attacks(board, f, t);
+        ]
+        if kind == "k" && abs(t - f) == 2 [
+            valid = castleAllowed(f, t);
+            castle = valid;
+        ]
+        if !valid [
+            return false;
+        ]
+
+        let candidate = clone(board);
+        set(candidate, f, ".");
+        let destinationPiece = piece;
+        if kind == "p" && (floor(t / 8) == 0 || floor(t / 8) == 7) [
+            let chosen = lower(promo);
+            if chosen != "q" && chosen != "r" && chosen != "b" && chosen != "n" [
+                chosen = "q";
+            ]
+            destinationPiece = chosen;
+            if turn == 1 [
+                destinationPiece = upper(chosen);
+            ]
+        ]
+        set(candidate, t, destinationPiece);
+        if enpassant [
+            set(candidate, t + 8 * turn, ".");
+        ]
+        if castle [
+            if t > f [
+                set(candidate, f + 1, get(candidate, f + 3));
+                set(candidate, f + 3, ".");
+            ]
+            if t < f [
+                set(candidate, f - 1, get(candidate, f - 4));
+                set(candidate, f - 4, ".");
+            ]
+        ]
+        if inCheck(candidate, turn) [
+            return false;
+        ]
+        if !commit [
+            return true;
+        ]
+
+        if len(history) >= 512 [
+            removeAt(history, 0);
+        ]
+        push(history, array(clone(board), turn, rights, ep, half, full, moves));
+        board = candidate;
+        if kind == "k" [
+            if turn == 1 [
+                rights = clearBit(clearBit(rights, 1), 2);
+            ]
+            if turn == -1 [
+                rights = clearBit(clearBit(rights, 4), 8);
+            ]
+        ]
+        if f == 63 || t == 63 [
+            rights = clearBit(rights, 1);
+        ]
+        if f == 56 || t == 56 [
+            rights = clearBit(rights, 2);
+        ]
+        if f == 7 || t == 7 [
+            rights = clearBit(rights, 4);
+        ]
+        if f == 0 || t == 0 [
+            rights = clearBit(rights, 8);
+        ]
+        ep = -1;
+        if kind == "p" && abs(dr) == 2 [
+            ep = (f + t) / 2;
+        ]
+        if kind == "p" || target != "." || enpassant [
+            half = 0;
+        ]
+        if kind != "p" && target == "." && !enpassant [
+            half = half + 1;
+        ]
+        if turn == -1 [
+            full = full + 1;
+        ]
+        turn = -turn;
+        moves = moves + 1;
+        message = "White to move";
+        if turn == -1 [
+            message = "Black to move";
+        ]
+        if inCheck(board, turn) [
+            message = message + " · Check";
+        ]
+        let available = hasLegalMoves();
+        if !available [
+            done = true;
+            message = "Draw by stalemate";
+            if inCheck(board, turn) [
+                message = "White wins by checkmate";
+                if turn == 1 [
+                    message = "Black wins by checkmate";
+                ]
+            ]
+        ]
+        if half >= 150 [
+            done = true;
+            message = "Draw · 75-move rule";
+        ]
+        if insufficientMaterial() [
+            done = true;
+            message = "Draw · insufficient material";
+        ]
+        if repetitionCount() >= 5 [
+            done = true;
+            message = "Draw · fivefold repetition";
+        ]
+        return true;
+    ]
+
+    : insufficientMaterial() = [
+        let count = 0;
+        let minor = 0;
+        let bishopSquare = -1;
+        let bishopsSame = true;
+        let allBishops = true;
+        for i from 0 to 64 [
+            let piece = lower(get(board, i));
+            if piece != "." && piece != "k" [
+                count = count + 1;
+                if piece == "b" || piece == "n" [
+                    minor = minor + 1;
+                ]
+                if piece != "b" [
+                    allBishops = false;
+                ]
+                if piece == "b" [
+                    let squareColor = (floor(i / 8) + (i % 8)) % 2;
+                    if bishopSquare != -1 && bishopSquare != squareColor [
+                        bishopsSame = false;
+                    ]
+                    bishopSquare = squareColor;
+                ]
+            ]
+        ]
+        if count == 0 [
+            return true;
+        ]
+        if count == 1 && minor == 1 [
+            return true;
+        ]
+        return allBishops && bishopsSame;
+    ]
+
+    : boardsSame(a, b) = [
+        for i from 0 to 64 [
+            if get(a, i) != get(b, i) [
+                return false;
+            ]
+        ]
+        return true;
+    ]
+
+    : repetitionCount() = [
+        let repeats = 1;
+        for i from 0 to len(history) [
+            let old = get(history, i);
+            if get(old, 1) == turn && get(old, 2) == rights && get(old, 3) == ep [
+                if boardsSame(get(old, 0), board) [
+                    repeats = repeats + 1;
+                ]
+            ]
+        ]
+        return repeats;
+    ]
+
+    : hasLegalMoves() = [
+        for f from 0 to 64 [
+            if side(get(board, f)) == turn [
+                for t from 0 to 64 [
+                    if legalMove(f, t, "q", false) [
+                        return true;
+                    ]
+                ]
+            ]
+        ]
+        return false;
+    ]
+
+    : glyph(piece) = [
+        if piece == "K" [
+            return "♔";
+        ]
+        if piece == "Q" [
+            return "♕";
+        ]
+        if piece == "R" [
+            return "♖";
+        ]
+        if piece == "B" [
+            return "♗";
+        ]
+        if piece == "N" [
+            return "♘";
+        ]
+        if piece == "P" [
+            return "♙";
+        ]
+        if piece == "k" [
+            return "♚";
+        ]
+        if piece == "q" [
+            return "♛";
+        ]
+        if piece == "r" [
+            return "♜";
+        ]
+        if piece == "b" [
+            return "♝";
+        ]
+        if piece == "n" [
+            return "♞";
+        ]
+        if piece == "p" [
+            return "♟";
+        ]
+        return "";
+    ]
+
+    : click(x, y) = [
+        if done [
+            return false;
+        ]
+        let file = floor((x - 192) / 52);
+        let rank = floor((y - 52) / 52);
+        if file < 0 || file >= 8 || rank < 0 || rank >= 8 [
+            return false;
+        ]
+        let to = rank * 8 + file;
+        if selected >= 0 [
+            if legalMove(selected, to, promotion, true) [
+                selected = -1;
+                validTargets = array();
+                return true;
+            ]
+        ]
+        selected = -1;
+        validTargets = array();
+        if side(get(board, to)) == turn [
+            selected = to;
+            for destination from 0 to 64 [
+                if legalMove(selected, destination, promotion, false) [
+                    push(validTargets, destination);
+                ]
+            ]
+        ]
+        return false;
+    ]
+
+    : keyEvent(code, pressed) = [
+        if pressed [
+            if code == "KeyQ" [
+                promotion = "q";
+            ]
+            if code == "KeyR" [
+                promotion = "r";
+            ]
+            if code == "KeyB" [
+                promotion = "b";
+            ]
+            if code == "KeyN" [
+                promotion = "n";
+            ]
+        ]
+    ]
+
+    : undo() = [
+        if len(history) == 0 [
+            return false;
+        ]
+        let old = pop(history);
+        board = get(old, 0);
+        turn = get(old, 1);
+        rights = get(old, 2);
+        ep = get(old, 3);
+        half = get(old, 4);
+        full = get(old, 5);
+        moves = get(old, 6);
+        selected = -1;
+        validTargets = array();
+        done = false;
+        message = "White to move";
+        if turn == -1 [
+            message = "Black to move";
+        ]
+        return true;
+    ]
+
+    : tick(dt) = [
+        // Turn-based: only legal user moves alter the board.
+    ]
+
+    : draw() = [
+        clear("#0b1730");
+        for i from 0 to 64 [
+            let row = floor(i / 8);
+            let col = i % 8;
+            let x = 192 + col * 52;
+            let y = 52 + row * 52;
+            let color = "#f0d9b5";
+            if (row + col) % 2 == 1 [
+                color = "#b58863";
+            ]
+            rect(x, y, 52, 52, color);
+            if selected == i [
+                rect(x, y, 52, 52, "#e7cb77");
+            ]
+            if indexOf(validTargets, i) >= 0 [
+                rect(x + 17, y + 17, 18, 18, "#359e62");
+            ]
+            let piece = get(board, i);
+            if piece != "." [
+                let ink = "#202128";
+                if side(piece) == 1 [
+                    ink = "#fff8e5";
+                ]
+                text(glyph(piece), x + 26, y + 40, 41, ink);
+            ]
+        ]
+        text(message, 400, 32, 19, "#d6eaff");
+        text("2 players · Click a piece, then destination · Q/R/B/N to promote · Undo available", 400, 497, 13, "#a1bcd6");
+    ]
     break;

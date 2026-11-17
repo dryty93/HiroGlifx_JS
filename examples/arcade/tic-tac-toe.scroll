@@ -1,6 +1,91 @@
-// HiroGlifx Arcade — tic-tac-toe
-// Replace the game type or customize its engine to make your own edition.
+// Two-player Tic-Tac-Toe: grid state, turns, win detection and drawing in HiroGlifx.
 .Main = ()
-    $ title = "Tic Tac Toe";
-    & game = arcade_game("tic-tac-toe");
+    & cells = filled(9, "");
+    # turn = 1;
+    # moves = 0;
+    # score = 0;
+    ? done = false;
+    $ message = "X to move";
+
+    : lineWins(a, b, c, mark) = [
+        return get(cells, a) == mark && get(cells, b) == mark && get(cells, c) == mark;
+    ]
+
+    : isWinner(mark) = [
+        if lineWins(0, 1, 2, mark) || lineWins(3, 4, 5, mark) || lineWins(6, 7, 8, mark) [
+            return true;
+        ]
+        if lineWins(0, 3, 6, mark) || lineWins(1, 4, 7, mark) || lineWins(2, 5, 8, mark) [
+            return true;
+        ]
+        if lineWins(0, 4, 8, mark) || lineWins(2, 4, 6, mark) [
+            return true;
+        ]
+        return false;
+    ]
+
+    : click(x, y) = [
+        if done [
+            return false;
+        ]
+        let col = floor((x - 205) / 130);
+        let row = floor((y - 65) / 130);
+        if col < 0 || col > 2 || row < 0 || row > 2 [
+            return false;
+        ]
+        let cell = row * 3 + col;
+        if get(cells, cell) != "" [
+            return false;
+        ]
+        let mark = "X";
+        if turn == -1 [
+            mark = "O";
+        ]
+        set(cells, cell, mark);
+        moves = moves + 1;
+        if isWinner(mark) [
+            done = true;
+            message = mark + " wins!";
+            return true;
+        ]
+        if moves == 9 [
+            done = true;
+            message = "Draw!";
+            return true;
+        ]
+        turn = -turn;
+        if turn == 1 [
+            message = "X to move";
+        ]
+        if turn == -1 [
+            message = "O to move";
+        ]
+        return true;
+    ]
+
+    : tick(dt) = [
+        // Deliberately turn-based: no automatic game movement.
+    ]
+
+    : draw() = [
+        clear("#0b1730");
+        text("TWO-PLAYER TIC-TAC-TOE", 400, 45, 22, "#e6f7ff");
+        for i from 0 to 9 [
+            let row = floor(i / 3);
+            let col = i % 3;
+            let fill = "#1d3257";
+            if (row + col) % 2 == 1 [
+                fill = "#263b64";
+            ]
+            rect(205 + col * 130, 65 + row * 130, 124, 124, fill);
+            let mark = get(cells, i);
+            if mark == "X" [
+                text(mark, 267 + col * 130, 150 + row * 130, 74, "#7ed9ff");
+            ]
+            if mark == "O" [
+                text(mark, 267 + col * 130, 150 + row * 130, 74, "#ffa5cd");
+            ]
+        ]
+        text(message, 400, 497, 21, "#e6f7ff");
+    ]
     break;
