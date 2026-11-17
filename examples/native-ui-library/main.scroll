@@ -1,0 +1,233 @@
+ui library
+// Native HiroGlifx: reusable DOM components, inherited properties and actions.
+.Component = ()
+    $ title = "";
+    $ variant = "default";
+    ? open = false;
+    # count = 0;
+    : mount(self) = [
+    ]
+    : unmount(self) = [
+    ]
+    break;
+
+.Layout = (Component)
+    : render(self) = [
+        element region div root;
+        class region "hg-wrap";
+    ]
+    break;
+
+.Stack = (Layout)
+    : render(self) = [
+        element region div root;
+        class region "hg-actions";
+    ]
+    break;
+
+.Grid = (Layout)
+    : render(self) = [
+        element region section root;
+        class region "hg-grid";
+    ]
+    break;
+
+.Section = (Layout)
+    : render(self) = [
+        element section section root;
+        class section "hg-section hg-wrap";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+    ]
+    break;
+
+.Text = (Component)
+    : render(self) = [
+        element value p root;
+        class value "hg-muted";
+        text value "{title}";
+    ]
+    break;
+
+.Heading = (Component)
+    : render(self) = [
+        element value h2 root;
+        class value "hg-title";
+        text value "{title}";
+    ]
+    break;
+
+.Button = (Component)
+    $ label = "Continue";
+    : render(self) = [
+        element button button root;
+        class button "hg-button";
+        attr button type "button";
+        text button "{label}";
+        on button click activate;
+    ]
+    : activate(self) = [
+        increment count 1;
+    ]
+    break;
+
+.PrimaryButton = (Button)
+    $ variant = "primary";
+    : render(self) = [
+        element button button root;
+        class button "hg-button hg-button-primary";
+        attr button type "button";
+        text button "{label}";
+        on button click activate;
+    ]
+    break;
+
+.SuccessButton = (PrimaryButton)
+    $ variant = "success";
+    : render(self) = [
+        element button button root;
+        class button "hg-button hg-button-success";
+        attr button type "button";
+        text button "{label}";
+        on button click activate;
+    ]
+    break;
+
+.Link = (Component)
+    $ label = "Learn more";
+    $ href = "/";
+    : render(self) = [
+        element link a root;
+        class link "hg-button";
+        attr link href "{href}";
+        text link "{label}";
+    ]
+    break;
+
+.Card = (Component)
+    $ description = "";
+    : render(self) = [
+        element panel article root;
+        class panel "hg-card";
+        element heading h3 panel;
+        text heading "{title}";
+        element content p panel;
+        text content "{description}";
+    ]
+    break;
+
+.MetricCard = (Card)
+    $ value = "0";
+    : render(self) = [
+        element panel article root;
+        class panel "hg-card";
+        element heading p panel;
+        class heading "hg-muted";
+        text heading "{title}";
+        element metric strong panel;
+        class metric "hg-metric";
+        text metric "{value}";
+        element content p panel;
+        text content "{description}";
+    ]
+    break;
+
+.Input = (Component)
+    $ label = "Your answer";
+    $ placeholder = "";
+    $ value = "";
+    : render(self) = [
+        element wrapper div root;
+        class wrapper "hg-field";
+        element caption label wrapper;
+        text caption "{label}";
+        attr caption for "hg-field";
+        element field input wrapper;
+        class field "hg-input";
+        attr field type "text";
+        attr field placeholder "{placeholder}";
+        attr field aria-label "{label}";
+        bind field value;
+    ]
+    break;
+
+.Navigation = (Component)
+    $ brand = "HiroGlifx";
+    : render(self) = [
+        element nav nav root;
+        class nav "hg-nav hg-wrap";
+        element brand a nav;
+        attr brand href "/";
+        class brand "hg-brand";
+        text brand "{brand}";
+        element links div nav;
+        class links "hg-links";
+        element dashboard a links;
+        attr dashboard href "/dashboard";
+        text dashboard "Dashboard";
+        element form a links;
+        attr form href "/form";
+        text form "Form";
+    ]
+    break;
+
+.Modal = (Component)
+    $ message = "This is a reusable modal.";
+    : render(self) = [
+        element panel section root;
+        class panel "hg-card";
+        attr panel aria-label "Dialog controls";
+        element heading h2 panel;
+        text heading "{title}";
+        element message p panel;
+        text message "{message}";
+        element close button panel;
+        class close "hg-button";
+        text close "Toggle";
+        on close click toggleOpen;
+    ]
+    : toggleOpen(self) = [
+        toggle open;
+    ]
+    break;
+
+.Tabs = (Component)
+    $ active = "Overview";
+    : render(self) = [
+        element panel nav root;
+        class panel "hg-actions";
+        attr panel aria-label "Sections";
+        element overview button panel;
+        class overview "hg-button";
+        text overview "{active}";
+        on overview click choose;
+    ]
+    : choose(self) = [
+        set active "Details";
+    ]
+    break;
+
+.Form = (Component)
+    $ message = "Submit";
+    ? submitted = false;
+    : render(self) = [
+        element form form root;
+        class form "hg-form";
+        element heading h2 form;
+        text heading "{title}";
+        element feedback p form;
+        attr feedback aria-live "polite";
+        class feedback "hg-note";
+        text feedback "{message}";
+        element submit button form;
+        attr submit type "submit";
+        class submit "hg-button hg-button-primary";
+        text submit "Submit";
+        on form submit save;
+    ]
+    : save(self) = [
+        set message "Successfully submitted.";
+        set submitted true;
+    ]
+    break;
