@@ -16,6 +16,9 @@ async function main(){
    const errors=[];page.on("pageerror",err=>errors.push(err.message));
    const response=await page.goto(base+"/showcase",{waitUntil:"domcontentloaded"});
    assert.equal(response.status(),200);
+   await page.waitForFunction(()=>document.querySelector("#notice")?.textContent?.trim()||document.querySelector("h1"),null,{timeout:15000});
+   const notice=await page.locator("#notice").textContent();
+   if(notice.trim())throw Error("Showcase native runtime error: "+notice);
    await page.getByRole("heading",{name:"Every component. One living gallery."}).waitFor();
    assert.equal(await page.locator("main").count(),1,"no duplicate main landmarks");
    const library=fs.readFileSync(path.join(root,"examples/native-ui-library/main.scroll"),"utf8");
