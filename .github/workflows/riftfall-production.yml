@@ -1,0 +1,58 @@
+name: Riftfall production readiness
+on:
+  pull_request:
+    paths:
+      - 'runtime/game-physics-stream.js'
+      - 'runtime/game-performance.js'
+      - 'runtime/game-art-direction.js'
+      - 'runtime/riftfall-world.js'
+      - 'runtime/steam-rpg-demo.js'
+      - 'scripts/vendor-riftfall-engine.js'
+      - 'scripts/prepare-riftfall-desktop.js'
+      - 'e2e/riftfall-offline-smoke.js'
+      - 'desktop/**'
+      - 'tests/**'
+      - '.github/workflows/riftfall-production.yml'
+  workflow_dispatch:
+jobs:
+  isolated-runtime:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and physics, art, packaging and performance tests
+        run: |
+          node --check runtime/game-physics-stream.js
+          node --check runtime/game-performance.js
+          node --check runtime/game-art-direction.js
+          node --check scripts/vendor-riftfall-engine.js
+          node --check scripts/prepare-riftfall-desktop.js
+          node --test tests/physics-region-stream.test.js tests/game-performance.test.js tests/game-art-direction.test.js tests/desktop-readiness.test.js
+  offline-engine:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned original engine distributions and Chromium
+        run: |
+          npm install --no-save --ignore-scripts --package-lock=false --no-audit babylonjs@9.37.0 babylonjs-loaders@9.37.0 @babylonjs/havok@1.3.14 recast-detour@1.6.4 playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Vendor, check WASM and build immutable offline bundle
+        run: |
+          node scripts/vendor-riftfall-engine.js
+          node scripts/prepare-riftfall-desktop.js
+          node scripts/stage-riftfall-desktop-app.js
+      - name: Verify no remote dependency during actual Havok browser gameplay
+        run: node e2e/riftfall-offline-smoke.js
+      - name: Upload offline screenshot and benchmark
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: riftfall-offline-performance
+          path: artifacts/riftfall-offline-desktop.png
+          if-no-files-found: warn
