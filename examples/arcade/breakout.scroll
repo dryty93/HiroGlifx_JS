@@ -1,6 +1,107 @@
-// HiroGlifx Arcade — breakout
-// Replace the game type or customize its engine to make your own edition.
+// Breakout — complete paddle, ball, brick collision, score and drawing in HiroGlifx.
 .Main = ()
-    $ title = "Breakout";
-    & game = arcade_game("breakout");
+    & bricks = filled(50, 1);
+    # remaining = 50;
+    # paddle = 400;
+    # ballX = 400;
+    # ballY = 380;
+    # velocityX = 180;
+    # velocityY = -260;
+    # lives = 3;
+    # score = 0;
+    ? done = false;
+    $ message = "";
+
+    : tick(dt) = [
+        paddle = clamp(paddle + (key("ArrowRight") + key("KeyD") - key("ArrowLeft") - key("KeyA")) * 470 * dt, 62, 738);
+        if pointer("x") >= 0 [
+            paddle = clamp(pointer("x"), 62, 738);
+        ]
+        ballX = ballX + velocityX * dt;
+        ballY = ballY + velocityY * dt;
+
+        if ballX <= 10 [
+            ballX = 10;
+            velocityX = abs(velocityX);
+        ]
+        if ballX >= 790 [
+            ballX = 790;
+            velocityX = -abs(velocityX);
+        ]
+        if ballY <= 10 [
+            ballY = 10;
+            velocityY = abs(velocityY);
+        ]
+
+        if ballY >= 460 && ballY <= 481 && abs(ballX - paddle) <= 61 && velocityY > 0 [
+            ballY = 460;
+            velocityY = -abs(velocityY);
+            velocityX = velocityX + (ballX - paddle) * 2.5;
+        ]
+
+        let hit = false;
+        for i from 0 to 50 [
+            if !hit && get(bricks, i) == 1 [
+                let bx = 38 + (i % 10) * 74 + 31;
+                let by = 65 + floor(i / 10) * 34 + 13;
+                if abs(ballX - bx) < 41 && abs(ballY - by) < 23 [
+                    set(bricks, i, 0);
+                    velocityY = -velocityY;
+                    score = score + 10;
+                    remaining = remaining - 1;
+                    hit = true;
+                ]
+            ]
+        ]
+
+        if ballY > 530 [
+            lives = lives - 1;
+            if lives <= 0 [
+                done = true;
+                message = "No lives left!";
+            ]
+            if lives > 0 [
+                ballX = paddle;
+                ballY = 380;
+                velocityX = 180;
+                velocityY = -260;
+            ]
+        ]
+
+        if remaining == 0 [
+            done = true;
+            message = "Brick champion!";
+        ]
+    ]
+
+    : draw() = [
+        clear("#0b1730");
+        for i from 0 to 50 [
+            if get(bricks, i) == 1 [
+                let row = floor(i / 10);
+                let color = "#87b5fd";
+                if row == 0 [
+                    color = "#f87991";
+                ]
+                if row == 1 [
+                    color = "#feb36c";
+                ]
+                if row == 2 [
+                    color = "#f4dd80";
+                ]
+                if row == 3 [
+                    color = "#80daba";
+                ]
+                rect(38 + (i % 10) * 74, 65 + row * 34, 65, 26, color);
+            ]
+        ]
+        rect(paddle - 60, 470, 120, 14, "#8deaff");
+        circle(ballX, ballY, 9, "#ffffff");
+        text("SCORE " + score + "     LIVES " + lives, 400, 30, 19, "#e6f7ff");
+        if done [
+            rect(145, 193, 510, 136, "#122747");
+            text(message, 400, 251, 29, "#f4df9a");
+            text("Select Restart to play again", 400, 294, 16, "#d6eaff");
+        ]
+    ]
     break;
