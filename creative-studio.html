@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HiroGlifx Creative Studio</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:25px;background:#0b1220;color:#edf4ff;font:15px system-ui}
+main{max-width:1260px;margin:auto}header{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr 1.25fr;gap:18px;margin-top:18px}
+textarea{width:100%;height:440px;background:#14213a;color:#c4e7ff;border:1px solid #465a7e;border-radius:12px;padding:16px;font:13px/1.6 monospace;resize:vertical}
+#stage{position:relative;aspect-ratio:16/9;background:#101827;border:1px solid #465a7e;border-radius:12px;overflow:hidden}
+canvas{display:block;width:100%;height:100%;object-fit:contain}#phaserMount{width:100%;height:100%}
+#phaserMount canvas{width:100%;height:100%;object-fit:contain}
+button,select{border:0;border-radius:9px;padding:11px 17px;cursor:pointer;background:#60a5fa;color:#061b30;font-weight:bold}
+select{background:#203551;color:#e6f1ff;border:1px solid #455f80}
+button:disabled{opacity:.45;cursor:not-allowed}.toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+input[type=range]{width:100%}small,p{color:#afc4e0}#status{min-height:24px;color:#a7e5c3}
+#stage:focus-within{outline:2px solid #60a5fa}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1>HiroGlifx Creative Studio</h1><p>2D games · 3D scenes · animation timelines · browser video recording</p></div>
+<div class="toolbar"><label for="engine">Engine</label><select id="engine">
+<option value="canvas">Canvas 2D (built-in)</option><option value="phaser">Phaser 4 (2D)</option>
+<option value="babylon">Babylon.js (3D)</option></select><button id="render">Build scene</button></div></header>
+<div class="grid"><section><h2>HiroGlifx scene commands</h2>
+<textarea id="source" spellcheck="false"># Arrow keys: reach the gold target!
+scene 640 360 "#101827"
+sprite player 30 165 42 42 "#60a5fa"
+sprite coin 550 165 35 35 "#facc15"
+sprite star 250 80 65 65 "#a78bfa"
+control ArrowRight player 20 0
+control ArrowLeft player -20 0
+control ArrowUp player 0 -20
+control ArrowDown player 0 20
+goal player coin
+tween star x 470 2800 0
+tween star y 205 2800 0</textarea>
+<p><small>Phaser/Babylon load from external CDNs and need internet. The Canvas renderer works offline. The engine can be changed without losing the editable source.</small></p></section>
+<section><h2>Live engine preview</h2>
+<div id="stage"><canvas id="canvas2d" width="640" height="360" tabindex="0" aria-label="Canvas game scene"></canvas>
+<div id="phaserMount" hidden tabindex="0" aria-label="Phaser game scene"></div>
+<canvas id="canvas3d" width="640" height="360" hidden tabindex="0" aria-label="Babylon 3D scene"></canvas></div>
+<div class="toolbar">
+<button id="play">Play timeline</button><button id="pause">Pause</button>
+<button id="record">Record WebM</button><button id="stop" disabled>Stop</button>
+</div>
+<label for="scrub">Timeline <span id="time">0 ms</span></label>
+<input id="scrub" type="range" min="0" max="4000" value="0" step="20">
+<div class="toolbar" aria-label="Keyboard substitute">
+<button data-key="ArrowLeft">←</button><button data-key="ArrowUp">↑</button>
+<button data-key="ArrowDown">↓</button><button data-key="ArrowRight">→</button></div>
+<p id="status" role="status" aria-live="polite">Ready</p><a id="download" hidden>Save WebM</a>
+</section></div></main>
+<script src="./runtime/creative-scene.js"></script>
+<script src="./runtime/phaser-adapter.js"></script>
+<script src="./runtime/babylon-adapter.js"></script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s),stage=$("#stage"),source=$("#source"),status=$("#status");
+const canvas2d=$("#canvas2d"),canvas3d=$("#canvas3d"),phaserMount=$("#phaserMount");
+const scrub=$("#scrub"),clock=$("#time"),download=$("#download");
+let engine="canvas",model=null,adapter=null,playing=false,frame=0,last=0,recorder=null,parts=[],downloadUrl=null;
+const scripts={
+  phaser:"https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js",
+  babylon:"https://cdn.babylonjs.com/babylon.js"
+};
+async function load(script,check){
+ if(check())return;
+ await new Promise((resolve,reject)=>{
+   const tag=document.createElement("script");tag.src=script;tag.async=true;
+   tag.onload=()=>check()?resolve():reject(new Error("Engine did not load"));
+   tag.onerror=()=>reject(new Error("Could not load engine from CDN"));
+   document.head.appendChild(tag);
+ });
+}
+function view(mode){
+ engine=mode;
+ canvas2d.hidden=mode!=="canvas";
+ canvas3d.hidden=mode!=="babylon";
+ phaserMount.hidden=mode!=="phaser";
+}
+function draw(){
+ if(!model)return;
+ if(engine==="canvas")model.render(canvas2d.getContext("2d"));
+ if(engine==="phaser"&&adapter)adapter.sync();
+ if(model.goal?.won)status.textContent="You win! Score: "+model.score;
+}
+function seek(ms){
+ if(!model)return;
+ ms=Math.max(0,Math.min(4000,Number(ms)));
+ if(adapter)adapter.seek(ms);
+ else model.seek(ms);
+ scrub.value=String(ms);clock.textContent=Math.round(ms)+" ms";
+ draw();
+}
+function stopPlay(){playing=false;cancelAnimationFrame(frame);frame=0;last=0;}
+function loop(now){
+ if(!playing||!model)return;
+ const dt=last?Math.min(now-last,100):0;last=now;
+ if(model.time+dt>=4000){seek(4000);stopPlay();return;}
+ seek(model.time+dt);frame=requestAnimationFrame(loop);
+}
+function activeCanvas(){
+ if(engine==="canvas")return canvas2d;
+ if(engine==="babylon")return canvas3d;
+ return phaserMount.querySelector("canvas");
+}
+async function build(){
+ if(recorder&&recorder.state!=="inactive")throw new Error("Stop recording before rebuilding");
+ stopPlay();if(adapter)adapter.stop();adapter=null;
+ engine=$("#engine").value;
+ status.textContent="Loading "+engine+"...";
+ if(engine==="babylon"){
+   model=HiroBabylon.compile3D(source.value);
+   await load(scripts.babylon,()=>!!window.BABYLON);
+   view(engine);adapter=new HiroBabylon.BabylonAdapter({BABYLON:window.BABYLON,canvas:canvas3d,model}).start();
+ }else{
+   model=HiroGlifxScene.compile(source.value);
+   view(engine);
+   if(engine==="phaser"){
+     await load(scripts.phaser,()=>!!window.Phaser);
+     adapter=new HiroPhaser.PhaserAdapter({Phaser:window.Phaser,container:phaserMount,model});
+     await adapter.start();
+   }
+ }
+ seek(0);status.textContent=engine+" ready";
+ const focus=activeCanvas();if(focus)focus.focus();
+}
+$("#render").addEventListener("click",()=>build().catch(e=>status.textContent=e.message));
+$("#engine").addEventListener("change",()=>{
+ if($("#engine").value==="babylon"){
+   source.value='world 3d #101827\ncamera 0 6 -16\nlight 0 10 -5\ncube hero 0 0 0 3 #60a5fa\ncube satellite 4 1 0 1 #a78bfa\nrotate hero y 1.5\nrotate satellite x 2';
+ }else if(engine==="babylon"){
+   source.value='scene 640 360 "#101827"\nsprite player 30 165 42 42 "#60a5fa"\nsprite coin 550 165 35 35 "#facc15"\ncontrol ArrowRight player 20 0\ncontrol ArrowLeft player -20 0\ncontrol ArrowUp player 0 -20\ncontrol ArrowDown player 0 20\ngoal player coin';
+ }
+ build().catch(e=>status.textContent=e.message);
+});
+$("#play").addEventListener("click",()=>{if(!model)return;stopPlay();playing=true;frame=requestAnimationFrame(loop);});
+$("#pause").addEventListener("click",stopPlay);
+scrub.addEventListener("input",()=>{stopPlay();seek(scrub.value);});
+function key(key){if(engine==="babylon"||!model)return;model.keydown(key);draw();}
+window.addEventListener("keydown",e=>{if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key))return;
+ if(document.activeElement===source)return;e.preventDefault();key(e.key);});
+document.querySelectorAll("[data-key]").forEach(button=>button.addEventListener("click",()=>key(button.dataset.key)));
+$("#record").addEventListener("click",()=>{
+ const canvas=activeCanvas();
+ if(!canvas||!canvas.captureStream||!window.MediaRecorder){status.textContent="WebM recording unsupported in this browser/engine";return;}
+ const mime=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(type=>MediaRecorder.isTypeSupported(type));
+ if(!mime){status.textContent="No supported WebM codec in this browser";return;}
+ if(downloadUrl)URL.revokeObjectURL(downloadUrl);
+ download.hidden=true;parts=[];
+ try{
+   const stream=canvas.captureStream(30);
+   recorder=new MediaRecorder(stream,{mimeType:mime});
+   recorder.ondataavailable=e=>{if(e.data.size)parts.push(e.data);};
+   recorder.onstop=()=>{
+     const blob=new Blob(parts,{type:mime});downloadUrl=URL.createObjectURL(blob);
+     download.href=downloadUrl;download.download="hiroglifx-scene.webm";download.hidden=false;
+     download.textContent="Download recorded WebM";
+     stream.getTracks().forEach(track=>track.stop());
+     $("#record").disabled=false;$("#stop").disabled=true;status.textContent="Recording finished";
+   };
+   recorder.start();$("#record").disabled=true;$("#stop").disabled=false;status.textContent="Recording...";
+ }catch(e){status.textContent=e.message;}
+});
+$("#stop").addEventListener("click",()=>{if(recorder&&recorder.state==="recording")recorder.stop();});
+build().catch(e=>status.textContent=e.message);
+})();
+</script></body></html>
