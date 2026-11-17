@@ -27,7 +27,7 @@ test("failed resource staging leaves existing visual regions intact",()=>{
    if(row[0]==="north")throw Error("asset unavailable");
    return {dispose(){released++;}};
  }});
- assert.deepEqual(stream.update({x:0,z:8}).regions,["south","middle"]);
+ assert.deepEqual(stream.update({x:0,z:0}).regions,["south","middle"]);
  assert.throws(()=>stream.update({x:0,z:-35}),/asset unavailable/);
  assert.deepEqual(stream.snapshot().regions,["south","middle"]);
  assert.equal(released,0,"Existing visuals should survive failed staging");
