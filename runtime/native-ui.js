@@ -55,7 +55,7 @@ class NativeUIRuntime{
    else if(op==="prop"){const child=obj.children.get(a);if(!child)throw Error("Unknown child "+a);const decl=this.program.classes.get(child.type).fields.get(b);if(!decl)throw Error("Unknown child prop "+b);const str=this.tmpl(c,obj);this.assign(child,b,decl.kind==="#"?Number(str):decl.kind==="?"?str==="true":str);}
    else if(op==="text")node(a).textContent=this.tmpl(b,obj);
    else if(op==="class"){const cls=this.tmpl(b,obj);if(!/^[\w\s-]*$/.test(cls))throw Error("Bad CSS class");node(a).className=cls;}
-   else if(op==="attr"){const val=this.tmpl(c,obj);if(b==="href"&&!/^\/(?!\/)[A-Za-z0-9_/?#=&%-]*$|^#[A-Za-z0-9_-]+$/.test(val))throw Error("Unsafe href");if((b==="src"||b==="poster")&&!SAFE_MEDIA.test(val))throw Error("Unsafe media URL");if(["autoplay","loop","muted","playsinline","controls"].includes(b)){if(val==="true")node(a).setAttribute(b,"");}else node(a).setAttribute(b,val);}
+   else if(op==="attr"){const val=this.tmpl(c,obj);if(b==="href"&&!/^\/(?!\/)[A-Za-z0-9_/?#=&%-]*$|^#[A-Za-z0-9_-]+$/.test(val))throw Error("Unsafe href");if((b==="src"||b==="poster")&&val!==""&&!SAFE_MEDIA.test(val))throw Error("Unsafe media URL");if(["autoplay","loop","muted","playsinline","controls"].includes(b)){if(val==="true")node(a).setAttribute(b,"");}else if(val!==""||b!=="src")node(a).setAttribute(b,val);}
    else if(op==="motion"){const el=node(a);el.dataset.hgMotion=b;
     if(b==="spotlight"||b==="tilt"||b==="magnetic"){
       const win=this.document.defaultView;
