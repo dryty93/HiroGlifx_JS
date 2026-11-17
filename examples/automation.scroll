@@ -1,0 +1,4 @@
+# Requires a Playwright page via the browser adapter.
+browser.open "https://example.com"
+browser.wait "h1"
+browser.screenshot "example.png"
