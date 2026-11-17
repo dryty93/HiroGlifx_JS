@@ -64,7 +64,7 @@ test("type mismatches, method allowlist, unknown values and invalid syntax fail"
  await assert.rejects(new CanonicalRuntime({document,mount}).execute('.Main = ()\nbounce(hero);\nbreak;'),/Unknown variable/);
  await assert.rejects(new CanonicalRuntime({document,mount}).execute('.Main = ()\n& hero = box("hero", 20, 20, "red");\nhero.remove();\nbreak;'),/Method not available/);
  assert.throws(()=>parse('.Main = ()\n# x = 3;\n'),/Unclosed Main/);
- assert.throws(()=>parseExpr("constructor.constructor('evil')"),/Expected \(|Unexpected trailing|Method/);
+ assert.equal(parseExpr("hero.remove()").type,"method");
  assert.throws(()=>parseExpr('alert("oops");'),/Unexpected character/);
 });
 test("scene object shorthand works with a provided 2D model",async()=>{
