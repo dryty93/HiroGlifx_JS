@@ -69,7 +69,7 @@
        if(this.visible(x,y,z))fn({x,y,z,type});
      }
    }
-   generate(radius=10){
+   generate(radius=10,profile=null){
      if(this.blocks.size)throw new Error("World already generated");
      radius=n(radius,4,18,"radius");if(!Number.isInteger(radius))throw new Error("Radius must be integer");
      this.radius=radius;
@@ -78,16 +78,28 @@
        const elevation=(Math.sin(x*.28+this.seed*.001)+Math.cos(z*.31-this.seed*.001))*.9
          +(rand(this.seed,x,z)-.5)*1.1;
        let height=Math.max(1,Math.min(5,Math.round(3+elevation)));
-       // Keep spawn area level and give initial exploration a reliable floor.
-       if(dist<3)height=3;
+       // When provided, HiroGlifx source owns terrain height and material policy.
+       if(profile?.heightAt){
+         height=profile.heightAt(x,z,this.seed);
+         if(!Number.isInteger(height)||height<1||height>5)throw new Error("Invalid HiroGlifx terrain height");
+       }else if(dist<3)height=3;
+       let surface=dist<radius*.85?"grass":"sand";
+       if(profile?.materialAt){
+         surface=profile.materialAt(x,z,radius);
+         if(!BLOCKS.includes(surface)||surface==="leaves")throw new Error("Invalid HiroGlifx surface material");
+       }
        for(let y=0;y<=height;y++){
-         const type=y===height?(dist<radius*.85?"grass":"sand"):y>=height-1?"dirt":"stone";
+         const type=y===height?surface:y>=height-1?"dirt":"stone";
          this.block(x,y,z,type,{silent:true});
        }
      }
      // Deterministic decorative trees, away from spawn.
      for(let x=-radius+2;x<=radius-2;x+=4)for(let z=-radius+2;z<=radius-2;z+=4){
-       if(Math.hypot(x,z)<5||rand(this.seed+7,x,z)>.29)continue;
+       const plant=profile?.treeAt?
+         profile.treeAt(x,z,this.seed):
+         (Math.hypot(x,z)>=5&&rand(this.seed+7,x,z)<=.29);
+       if(typeof plant!=="boolean")throw new Error("Invalid HiroGlifx tree rule");
+       if(!plant)continue;
        const top=this.groundTop(x,z);
        if(top===null)continue;
        for(let j=1;j<=3;j++)this.block(x,top+j,z,"wood",{silent:true});
