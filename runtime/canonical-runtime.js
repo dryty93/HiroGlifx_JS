@@ -9,7 +9,7 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(base){
  "use strict";
  const NAME=/^[A-Za-z_][A-Za-z0-9_]*$/;
- const TYPES={"#":"number","$":"string","?":"boolean","&":"object"};
+ const TYPES={"#":"number","$":"string","?":"boolean","&":"object","@":"event"};
  const PRESETS=new Set(Object.keys(base.effects));
  function lex(source){
    const tokens=[];let i=0;
@@ -96,7 +96,7 @@
      }
      if(!block)throw new SyntaxError("Line "+(i+1)+": expected .Main = ()");
      const statement=line.replace(/;$/,"").trim();
-     const declaration=statement.match(/^([#$?&])\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
+     const declaration=statement.match(/^([#$?&@])\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)$/);
      try{
        if(declaration)nodes.push({type:"declaration",kind:declaration[1],name:declaration[2],value:parseExpr(declaration[3]),line:i+1});
        else nodes.push({type:"statement",value:parseExpr(statement),line:i+1});
@@ -135,7 +135,7 @@
    constructor({document=null,mount=null,scene=null}={}){
      this.document=document;this.mount=mount||document?.body||null;
      this.scene=scene;this.values=new Map();this.elements=new Map();this.controllers=[];
-     this.factories=new Map();
+     this.factories=new Map();this.methods=new Map();
    }
    register(name,fn){
      if(!NAME.test(name)||!name.includes("_")||typeof fn!=="function")throw new Error("Extension factories require namespaced names like fx_glow");
@@ -143,6 +143,7 @@
      this.factories.set(name,fn);return this;
    }
    _type(value){
+     if(value?.kind==="event")return "event";
      if(value instanceof AnimationController)return "object";
      if(value!==null&&typeof value==="object")return "object";
      return typeof value;
@@ -159,6 +160,12 @@
      const el=this.document.createElement("div");el.id=name;
      el.style.width=width+"px";el.style.height=height+"px";el.style.background=color;el.style.borderRadius="14px";
      this.mount.appendChild(el);this.elements.set(name,el);return el;
+   }
+   registerMethod(kind,method,handler){
+     if(!NAME.test(kind)||!NAME.test(method)||typeof handler!=="function")throw new Error("Invalid method registration");
+     const key=kind+"."+method;
+     if(this.methods.has(key))throw new Error("Duplicate method "+key);
+     this.methods.set(key,handler);return this;
    }
    async _invoke(name,args){
      if(this.factories.has(name))return this.factories.get(name)({args:[...args],runtime:this});
@@ -187,19 +194,27 @@
      }
      throw new Error("Unknown callable "+name);
    }
-   async _evaluate(node){
+   async _evaluate(node,scope=null){
      if(node.type==="literal")return node.value;
      if(node.type==="reference"){
+       if(scope&&Object.prototype.hasOwnProperty.call(scope,node.name))return scope[node.name];
        if(!this.values.has(node.name))throw new Error("Unknown variable "+node.name);
        return this.values.get(node.name).value;
      }
-     if(node.type==="call")return this._invoke(node.name,await Promise.all(node.args.map(x=>this._evaluate(x))));
+     if(node.type==="call")return this._invoke(node.name,await Promise.all(node.args.map(x=>this._evaluate(x,scope))));
      if(node.type==="method"){
-       const target=await this._evaluate(node.target);
-       if(!(target instanceof AnimationController)||!["play","pause","reverse","loop","cancel"].includes(node.method))
-         throw new Error("Method not available on this object: "+node.method);
-       if(node.args.length)throw new Error("Controller methods take no arguments");
-       return target[node.method]();
+       const target=await this._evaluate(node.target,scope);
+       if(target instanceof AnimationController){
+         if(!["play","pause","reverse","loop","cancel"].includes(node.method))
+           throw new Error("Method not available on animation: "+node.method);
+         if(node.args.length)throw new Error("Controller methods take no arguments");
+         return target[node.method]();
+       }
+       const kind=target?.kind;
+       const handler=typeof kind==="string"?this.methods.get(kind+"."+node.method):null;
+       if(!handler)throw new Error("Method not available on this object: "+node.method);
+       const args=await Promise.all(node.args.map(x=>this._evaluate(x,scope)));
+       return handler({target,args,runtime:this});
      }
      throw new Error("Invalid AST node");
    }
