@@ -2,7 +2,7 @@
 
 ## What is HiroGlifx and what is JavaScript?
 
-The .scroll files are the authored programming language. The JavaScript interpreter executes this language and the browser supplies Canvas 2D rendering. In earlier Arcade examples, the source was just an entrypoint that launched a JavaScript implementation of the game. That is **not** enough to say the game itself is written in HiroGlifx.
+The `.scroll` files are the authored programming language. The JavaScript interpreter executes this language and the browser supplies Canvas 2D rendering. In earlier Arcade examples, the source was just an entrypoint that launched a JavaScript implementation of the game. That is **not** enough to say the game itself is written in HiroGlifx.
 
 **Pong is the first fully game-scripted example.** Its full logic now lives in [`examples/arcade/pong.scroll`](../examples/arcade/pong.scroll). It defines all simulation variables, computer paddle logic, wall and paddle collision, scoring, victory checks, and complete rendering calls. The host (`runtime/scroll-game-runtime.js`) does not contain Pong's rules.
 
@@ -31,6 +31,8 @@ Changes to the `examples/arcade/pong.scroll` file will load on a page refresh. C
 ## Other games
 
 Snake, Breakout, Star Defense, Chess, and Tic-Tac-Toe still have JavaScript-backed mechanics in `runtime/arcade-games.js` or `runtime/arcade-chess.js`; their `.scroll` files currently instantiate these adapters. The source viewer labels these honestly. Migrating those games requires state containers (arrays/grids), loops, event handlers, and a richer object model. Chess also needs complex legal-move generation and would benefit from implementing list/board abstractions first.
+
+Native game-script syntax is also recognized by `hiro check` when it is used in a local project. The generic `hiro dev` page template does not yet contain a Canvas game host; to play this kind of script, use `arcade.html`.
 
 ## Tests
 
