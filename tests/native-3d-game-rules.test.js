@@ -63,5 +63,5 @@ test("scripted terrain callbacks reject invalid geometry and unwanted host servi
  assert.throws(()=>new VoxelWorld(4).generate(6,{heightAt:()=>3,treeAt:()=>"yes"}),/tree rule/);
  assert.throws(()=>new WorldRules(sky,{services:{eval:()=>{}}}),/namespaced/);
  const policy=new WorldRules(sky);
- assert.throws(()=>policy.tick(.02),/Unknown function world_configure/);
+ assert.throws(()=>policy.tick(.02),/Unregistered world service world_configure/);
 });
