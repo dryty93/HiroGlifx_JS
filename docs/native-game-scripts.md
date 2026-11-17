@@ -1,39 +1,38 @@
-# HiroGlifx Native Game Scripting — Phase 19
+# HiroGlifx Game Scripting — Native Arcade Phase 20
 
-## What is HiroGlifx and what is JavaScript?
+HiroGlifx `.scroll` source now implements the complete rules and drawing for all six Arcade examples: Pong, Snake, Breakout, Star Defense, Chess, and Tic-Tac-Toe. JavaScript still implements the **generic language interpreter** and browser Canvas/input integration; game-specific rules are no longer executed from the older `runtime/arcade-games.js` or `runtime/arcade-chess.js` modules.
 
-The `.scroll` files are the authored programming language. The JavaScript interpreter executes this language and the browser supplies Canvas 2D rendering. In earlier Arcade examples, the source was just an entrypoint that launched a JavaScript implementation of the game. That is **not** enough to say the game itself is written in HiroGlifx.
+## Source is always available
 
-**Pong is the first fully game-scripted example.** Its full logic now lives in [`examples/arcade/pong.scroll`](../examples/arcade/pong.scroll). It defines all simulation variables, computer paddle logic, wall and paddle collision, scoring, victory checks, and complete rendering calls. The host (`runtime/scroll-game-runtime.js`) does not contain Pong's rules.
+The [Arcade](../arcade.html) loads the real `examples/arcade/<game>.scroll` file and renders the complete source alongside gameplay. The *JavaScript runtime* tab fetches `runtime/scroll-game-runtime.js` to distinguish the implementation of the language from the game authored in the language.
 
-## Supported executable syntax
+Full authored game sources:
 
-- `.Main = ()` begins the program; `break;` finishes it
-- `# number = 1;`, `$ label = "text";`, `? active = true;` declare typed state
-- `: tick(dt) = [ ... ]` is called once per game frame
-- `: draw() = [ ... ]` describes the Canvas display
-- `variable = expression;` modifies already-declared state with type checking
-- `if expression [ ... ]` branches; conditions may nest, bounded to eight levels
-- Arithmetic: `+ - * / %`; comparisons: `< > <= >= == !=`; logic: `&& || !`
-- Safe built-ins: `abs`, `min`, `max`, `clamp`, `floor`, `ceil`, `round`, `sign`, `sqrt`, `key(name)`, `pointer(axis)`
-- Canvas drawing actions are restricted to `draw()`: `clear`, `rect`, `circle`, and `text`
+- [Pong](../examples/arcade/pong.scroll) — physics, paddles, opponent AI and scoring
+- [Snake](../examples/arcade/snake.scroll) — arrays, food, collision, grid logic
+- [Breakout](../examples/arcade/breakout.scroll) — bricks, ball, bounce and lives
+- [Star Defense](../examples/arcade/star-defense.scroll) — bullets, enemy formations and shooting
+- [Chess](../examples/arcade/chess.scroll) — a 64-square board, legal moves, check, checkmate, castling, en passant, promotions, stalemate, insufficient material, automatic draw conditions, undo
+- [Tic-Tac-Toe](../examples/arcade/tic-tac-toe.scroll) — click handling, turns, and win/draw detection
 
-No JavaScript evaluation, dynamic property access, unbounded loop statements, reflective constructors, arbitrary networking or filesystem access. The interpreter enforces a maximum program length and instruction budget for each frame. This is a first language subset, not full canonical compiler unification.
+## Interpreter capabilities
 
-## How to try the real source
+Start with `.Main = ()` and end with `break;`. Declare typed globals using `#` number, `$` string, `?` boolean, and `&` array. Define `: tick(dt) = [ ... ]` and `: draw() = [ ... ]`. Optional methods: `: init()`, `: click(x, y)`, `: keyEvent(code, pressed)`, and custom `: method(arg1, ...)` methods. Every method has a bounded instruction budget; recursive calls are depth-limited.
 
-Run `python3 -m http.server 8000 --bind 127.0.0.1` from the repository root, then open `http://127.0.0.1:8000/arcade.html?game=pong`. On the right, the source viewer shows **every executable line** of the HiroGlifx Pong program.
+Control flow: `if condition [ ... ]`, `for i from start to end [ ... ]` (exclusive end), `while condition [ ... ]` (bounded), `let local = expr;`, global or local assignment, `return value;`, `break;` in a loop, and expression statements that call functions.
 
-The code panel also has a **JavaScript runtime** tab that fetches and shows the full JavaScript implementation (`runtime/scroll-game-runtime.js` for Pong, `runtime/arcade-chess.js` for Chess, and `runtime/arcade-games.js` for the other four genres). You can inspect and copy both sides independently, without the app pretending its game engine is HiroGlifx source.
+Expressions: finite numbers, strings, booleans, arithmetic, comparisons, logic, calls and parentheses. There are **no dynamic JavaScript properties, eval, Function, imports, direct DOM access, or arbitrary browser navigation**.
 
-Changes to the `examples/arcade/pong.scroll` file will load on a page refresh. Change `# winningScore = 7` to `# winningScore = 3`, or modify `# paddleSpeed = 420`, to alter gameplay without changing JavaScript.
+Built-in functions: numeric `abs`, `min`, `max`, `clamp`, `floor`, `ceil`, `round`, `sign`, `sqrt`, `sin`, `cos`; arrays `array`, `filled`, `chars`, `get`, `set`, `len`, `clone`, `push`, `unshift`, `pop`, `shift`, `removeAt`, `char`, `indexOf`; strings `lower`, `upper`; seeded `random`; input `key(name)` and `pointer("x"|"y")`. Canvas draw-only calls: `clear`, `rect`, `circle`, and `text`.
 
-## Other games
+## Chess scope
 
-Snake, Breakout, Star Defense, Chess, and Tic-Tac-Toe still have JavaScript-backed mechanics in `runtime/arcade-games.js` or `runtime/arcade-chess.js`; their `.scroll` files currently instantiate these adapters. The source viewer labels these honestly. Migrating those games requires state containers (arrays/grids), loops, event handlers, and a richer object model. Chess also needs complex legal-move generation and would benefit from implementing list/board abstractions first.
+The rules are *implemented in Chess's `.scroll` file*, including king safety during move validation, castling through non-attacked squares, en passant, all four promotion types and endgames. The example is local two-player, with an Undo control. It has no chess AI, clocks, PGN export, online multiplayer, or full claim-based draw interface. This is a chess demo and game-language stress test, not a replacement for an established chess engine.
 
-Native game-script syntax is also recognized by `hiro check` when it is used in a local project. The generic `hiro dev` page template does not yet contain a Canvas game host; to play this kind of script, use `arcade.html`.
+## Validation
 
-## Tests
+Run `node --test tests/native-arcade-all.test.js tests/scroll-game-runtime.test.js` to check real native gameplay, including chess special moves and safety budgets. `e2e/arcade-smoke.js` plays through browser input, verifies code provenance and captures screenshots. The standard project checker can validate game scripts; hosting a new game requires a Canvas game host similar to `arcade.html`.
 
-Run `node --test tests/scroll-game-runtime.test.js`. Browser coverage is in `e2e/arcade-smoke.js`. The tests verify that Pong's movement, computer paddle, collision, scoring and renderer are executed from .scroll state and methods.
+## Important distinction for the wider platform
+
+Skybound and Blockhaven still have JavaScript game-specific rules and a HiroGlifx `.scroll` object configuration layer. The *Arcade's six games* are genuinely authored in `.scroll`; that architecture is the template for moving more gameplay systems into the language. Reuse the generic native interpreter rather than making one JavaScript factory per game.
