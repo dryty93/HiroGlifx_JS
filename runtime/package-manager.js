@@ -9,6 +9,7 @@ const {parseExtended}=require("./expressive-runtime");
 const {parse:parseCanonical}=require("./canonical-runtime");
 const {parseProgram:parseScrollGame}=require("./scroll-game-runtime");
 const {compile:compileClassGame}=require("./scroll-game-classes");
+const {compile:compileNativeUI}=require("./native-ui");
 const NAME=/^[a-z][a-z0-9-]{0,39}$/;
 const VERSION=/^\d+\.\d+\.\d+$/;
 const IMPORT=/^import\s+([a-z][a-z0-9-]{0,39})\s*;?$/;
@@ -43,6 +44,7 @@ function writeAtomic(filename,value){
  }finally{if(fs.existsSync(temp))fs.unlinkSync(temp);}
 }
 function validateLibrary(source,name){
+ if(/^ui library$/m.test(source)){compileNativeUI(source);if(/^\s*\.Main\s*=/m.test(source))throw new Error("UI package cannot declare Main");return;}
  if(typeof source!=="string"||source.length>100000)throw new Error("Package exceeds 100 KB");
  if(/^\s*\.[A-Za-z_][\w]*\s*=\s*\([A-Za-z_][\w]*\)?\s*$/m.test(source)||
     /^\s*\.[A-Za-z_][\w]*\s*=\s*\(\)\s*$/m.test(source)){
@@ -162,6 +164,13 @@ function readPackage(project,name,lock){
 }
 function resolveSource(project,source){
  project=path.resolve(project);
+ if(/^ui application$/m.test(source)){
+   const lock=readLocked(project),ordered=[],visited=new Set();
+   function visit(name,stack=[]){if(stack.includes(name))throw new Error("Import cycle");if(visited.has(name))return;const data=readPackage(project,name,lock);if(!/^ui library$/m.test(data))throw new Error("UI imports require UI libraries");for(const dependency of scanImports(data))visit(dependency,[...stack,name]);ordered.push(data.replace(/^ui library\s*$/m,""));visited.add(name);}
+   for(const name of scanImports(source))visit(name);
+   const expanded=source.replace(/^ui application\s*$/m,"ui application\n"+ordered.join("\n")).replace(/^import [a-z][a-z0-9-]*;?$/gm,"");
+   compileNativeUI(expanded);return expanded;
+ }
  // A canonical expression page is validated directly; legacy libraries are not yet compatible.
  if(/^\.Main\s*=\s*\(\)\s*$/m.test(source)){
    if(/^\s*import\s+/m.test(source)){
