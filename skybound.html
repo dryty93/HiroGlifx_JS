@@ -62,6 +62,7 @@ kbd{padding:4px 7px;background:#253d60;border:1px solid #5b779d;border-bottom-wi
 .stage-card.finished{border-color:#5de1ce}
 .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.links a{font-size:13px;color:#bfe5ff;border-bottom:1px solid #76b2e5;text-decoration:none}
 footer{font-size:12px;color:#7994b7;margin:23px 0 0;text-align:center}
+.source-embed{margin-top:20px;background:#14243dd9;border:1px solid #345373;border-radius:17px;padding:18px}.source-embed summary{cursor:pointer;color:#91ddff;font-weight:900}.source-embed pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:480px;overflow:auto;background:#091629;padding:17px;border-radius:12px;color:#b9f1da;font:12px/1.6 ui-monospace,monospace}.source-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.source-actions button{border:1px solid #698abd;background:#27446d;color:#eff8ff;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}.source-actions a{color:#a9ddff}
 @media(max-width:760px){.shell{padding:15px 14px 30px}.game-frame{border-radius:16px}#game{aspect-ratio:1/1.08}
 .hud{inset:9px 9px auto}.hud-item{font-size:11px;padding:7px 9px;border-radius:9px}.stage-bar{bottom:8px}
 .grid-bottom{grid-template-columns:1fr}.stages{grid-template-columns:repeat(5,minmax(0,1fr))}
@@ -78,7 +79,7 @@ footer{font-size:12px;color:#7994b7;margin:23px 0 0;text-align:center}
 <section aria-label="Skybound Obby game" class="game-frame">
 <canvas id="game" width="1280" height="680" tabindex="0" aria-label="Skybound 3D game canvas"></canvas>
 <div class="hud"><div class="hud-left"><div class="hud-item" id="stageLabel">01 · CLOUD STEPS</div><div class="hud-item" id="modeLabel">READY</div></div>
-<div class="hud-right"><div class="hud-item">⏱ <b id="timer">0:00.0</b></div><div class="hud-item">☠ <b id="deaths">0</b></div></div></div>
+<div class="hud-right"><div class="hud-item">⏱ <b id="timer">0:00.0</b></div><div class="hud-item">☠ <b id="deaths">0</b></div><div class="hud-item">★ <b id="score">0</b></div></div></div>
 <div class="stage-bar" aria-label="Five-stage progress"><div class="stage-segment current"></div><div class="stage-segment"></div><div class="stage-segment"></div><div class="stage-segment"></div><div class="stage-segment"></div></div>
 <div class="overlay" id="overlay"><div class="overlay-card"><span class="star-icon" aria-hidden="true">✦</span>
 <div class="eyebrow" id="overlayEyebrow">THE SKYBOUND CHALLENGE</div><h2 id="overlayTitle">Your adventure starts here.</h2>
@@ -93,8 +94,11 @@ footer{font-size:12px;color:#7994b7;margin:23px 0 0;text-align:center}
 <div class="stages" id="stageCards"><div class="stage-card active"><b>01</b><small>Cloud Steps</small></div><div class="stage-card"><b>02</b><small>Lava Run</small></div><div class="stage-card"><b>03</b><small>Moving Skies</small></div><div class="stage-card"><b>04</b><small>Vanishing Path</small></div><div class="stage-card"><b>05</b><small>Final Ascent</small></div></div></section>
 <section class="panel"><div class="eyebrow">MADE WITH HIROGLIFX</div><h3>A game built with the language itself</h3><p>Skybound uses canonical <code>.Main = ()</code> syntax, reusable Runner blueprints, game-object references, and a Babylon.js browser renderer. The obstacle-course code is available for you to edit and extend.</p>
 <div class="links"><a href="./obby-playground.html">Edit the course</a><a href="./showcase.html">See other HiroGlifx demos</a><a href="./docs/skybound-showcase.md">How it works</a></div></section></div>
+<details class="source-embed" id="skyboundSourcePanel"><summary>View Skybound’s complete HiroGlifx gameplay and course scripts</summary><p>The game’s scoring, stage difficulty and reward logic is now implemented in the gameplay file. The separate course file defines all platform geometry. Babylon and the generic physics engine remain JavaScript.</p><div class="source-actions"><button id="showSkyboundRules">Full gameplay rules</button><button id="showSkyboundCourse">Course / classes</button><a id="skyboundSourceLink" href="./examples/skybound-gameplay.scroll" target="_blank" rel="noopener">Open source</a></div><pre id="skyboundSourceCode">Loading HiroGlifx source…</pre></details>
 <footer>Built in HiroGlifx · Browser-first, responsive, original game prototype · No account required</footer>
 </div>
+<script src="./runtime/scroll-game-runtime.js"></script>
+<script src="./runtime/scroll-world-rules.js"></script>
 <script src="./runtime/scroll-runtime.js"></script>
 <script src="./runtime/canonical-runtime.js"></script>
 <script src="./runtime/obby-world.js"></script>
@@ -109,9 +113,17 @@ footer{font-size:12px;color:#7994b7;margin:23px 0 0;text-align:center}
 const $=id=>document.getElementById(id),keys=new Set(),segments=[...document.querySelectorAll(".stage-segment")];
 const cards=[...document.querySelectorAll(".stage-card")];
 let runtime=null,model=null,renderer=null,started=false,paused=true,ready=false,source=null,events=[],raf=0,lastStage=1,muted=false,audio=null;
+let rules=null,rulesSource=null,sourceMode="rules";
+function showSkyboundCode(mode){
+ sourceMode=mode;
+ $("skyboundSourceCode").textContent=mode==="rules"?rulesSource:source;
+ $("skyboundSourceLink").href=mode==="rules"?"./examples/skybound-gameplay.scroll":"./examples/skybound-course.scroll";
+}
+$("showSkyboundRules").onclick=()=>showSkyboundCode("rules");
+$("showSkyboundCourse").onclick=()=>showSkyboundCode("course");
 const bestKey="hiroglifx-skybound-best-v1";
 // Read-only state snapshot for browser QA and performance diagnostics.
-window.HiroSkyboundSnapshot=()=>model?Object.freeze({x:model.player.x,z:model.player.z,stage:model.currentStage,time:model.elapsed,completed:model.completed}):null;
+window.HiroSkyboundSnapshot=()=>model?Object.freeze({x:model.player.x,z:model.player.z,stage:model.currentStage,time:model.elapsed,completed:model.completed,score:rules?.get("score")??0,rulesLoaded:!!rules}):null;
 function best(){try{return Number(localStorage.getItem(bestKey))||0;}catch{return 0;}}
 function setBest(value){try{localStorage.setItem(bestKey,String(value));}catch{}}
 function time(value){const minutes=Math.floor(value/60),seconds=(value%60).toFixed(1).padStart(4,"0");return minutes+":"+seconds;}
@@ -139,6 +151,7 @@ function hud(){
  if(!model)return;
  const s=model.summary();$("stageLabel").textContent=String(s.stage).padStart(2,"0")+" · "+s.stageName.toUpperCase();
  $("timer").textContent=time(s.time);$("deaths").textContent=s.deaths;
+ $("score").textContent=rules?.get("score")??0;
  $("modeLabel").textContent=model.completed?"COMPLETE":paused?"PAUSED":"LIVE";
  segments.forEach((segment,i)=>{
   segment.classList.toggle("complete",i+1<s.stage);
@@ -149,32 +162,44 @@ function hud(){
 function teardown(){
  cancelAnimationFrame(raf);keys.clear();for(const unsub of events)unsub();events=[];
  if(renderer)renderer.stop();renderer=null;
- if(runtime)runtime.dispose();runtime=null;model=null;ready=false;started=false;paused=true;
+ if(runtime)runtime.dispose();runtime=null;model=null;rules=null;ready=false;started=false;paused=true;
 }
 async function build(){
  teardown();
  if(!window.BABYLON)throw new Error("Babylon.js could not load. An internet connection is required.");
- if(!source){
-  const response=await fetch("./examples/skybound-course.scroll",{cache:"no-store"});
-  if(!response.ok)throw new Error("Could not fetch the Skybound course");
-  source=await response.text();
+ if(!source||!rulesSource){
+   const [course,gameplay]=await Promise.all([
+     fetch("./examples/skybound-course.scroll",{cache:"no-store"}),
+     fetch("./examples/skybound-gameplay.scroll",{cache:"no-store"})
+   ]);
+   if(!course.ok||!gameplay.ok)throw new Error("Could not fetch Skybound's HiroGlifx sources");
+   source=await course.text();rulesSource=await gameplay.text();
  }
  const rt=HiroObbyCanonical.install(new HiroCanonical.CanonicalRuntime());
  const code=HiroBlueprints.install(rt,source);
  await rt.execute(code);
  const world=rt.get("world");
  if(!world?.player||world.tiles.size<10)throw new Error("Skybound course is missing game objects");
- const view=new HiroObbyBabylon.ObbyBabylonAdapter({BABYLON:window.BABYLON,canvas:$("game"),world});
+ const policy=new HiroWorldRules.WorldRules(rulesSource,{name:"skybound-gameplay",services:{
+   world_configure:(speed,jumpForce)=>{
+     world.moveSpeed=speed;world.jumpSpeed=jumpForce;return speed;
+   }
+ }});
+ const view=new HiroObbyBabylon.ObbyBabylonAdapter({
+   BABYLON:window.BABYLON,canvas:$("game"),world,
+   onBeforeStep:dt=>policy.tick(dt)
+ });
  view.start();view.paused=true;
- runtime=rt;model=world;renderer=view;ready=true;lastStage=1;
- events.push(world.on("jump",()=>sound(680,.085)));
- events.push(world.on("checkpoint",({tile})=>{sound(840,.2);announce("✓ Checkpoint saved: "+tile);}));
- events.push(world.on("stage",({stage,title})=>{lastStage=stage;sound(700+stage*80,.22);announce("STAGE "+stage+" — "+title);}));
- events.push(world.on("respawn",()=>{sound(190,.24);announce("Try again! Your checkpoint is saved.");}));
+ runtime=rt;model=world;renderer=view;rules=policy;ready=true;lastStage=1;showSkyboundCode(sourceMode);
+ events.push(world.on("jump",()=>{policy.run("onJump");sound(680,.085);}));
+ events.push(world.on("checkpoint",({tile})=>{policy.run("onCheckpoint");sound(840,.2);announce("✓ Checkpoint saved: "+tile);}));
+ events.push(world.on("stage",({stage,title})=>{policy.run("onStage",stage);lastStage=stage;sound(700+stage*80,.22);announce("STAGE "+stage+" — "+title);}));
+ events.push(world.on("respawn",()=>{policy.run("onRespawn");sound(190,.24);announce("Try again! Your checkpoint is saved.");}));
  events.push(world.on("finish",()=>{
+  policy.run("onFinish");
   renderer.paused=true;paused=true;const old=best();
   if(!old||world.elapsed<old){setBest(world.elapsed);updateBest();}
-  sound(1100,.45);overlay("You reached the summit!","Your time: "+time(world.elapsed)+" · "+world.dead+" respawns. "+
+  sound(1100,.45);overlay("You reached the summit!","Your time: "+time(world.elapsed)+" · Score "+policy.get("score")+" · "+world.dead+" respawns. "+
   ((!old||world.elapsed<old)?"New personal best!":"Think you can beat your best time?"),"SKYBOUND COMPLETE","↻ Play again");
  }));
  announce("Skybound is ready. Press Start adventure.");
