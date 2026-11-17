@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+<rect width="1200" height="675" fill="#0b1220"/>
+<text x="48" y="58" fill="#f1f6ff" font-family="Arial" font-weight="bold" font-size="31">HiroGlifx / Phase 11 — A reusable .scroll ecosystem</text>
+<text x="48" y="90" fill="#a0b7d3" font-family="Arial" font-size="16">Committed implementation diagram — not a captured browser screenshot</text>
+<rect x="42" y="135" width="360" height="445" rx="17" fill="#16253c" stroke="#455c7b"/>
+<text x="67" y="178" fill="#93c5fd" font-family="monospace" font-size="19">sparkfx/main.scroll</text>
+<text x="67" y="226" fill="#dceafa" font-family="monospace" font-size="16">.Card = [</text>
+<text x="82" y="255" fill="#a7ebce" font-family="monospace" font-size="15">box badge 88 88 blue;</text>
+<text x="67" y="285" fill="#dceafa" font-family="monospace" font-size="16">]</text>
+<text x="67" y="334" fill="#a7ebce" font-family="monospace" font-size="15">extends PartyCard Card</text>
+<text x="67" y="380" fill="#dceafa" font-family="monospace" font-size="15">.PartyCard = [</text>
+<text x="83" y="413" fill="#a7ebce" font-family="monospace" font-size="15">pulse badge 950 infinite;</text>
+<text x="67" y="444" fill="#dceafa" font-family="monospace" font-size="15">]</text>
+<text x="67" y="520" fill="#a9bdd8" font-family="Arial" font-size="15">Local package with version metadata</text>
+<rect x="424" y="135" width="345" height="445" rx="17" fill="#16253c" stroke="#455c7b"/>
+<text x="451" y="178" fill="#93c5fd" font-family="monospace" font-size="19">my-app/app.scroll</text>
+<text x="452" y="224" fill="#a7ebce" font-family="monospace" font-size="20">import sparkfx</text>
+<text x="452" y="287" fill="#dceafa" font-family="monospace" font-size="17">.Main = [</text>
+<text x="467" y="323" fill="#a7ebce" font-family="monospace" font-size="17">use PartyCard hero;</text>
+<text x="452" y="360" fill="#dceafa" font-family="monospace" font-size="17">]</text>
+<rect x="452" y="426" width="287" height="102" rx="10" fill="#223957"/>
+<text x="472" y="462" fill="#dceafa" font-family="Arial" font-size="17">hiro.lock.json</text>
+<text x="472" y="492" fill="#a7ebce" font-family="monospace" font-size="16">sha256 + version</text>
+<text x="472" y="514" fill="#a9bdd8" font-family="Arial" font-size="13">Verified before imports run</text>
+<path d="M780 346H820" stroke="#60a5fa" stroke-width="4"/><path d="M811 334l14 12-14 12" fill="none" stroke="#60a5fa" stroke-width="4"/>
+<rect x="837" y="135" width="320" height="445" rx="17" fill="#101d30" stroke="#455c7b"/>
+<text x="865" y="178" fill="#93c5fd" font-family="Arial" font-size="20">Live UI preview</text>
+<rect x="945" y="241" width="103" height="103" rx="22" fill="#7c3aed"/>
+<text x="997" y="401" fill="#f0f4fc" font-family="Arial" font-weight="bold" text-anchor="middle" font-size="21">Party card!</text>
+<rect x="913" y="437" width="170" height="43" rx="9" fill="#60a5fa"/>
+<text x="998" y="465" fill="#12233b" font-family="Arial" font-weight="bold" text-anchor="middle" font-size="16">Celebrate</text>
+<text x="998" y="533" fill="#b1c9e5" font-family="Arial" text-anchor="middle" font-size="14">Imported component</text>
+<rect x="42" y="602" width="1115" height="49" rx="10" fill="#203a59"/>
+<text x="600" y="633" fill="#c9e2ff" text-anchor="middle" font-family="monospace" font-size="17">hiro package add   •   import sparkfx   •   class inheritance   •   verified lockfile</text>
+</svg>

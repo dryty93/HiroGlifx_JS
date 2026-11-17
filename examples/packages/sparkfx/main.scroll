@@ -1,0 +1,12 @@
+ability celebrate target => spin {target} 750 | color {target} purple
+
+.Card = [
+  box badge 88 88 blue;
+  center badge;
+  text caption "Made with a scroll library";
+]
+extends PartyCard Card
+.PartyCard = [
+  text caption "Party card!";
+  pulse badge 950 infinite;
+]

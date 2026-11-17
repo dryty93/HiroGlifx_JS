@@ -1,0 +1,8 @@
+import sparkfx
+.Main = [
+  page "HiroGlifx Packages";
+  background "#101827";
+  use PartyCard feature;
+  button celebrate "Celebrate";
+  on click celebrate => animate feature-badge spin 700;
+]

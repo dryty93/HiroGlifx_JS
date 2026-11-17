@@ -4,6 +4,7 @@ const fs=require("node:fs");
 const path=require("node:path");
 const {parseExtended}=require("./runtime/expressive-runtime");
 const {serveProject}=require("./runtime/dev-server");
+const {installLocal,removePackage,readLocked,resolveSource}=require("./runtime/package-manager");
 const example=String.raw;
 const HOME=[
 '.Main = [',
@@ -55,12 +56,30 @@ function validateProject(project){
   }
   for(const file of files){
     const source=fs.readFileSync(file,"utf8");
-    parseExtended(source);
+    resolveSource(project,source);
   }
   return files.length;
 }
 async function main(argv=process.argv.slice(2)){
   const [command,location,...rest]=argv;
+  if(command==="package"){
+    const [action,projectDir,arg]=[location,rest[0],rest[1]];
+    if(!projectDir)throw new Error("Usage: hiro package <add|remove|list> <project> [path|name]");
+    const project=path.resolve(projectDir);
+    if(action==="add"){
+      if(!arg)throw new Error("Supply the local package folder");
+      const installed=installLocal(project,arg);console.log("Installed",installed.name+"@"+installed.version);return;
+    }
+    if(action==="remove"){
+      if(!arg)throw new Error("Supply the package name");
+      removePackage(project,arg);console.log("Removed",arg);return;
+    }
+    if(action==="list"){
+      for(const [name,item] of Object.entries(readLocked(project).packages))console.log(name+"@"+item.version);
+      return;
+    }
+    throw new Error("Unknown package command: "+action);
+  }
   if(command==="init"){
     if(!location)throw new Error("Usage: hiro init <project-directory>");
     const dir=makeProject(location);
@@ -82,7 +101,7 @@ async function main(argv=process.argv.slice(2)){
     console.log("HiroGlifx app: http://127.0.0.1:"+live.server.address().port);
     return live;
   }
-  console.log("HiroGlifx CLI\n  hiro init <directory>\n  hiro dev <directory> [port]\n  hiro check <directory>");
+  console.log("HiroGlifx CLI\n  hiro init <directory>\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
 }
 if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
 module.exports={main,makeProject,validateProject};
