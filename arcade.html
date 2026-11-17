@@ -105,7 +105,7 @@ function showSource(mode){
    $("sourceFile").href=enginePath(gameId);
  }
 }
-window.HiroArcadeSnapshot=()=>game?Object.freeze({name:game.name,turn:game.name==="chess"?game.get("turn"):null,moves:game.name==="chess"?game.get("moves"):null,score:game.score,done:game.done,sourceMode:"native-scroll",state:game.name==="chess"?"board64":null}):null;
+window.HiroArcadeSnapshot=()=>game?Object.freeze({name:game.name,turn:game.get("turn")??null,moves:game.get("moves")??null,score:game.score,done:game.done,sourceMode:"native-scroll",player:game.get("player")??null,paddle:game.get("paddle")??null,ship:game.get("ship")??null,snakeHead:game.get("snake")?.[0]??null,shots:game.get("shots")?.length??0,bricksRemaining:game.get("remaining")??null}):null;
 const gameName=()=>new URL(location.href).searchParams.get("game")||"pong";
 function setStatus(message){$("status").textContent=message;}
 function draw(){if(game)game.render(ctx);}
