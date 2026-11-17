@@ -18,12 +18,43 @@ async function main(){
   for(const width of [1440,390]){
    const page=await browser.newPage({viewport:{width,height:900}});
    const errors=[];page.on("pageerror",e=>errors.push(e.message));
-   for(const [route,title] of [["/","Interfaces that feel"],["/dashboard","Your command center"],["/form","Join the next generation"]]){
+   for(const [route,title] of [["/","Interfaces that feel"],["/dashboard","Your command center"],["/form","Join the next generation"],["/experiences","The web should make you feel something"],["/studio","Designed to be experienced"]]){
     await page.goto(base+route,{waitUntil:"domcontentloaded"});
     await page.getByText(title,{exact:false}).waitFor();
     assert.equal(await page.locator("h1").count(),1);
     assert.equal(await page.locator("body").evaluate(el=>el.scrollWidth<=innerWidth+2),true,"horizontal overflow");
+    if(route==="/experiences"||route==="/studio"){
+     for(let y=0;y<await page.evaluate(()=>document.body.scrollHeight);y+=650){
+      await page.evaluate(scrollY=>window.scrollTo(0,scrollY),y);
+      await page.waitForTimeout(28);
+     }
+     await page.evaluate(()=>window.scrollTo(0,0));
+     await page.waitForTimeout(150);
+    }
     await page.screenshot({path:path.join(artifacts,"native-ui-"+(route==="/"?"landing":route.slice(1))+"-"+width+".png"),fullPage:true});
+    if(route==="/experiences"){
+     const carousel=page.locator(".hg-track");
+     assert.equal(await carousel.evaluate(el=>el.style.getPropertyValue("--hg-slide")),"0");
+     await page.getByRole("button",{name:"Next experience"}).click();
+     assert.equal(await carousel.evaluate(el=>el.style.getPropertyValue("--hg-slide")),"1");
+     await page.getByRole("button",{name:"Next experience"}).click();
+     await page.getByRole("button",{name:"Next experience"}).click();
+     assert.equal(await carousel.evaluate(el=>el.style.getPropertyValue("--hg-slide")),"0");
+     assert(await page.locator("[data-hg-motion=reveal].hg-in-view").count()>0,"viewport reveal");
+    }
+    if(route==="/studio"){
+     const faq=page.getByRole("button",{name:"Is the motion really native?"});
+     assert.equal(await faq.getAttribute("aria-expanded"),"false");
+     await faq.click();
+     assert.equal(await faq.getAttribute("aria-expanded"),"true");
+     const pricing=page.locator(".hg-pricing");
+     assert.equal(await pricing.getByText("$24").isVisible(),true);
+     await pricing.getByRole("button",{name:"Switch monthly / yearly"}).click();
+     assert.equal(await pricing.getByText("$19").isVisible(),true);
+     assert.equal(await pricing.getByText("$24").isVisible(),false);
+     assert.equal(await page.locator("img.hg-image").count(),1);
+     assert.equal(await page.locator("img.hg-image").evaluate(el=>el.complete&&el.naturalWidth>0),true);
+    }
     if(route==="/dashboard"){
      const button=page.getByRole("button",{name:"Clicked 0 times"});await button.click();
      await page.getByRole("button",{name:"Clicked 1 times"}).waitFor();
@@ -43,7 +74,7 @@ async function main(){
    }
    assert.deepEqual(errors,[]);await page.close();
   }
-  console.log("Native UI .scroll pages passed Chromium desktop/mobile, click and submit");
+  console.log("Native UI desktop/mobile: cinematic, bento, reveal, carousel, FAQ, pricing, images, click and submit");
  }finally{if(browser)await browser.close();server.kill("SIGTERM");fs.rmSync(dir,{recursive:true,force:true});}
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
