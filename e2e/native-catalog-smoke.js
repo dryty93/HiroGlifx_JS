@@ -23,6 +23,15 @@ async function main(){
     assert.equal(await page.getByRole("main").count(),1,"one main landmark");
     const overflow=await page.evaluate(()=>({body:document.body.scrollWidth,viewport:innerWidth}));
     assert(overflow.body<=overflow.viewport+2,route+" "+width+" horizontal overflow "+JSON.stringify(overflow));
+    // Scroll all chapters into view before capturing a full-page screenshot.
+    // The production reveal effect is intentionally viewport-driven; an immediate
+    // full-page screenshot would otherwise show unrevealed content as blank.
+    for(let y=0,limit=await page.evaluate(()=>document.body.scrollHeight);y<limit;y+=570){
+     await page.evaluate(scrollTo=>window.scrollTo(0,scrollTo),y);
+     await page.waitForTimeout(35);
+    }
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await page.waitForTimeout(180);
     await page.screenshot({path:path.join(dir,"native-catalog-"+route+"-"+width+".png"),fullPage:true,animations:"disabled"});
     if(route==="catalog"){
      for(const name of ["Hero experiences","Portfolio experiences","Narrative experiences","Conversion experiences"])
