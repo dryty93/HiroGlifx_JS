@@ -29,10 +29,19 @@ class CombatWorld{
  strike(attackerId,targetId,{damage=20,range=2.3,cost=15,cooldown=.55,knockback=0}={}){
    const attacker=this.actor(attackerId),target=this.actor(targetId);
    [damage,range,cost,cooldown,knockback].forEach((v,i)=>finite(v,0,i===0?10000:1000,["damage","range","cost","cooldown","knockback"][i]));
-   if(!attacker.alive||!target.alive||attacker.team===target.team||attacker.stamina<cost)return {hit:false,reason:"blocked"};
+   if(!attacker.alive||!target.alive||attacker.team===target.team||attacker.stamina<cost||attacker.status.get("stun")?.ends>this.elapsed)return {hit:false,reason:"blocked"};
    if(distance(attacker,target)>range)return {hit:false,reason:"out-of-range"};
    if((this.cooldowns.get(attackerId)||0)>this.elapsed)return {hit:false,reason:"cooldown"};
    attacker.stamina-=cost;this.cooldowns.set(attackerId,this.elapsed+cooldown);
+   if(target.status.get("evade")?.ends>this.elapsed){
+     this.emit("evade",{attacker:attackerId,target:targetId});
+     return {hit:false,reason:"evaded"};
+   }
+   if(target.status.get("parry")?.ends>this.elapsed){
+     this.status(attackerId,"stun",{duration:.65});
+     this.emit("parry",{attacker:attackerId,target:targetId});
+     return {hit:false,reason:"parried"};
+   }
    const weapon=attacker.equipment.get("weapon")?.damage||0;
    const protection=target.armor+(target.equipment.get("armor")?.defense||0);
    const effective=Math.max(1,Math.round((damage+weapon)*100/(100+protection)));
@@ -43,7 +52,7 @@ class CombatWorld{
  }
  heal(id,amount){const a=this.actor(id);finite(amount,0,10000,"heal");if(!a.alive)return 0;a.health=Math.min(a.maxHealth,a.health+amount);this.emit("heal",{actor:id,health:a.health});return a.health;}
  status(id,name,{duration=2,power=1}={}){
-   if(!["poison","slow","stun","regen"].includes(name))throw Error("Unknown status");
+   if(!["poison","slow","stun","regen","evade","parry"].includes(name))throw Error("Unknown status");
    finite(duration,.01,120,"duration");finite(power,0,1000,"power");
    this.actor(id).status.set(name,{ends:this.elapsed+duration,power});this.emit("status",{actor:id,name});return true;
  }
@@ -62,5 +71,30 @@ class CombatWorld{
  }
  snapshot(){return [...this.actors.values()].map(a=>({id:a.id,health:a.health,stamina:a.stamina,team:a.team,alive:a.alive,x:a.x,z:a.z}));}
 }
-return {CombatWorld,distance};
+class TelegraphQueue{
+ constructor({maxActive=32}={}){
+   if(!Number.isInteger(maxActive)||maxActive<1||maxActive>256)throw Error("Invalid telegraph limit");
+   this.maxActive=maxActive;this.active=new Map();
+ }
+ schedule(id,delay,callback){
+   if(typeof id!=="string"||!ID.test(id)||!Number.isFinite(delay)||delay<=0||delay>10||
+      typeof callback!=="function")throw Error("Invalid telegraph");
+   if(this.active.has(id)||this.active.size>=this.maxActive)return false;
+   this.active.set(id,{remaining:delay,callback});return true;
+ }
+ remaining(id){return this.active.get(id)?.remaining||0;}
+ has(id){return this.active.has(id);}
+ cancel(id){return this.active.delete(id);}
+ tick(dt){
+   finite(dt,0,.1,"telegraph delta");
+   const ready=[];
+   for(const [id,task] of this.active){
+     task.remaining-=dt;
+     if(task.remaining<=0){this.active.delete(id);ready.push(task.callback);}
+   }
+   for(const callback of ready)callback();
+ }
+ dispose(){this.active.clear();}
+}
+return {CombatWorld,distance,TelegraphQueue};
 });
