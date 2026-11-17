@@ -42,49 +42,57 @@ To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonica
 
 This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
 
-## Native HiroGlifx gameplay scripting (Phase 19)
+## Full HiroGlifx gameplay: all six Arcade games (Phase 20)
 
-**Pong is now genuinely written in HiroGlifx** rather than just invoking `arcade_game("pong")`. Its complete gameplay source is [`examples/arcade/pong.scroll`](examples/arcade/pong.scroll): typed state, `: tick(dt) = [ ... ]` game loop, `if condition [ ... ]` branching, arithmetic, physics, computer opponent, collision tests, scoring, winning logic, and `: draw() = [ ... ]` browser Canvas instructions. The host JavaScript interpreter supplies safe arithmetic, inputs and rendering primitives; it does **not** implement Pong's rules. The [Arcade](arcade.html) shows the entire live `.scroll` program.
+**Pong, Snake, Breakout, Star Defense, Chess, and Tic-Tac-Toe now implement their game rules and drawing directly in `.scroll`**, not JavaScript launchers. The browser host uses the shared [game-script interpreter](runtime/scroll-game-runtime.js) for input, mathematics, collections, control flow, and Canvas 2D output. Each selected game displays its *entire executable source* in [HiroGlifx Arcade](arcade.html). Switch to **JavaScript runtime** to inspect the generic interpreter separately.
 
-```scroll
-.Main = ()
-    # player = 260;
-    # ballX = 400;
-    # velocityX = 260;
-    : tick(dt) = [
-        ballX = ballX + velocityX * dt;
-        if ballX > 800 [
-            ballX = 400;
-        ]
-    ]
-    : draw() = [
-        clear("#0b1730");
-        rect(18, player - 50, 15, 100, "#85e1ff");
-    ]
-    break;
-```
+### Complete playable `.scroll` programs
 
-The excerpt above is shortened for readability; the linked file contains the **complete** executable Pong game. The new `runtime/scroll-game-runtime.js` is a bounded, no-eval interpreter for this subset. It does not currently support arbitrary JS, object reflection, classes or unbounded loops. The **other five Arcade games still use JavaScript-backed host engines**; their source panel explicitly says so rather than falsely implying the three-line launcher contains their full game rules. The eventual goal is to port them into this game-script subset and unify it with the main HiroGlifx compiler.
+| Game | Full HiroGlifx source | Mechanics in `.scroll` |
+| --- | --- | --- |
+| Pong | [pong.scroll](examples/arcade/pong.scroll) | Paddle controls, opponent AI, scoring and collisions |
+| Snake | [snake.scroll](examples/arcade/snake.scroll) | Direction, food spawning, growth, self/wall collisions |
+| Breakout | [breakout.scroll](examples/arcade/breakout.scroll) | Paddle, ball, bricks, lives, win/loss |
+| Star Defense | [star-defense.scroll](examples/arcade/star-defense.scroll) | Enemy movement, projectiles, hits, scoring |
+| Chess | [chess.scroll](examples/arcade/chess.scroll) | King safety, legal moves, castling, en passant, promotions, mate, stalemate, undo and automatic draw rules |
+| Tic-Tac-Toe | [tic-tac-toe.scroll](examples/arcade/tic-tac-toe.scroll) | 3×3 grid, turn handling, legal placement and win/draw detection |
 
-## Play six browser arcade games and inspect the HiroGlifx source
-
-Open **[HiroGlifx Arcade](arcade.html)** for Pong, Snake, Breakout, Star Defense (an original Galaga-style shooter), local two-player chess, and Tic-Tac-Toe. All six run from canonical `.scroll` programs via the shared `arcade_game(...)` factory. Each game's visible source viewer loads the actual `examples/arcade/*.scroll` file and links to its JavaScript host engine. Chess supports legal moves, castling, en passant, promotions and end-of-game detection; this first version has **no chess AI**.
-
-**Blockhaven now also has a real source-code viewer:** expand **View Blockhaven's real HiroGlifx source** below the voxel game to copy its `.scroll` file or inspect its engine and renderer. See [Arcade documentation](docs/arcade.md) for controls and current limitations.
+Run locally:
 
 ```bash
 python3 -m http.server 8000 --bind 127.0.0.1
 # http://127.0.0.1:8000/arcade.html
 ```
 
+### Language features added
+
 ```scroll
 .Main = ()
-    $ title = "Pong";
-    & game = arcade_game("pong");
+    & items = array(5, 7, 9);
+    # score = 0;
+    : sumItems() = [
+        let total = 0;
+        for i from 0 to len(items) [
+            total = total + get(items, i);
+        ]
+        return total;
+    ]
+    : tick(dt) = [
+        score = sumItems();
+    ]
+    : draw() = [
+        clear("#0b1730");
+        text("SCORE " + score, 400, 260, 32, "#e6f7ff");
+    ]
     break;
 ```
 
-These are browser games with HiroGlifx entrypoints and trusted JavaScript game adapters—not yet gameplay written entirely inside the `.scroll` language.
+Arrays, indexed operations, nested bounded `for`/`while` loops, custom methods, local variables, `return`, click/key events, and safe math/string/collection functions are now part of the **game-script interpreter**. A per-frame instruction and loop budget prevents unbounded execution. The interpreter does not use `eval` or expose arbitrary JavaScript. This is an expanding canonical-style subset; it has not yet been fully unified with every older HiroGlifx syntax/runtime.
+
+**Chess is local human-vs-human** (no chess AI or network play). These six games remain browser prototypes, with their complete game behavior now authored in HiroGlifx. See [Native game syntax](docs/native-game-scripts.md) and [Arcade documentation](docs/arcade.md).
+
+**Blockhaven's source viewer** continues to show its actual `.scroll` initialization, but the voxel game logic is still in host JavaScript; it has *not* been ported to native `.scroll` game scripts.
+
 
 ## Blockhaven — original 3D voxel sandbox (browser)
 
