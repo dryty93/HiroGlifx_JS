@@ -234,3 +234,19 @@ test("unsafe showcase anchor ids are rejected",()=>{
  assert.throws(()=>runtime.execute('ui application\n.Main = ()\n : render(self) = [\n element section section root;\n attr section id "../bad";\n ]\n break;'),/Unsafe element id/);
  runtime.dispose();
 });
+
+
+test("full 66-class showroom mounts and unmounts every native component in the DOM host",()=>{
+ const dir=makeProject();
+ try{
+  const dom=fakeDOM();
+  const source=resolveSource(dir,page("pages/showcase.scroll"));
+  const ui=new NativeUIRuntime(dom).execute(source);
+  const rendered=new Set(dom.nodes.map(node=>node.dataset.hiroComponent).filter(Boolean));
+  const expected=[...compile(LIB).classes.keys()];
+  assert.deepEqual(expected.filter(name=>!rendered.has(name)),[],"missing DOM component instance");
+  assert.equal(dom.nodes.filter(node=>node.tagName==="PRE").length,66);
+  ui.dispose();
+  assert.equal(dom.mount.children.length,0);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
