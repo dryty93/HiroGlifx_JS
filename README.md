@@ -61,6 +61,20 @@ To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonica
 
 This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
 
+## Skybound Obby — flagship browser experience
+
+**[Play Skybound](skybound.html)** or explore the **[HiroGlifx Showcase](showcase.html)** to discover browser projects. Skybound is an original five-stage single-player obstacle course made with canonical `.Main = ()` HiroGlifx classes and a Babylon.js renderer, and includes a polished UI with a timer, deaths, checkpoint feedback, personal bests, sound cues, touch buttons and restart.
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# open http://127.0.0.1:8000/showcase.html
+# or http://127.0.0.1:8000/skybound.html
+```
+
+Gameplay systems include a moving-platform stage, temporary disappearing platforms, rotating moving lava hazards, a five-stage progression model, and basic buffered/coyote jumps. The game source is `examples/skybound-course.scroll`, and [Obby Builder](obby-playground.html) opens the same course for editing.
+
+**Current scope:** This is a refined browser prototype, not a claim of Roblox-level production polish, multiplayer, account persistence or an advanced physics controller. It still needs real-device usability and frame-rate testing, character animation, gamepad accessibility, full asset/audio pipelines, deterministic replays, and hosted performance verification. See [Skybound Showcase guide](docs/skybound-showcase.md).
+
 ## Build a Roblox-style obstacle course — Browser Obby Builder
 
 The new [Obby Builder](obby-playground.html) demonstrates a single-player Babylon.js tile obstacle game written in the **canonical `.Main = ()` syntax**. It includes platform jumps, hazards, checkpoints, finish detection, and a live course editor. It is an original browser game, not an integration with Roblox.
