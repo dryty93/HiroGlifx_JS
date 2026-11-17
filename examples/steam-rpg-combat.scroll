@@ -35,7 +35,7 @@
         kills = kills + 1;
         if kills >= 7 [
             done = true;
-            message = "All three raiders defeated!";
+            message = "The Rift Guardian has fallen!";
         ]
         return kills;
     ]
