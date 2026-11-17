@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions]
   pull_request:
 jobs:
   node:
@@ -16,6 +16,9 @@ jobs:
           node --check runtime/scroll-runtime.js
           node --check runtime/app-runtime.js
           node --check runtime/data-server.js
+          node --check runtime/auth-server.js
+          node --check runtime/run-auth-server.js
+          node --check runtime/create-user.js
           node --check runtime/run-data-server.js
           node --check runtime/playwright-adapter.js
           node --check runtime/run-server.js
