@@ -89,6 +89,7 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 <script src="./runtime/game-save.js"></script>
 <script src="./runtime/game-audio.js"></script>
 <script src="./runtime/game-fx.js"></script>
+<script src="./runtime/game-chapters.js"></script>
 <script src="./runtime/riftfall-campaign.js"></script>
 <script src="./runtime/riftfall-ui.js"></script>
 <script>
@@ -97,6 +98,7 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 const $=id=>document.getElementById(id);
 let demo=null,started=false,ui=null;
 window.HiroRiftfallContentSnapshot=()=>demo?.campaign?.snapshot()||null;
+window.HiroRiftfallChapterSnapshot=()=>demo?.campaign?.chapters?.snapshot()||null;
 window.HiroRiftfallSnapshot=()=>demo?.ready?demo.snapshot():null;
 function status(message){$("status").textContent=message;}
 function showOverlay(title,description,button){
@@ -106,13 +108,14 @@ function showOverlay(title,description,button){
 async function initialize(){
  $("start").disabled=true;status("Loading Havok and local glTF...");
  try{
-   const [response,contentResponse,levelResponse]=await Promise.all([
+   const [response,contentResponse,levelResponse,chapterResponse]=await Promise.all([
      fetch("./examples/steam-rpg-combat.scroll",{cache:"no-store"}),
      fetch("./examples/riftfall-content.scroll",{cache:"no-store"}),
-     fetch("./examples/riftfall-levels.scroll",{cache:"no-store"})
+     fetch("./examples/riftfall-levels.scroll",{cache:"no-store"}),
+     fetch("./examples/riftfall-chapters.scroll",{cache:"no-store"})
    ]);
-   if(!response.ok||!contentResponse.ok||!levelResponse.ok)throw Error("HiroGlifx combat/content/level source unavailable");
-   const source=await response.text(),contentSource=await contentResponse.text(),levelSource=await levelResponse.text();
+   if(!response.ok||!contentResponse.ok||!levelResponse.ok||!chapterResponse.ok)throw Error("HiroGlifx combat/content/level source unavailable");
+   const source=await response.text(),contentSource=await contentResponse.text(),levelSource=await levelResponse.text(),chapterSource=await chapterResponse.text();
    $("source").textContent=source;
    if(ui){ui.dispose();ui=null;}
    if(demo)demo.dispose();
@@ -126,16 +129,16 @@ async function initialize(){
        $("navmode").textContent=s.navMode==="recast"?"RECAST NAVMESH":"A* GRID";
        $("mode").textContent=s.physics.toUpperCase();$("clip").textContent=s.animation;
        ui?.update(s);
-       if(s.done||s.health<=0){demo.pause();started=false;
-         showOverlay(s.done?"Raiders defeated!":"You were defeated",
+       if((s.done && (!s.campaign?.chapters||s.campaign.chapters.finished))||s.health<=0){demo.pause();started=false;
+         showOverlay(s.done?"The Riftfall campaign is complete!":"You were defeated",
            s.done?"Your HiroGlifx combat logic completed the encounter. Restart to fight again.":"The raiders overwhelmed you. Restart to retry.",
            "↻ Play again");}
      }});
    await demo.initialize();
    const storage=(()=>{try{return localStorage;}catch{return null;}})();
-   new HiroRiftfallCampaign.RiftfallCampaign({demo,source:contentSource,storage,onChange:(_snapshot,e)=>{if(e.type!=="inventory")status(e.message);}});
+   new HiroRiftfallCampaign.RiftfallCampaign({demo,source:contentSource,chapterSource,storage,onChange:(_snapshot,e)=>{if(e.type!=="inventory")status(e.message);}});
    ui=new HiroRiftfallUI.RiftfallUI({stage:document.querySelector(".stage"),
-      toolbar:document.querySelector(".toolbar"),source:$("source"),combatSource:source,contentSource,
+      toolbar:document.querySelector(".toolbar"),source:$("source"),combatSource:source,contentSource,chapterSource,
       getDemo:()=>demo,status});
    $("start").disabled=false;$("start").textContent="▶ Enter the arena";
    status("Ready. "+demo.assetStatus);
@@ -147,7 +150,7 @@ async function initialize(){
 }
 $("start").onclick=async()=>{
  if(!demo?.ready)return;
- if(demo.rules.done||!demo.combat.actor("hero").alive){await initialize();if(!demo?.ready)return;}
+ if((demo.rules.done&&(!demo.campaign?.chapters||demo.campaign.chapters.finished))||!demo.combat.actor("hero").alive){await initialize();if(!demo?.ready)return;}
  demo.start();started=true;$("overlay").hidden=true;$("game").focus();status("Defeat the raiders. "+demo.assetStatus);
 };
 $("attack").onclick=()=>demo?.attack();

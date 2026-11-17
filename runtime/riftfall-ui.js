@@ -4,10 +4,10 @@
 (function(root,factory){const api=factory(root);if(typeof module==="object"&&module.exports)module.exports=api;else root.HiroRiftfallUI=api;})(typeof globalThis!=="undefined"?globalThis:this,function(root){
 "use strict";
 class RiftfallUI{
- constructor({stage,toolbar,source,combatSource,contentSource,getDemo,status}){
+ constructor({stage,toolbar,source,combatSource,contentSource,chapterSource="",getDemo,status}){
    if(!stage||!toolbar||!source||typeof getDemo!=="function")throw Error("Missing Riftfall UI mount");
    this.stage=stage;this.toolbar=toolbar;this.source=source;
-   this.combatSource=combatSource;this.contentSource=contentSource;
+   this.combatSource=combatSource;this.contentSource=contentSource;this.chapterSource=chapterSource;
    this.getDemo=getDemo;this.status=status||(()=>{});
    this.nodes=[];this.open=false;this.abort=new AbortController();
    this.mount();
@@ -28,6 +28,7 @@ class RiftfallUI{
    const controls=[
      ["inventoryButton","🎒 Inventory","inventory"],
      ["questsButton","📜 Quests","quests"],
+     ["chaptersButton","🗺 Chapters","chapters"],
      ["craftButton","⚒ Craft","craft"],
      ["talkButton","💬 Talk","dialogue"],
      ["potionButton","♥ Potion","potion"],
@@ -55,17 +56,20 @@ class RiftfallUI{
    const stats=this.el("div",{className:"rpg-stats"});this.nodes.push(stats);
    this.xp=this.el("div",{className:"chip",id:"xpBadge"},"⭐ 0 XP");
    this.questCount=this.el("div",{className:"chip",id:"questBadge"},"📜 0 QUESTS");
-   stats.append(this.xp,this.questCount);
+   this.chapterBadge=this.el("div",{className:"chip",id:"chapterBadge"},"🗺 Broken Approach");
+   stats.append(this.xp,this.questCount,this.chapterBadge);
    const hud=this.stage.querySelector(".hud");
    if(hud)hud.appendChild(stats);else this.stage.appendChild(stats);
    const tabs=this.el("div",{className:"rpg-source-tabs"});
    const combat=this.el("button",{id:"combatSourceTab",type:"button","aria-pressed":"true"},"Combat .scroll");
    const content=this.el("button",{id:"contentSourceTab",type:"button","aria-pressed":"false"},"Items / quests .scroll");
-   tabs.append(combat,content);
+   const chapters=this.el("button",{id:"chapterSourceTab",type:"button","aria-pressed":"false"},"Chapters .scroll");
+   tabs.append(combat,content,chapters);
    this.source.parentElement.insertBefore(tabs,this.source);
    this.nodes.push(tabs);
-   this.listen(combat,"click",()=>{this.source.textContent=this.combatSource;combat.setAttribute("aria-pressed","true");content.setAttribute("aria-pressed","false");});
-   this.listen(content,"click",()=>{this.source.textContent=this.contentSource;content.setAttribute("aria-pressed","true");combat.setAttribute("aria-pressed","false");});
+   this.listen(combat,"click",()=>{this.source.textContent=this.combatSource;combat.setAttribute("aria-pressed","true");content.setAttribute("aria-pressed","false");chapters.setAttribute("aria-pressed","false");});
+   this.listen(content,"click",()=>{this.source.textContent=this.contentSource;content.setAttribute("aria-pressed","true");combat.setAttribute("aria-pressed","false");chapters.setAttribute("aria-pressed","false");});
+   this.listen(chapters,"click",()=>{this.source.textContent=this.chapterSource;chapters.setAttribute("aria-pressed","true");combat.setAttribute("aria-pressed","false");content.setAttribute("aria-pressed","false");});
    this.listen(root,"keydown",event=>{
      if(["INPUT","TEXTAREA","SELECT"].includes(event.target.tagName))return;
      if(this.open){
@@ -73,7 +77,7 @@ class RiftfallUI{
        event.preventDefault();event.stopImmediatePropagation();return;
      }
      if(event.repeat)return;
-     const actions={KeyI:"inventory",KeyQ:"quests",KeyC:"craft",KeyE:"dialogue",KeyH:"potion",F5:"save",F9:"load"};
+     const actions={KeyI:"inventory",KeyQ:"quests",KeyM:"chapters",KeyC:"craft",KeyE:"dialogue",KeyH:"potion",F5:"save",F9:"load"};
      if(actions[event.code]){
        event.preventDefault();event.stopImmediatePropagation();this.action(actions[event.code]);
      }
@@ -91,7 +95,7 @@ class RiftfallUI{
  hide(){
    if(!this.open)return;
    this.open=false;this.modal.hidden=true;
-   if(this.wasPlaying&&this.demo?.combat.actor("hero").alive&&!this.demo.rules.done)this.demo.start();
+   if(this.wasPlaying&&this.demo?.combat.actor("hero").alive&&(!this.demo.rules.done||!this.campaign?.chapters||!this.campaign.chapters.finished))this.demo.start();
  }
  line(name,description,button,click,disabled=false){
    const div=this.el("div",{className:"rpg-entry"}),info=this.el("div");
@@ -126,6 +130,12 @@ class RiftfallUI{
        button,()=>{if(!c.claim(q.id))this.status("Quest claim blocked by inventory capacity.");this.quests();});
    }
  }
+ chapters(){
+   const c=this.campaign;this.show("Campaign chapters","Story chapters are authored in HiroGlifx. Earlier accomplishments count toward future objectives.");
+   for(const chapter of c.snapshot().chapterDetails){
+     this.line(chapter.title,chapter.description+" · "+chapter.progress+"/"+chapter.target+" · "+chapter.status);
+   }
+ }
  craft(){
    const c=this.campaign;this.show("Rift forge","Use Rift Shards and other materials to craft gear.");
    for(const recipe of c.recipes()){
@@ -151,6 +161,7 @@ class RiftfallUI{
    const c=this.campaign;if(!c)return;
    if(action==="inventory")return this.inventory();
    if(action==="quests")return this.quests();
+   if(action==="chapters")return this.chapters();
    if(action==="craft")return this.craft();
    if(action==="dialogue")return this.dialogue();
    if(action==="potion"){this.status(c.potion()?"Healed using a potion.":"No potion available.");return;}
@@ -162,6 +173,7 @@ class RiftfallUI{
    const c=snapshot?.campaign;if(!c)return;
    this.xp.textContent="⭐ "+c.experience+" XP";
    this.questCount.textContent="📜 "+c.questDetails.filter(q=>q.status==="active"||q.status==="completed").length+" QUESTS";
+   if(this.chapterBadge){const active=c.chapterDetails?.find(x=>x.status==="active");this.chapterBadge.textContent=active?"🗺 "+active.title:"🗺 Campaign complete";}
  }
  dispose(){this.abort.abort();for(const node of this.nodes)node.remove();this.nodes=[];this.modal=null;}
 }

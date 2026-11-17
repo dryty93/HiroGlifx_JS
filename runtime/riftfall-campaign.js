@@ -6,15 +6,18 @@
  const saving=typeof module==="object"&&module.exports?require("./game-save"):root.HiroGameSave;
  const audio=typeof module==="object"&&module.exports?require("./game-audio"):root.HiroGameAudio;
  const effects=typeof module==="object"&&module.exports?require("./game-fx"):root.HiroGameFX;
- const api=factory(root,prog,saving,audio,effects);
+ const chapters=typeof module==="object"&&module.exports?require("./game-chapters"):root.HiroGameChapters;
+ const api=factory(root,prog,saving,audio,effects,chapters);
  if(typeof module==="object"&&module.exports)module.exports=api;else root.HiroRiftfallCampaign=api;
-})(typeof globalThis!=="undefined"?globalThis:this,function(root,prog,saving,audio,effects){
+})(typeof globalThis!=="undefined"?globalThis:this,function(root,prog,saving,audio,effects,chapters){
 "use strict";
 const allowedSlot=/^(auto|quick|slot-[123])$/;
 class RiftfallCampaign{
- constructor({demo,source,storage=null,onChange=()=>{}}){
+ constructor({demo,source,chapterSource=null,storage=null,onChange=()=>{}}){
    if(!demo?.combat||!demo?.scene||typeof source!=="string")throw Error("Campaign requires initialized RPG and HiroGlifx content");
    this.demo=demo;this.content=new prog.GameContent(source).starter();
+   this.chapters=chapterSource?new chapters.ChapterDirector(chapters.buildChapters(chapterSource)):null;
+   this.chapterEvents=new Set();
    this.audio=new audio.GameAudio();this.fx=new effects.CombatFX({BABYLON:demo.B,scene:demo.scene,maxParticles:64});
    this.store=storage?new saving.GameSaveStore(storage):null;
    this.onChange=onChange;this.dialogue=null;this.reachedWatchtower=false;
@@ -39,8 +42,10 @@ class RiftfallCampaign{
      if(event.actor==="hero"){this.audio.play("defeat");return;}
      const index=Number(event.actor.split("-").at(-1))||0;
      const drop=this.content.defeated("raider",index);
+     this.recordChapterEvents();
      this.audio.play("collect");
      this.emit("loot","Raider defeated · collected "+drop);
+     this.autoSave();
    }
  }
  async enableAudio(){
@@ -53,7 +58,7 @@ class RiftfallCampaign{
    const p=this.demo.character?.position;
    if(p&&!this.reachedWatchtower&&p.z< -23&&Math.abs(p.x)<5){
      this.reachedWatchtower=true;
-     this.content.reach("watchtower");this.audio.play("quest");
+     this.content.reach("watchtower");this.recordChapterEvents();this.audio.play("quest");
      this.emit("explore","Discovered the old watchtower");
      this.autoSave();
    }
@@ -83,6 +88,7 @@ class RiftfallCampaign{
  }
  craft(id){
    if(!this.content.craft(id))return false;
+   this.recordChapterEvents();
    this.audio.play("quest");this.emit("craft","Crafted "+this.content.catalog.get(id).label);
    this.autoSave();return true;
  }
@@ -105,6 +111,7 @@ class RiftfallCampaign{
    const current=id||"elder";
    if(index===null)return this.content.dialogue.open(current);
    const next=this.content.talk(current,index);
+   this.recordChapterEvents();
    this.audio.play("collect");this.emit("dialogue","Keeper Nara");this.autoSave();
    return next;
  }
@@ -122,15 +129,56 @@ class RiftfallCampaign{
          progress:e?.progress?.[0]||0,target:q.objectives[0].target,experience:q.experience,rewards:q.rewards};
      }),
      recipes:this.recipes(),experience:this.content.quests.experience,
+     chapters:this.chapters?.snapshot()||null,
+     chapterDetails:this.chapters?.chapters.map((c,i)=>({id:c.id,title:c.title,description:c.description,status:i<this.chapters.index?"completed":i===this.chapters.index?"active":"locked",progress:i===this.chapters.index?this.chapters.progress:i<this.chapters.index?c.objective.target:0,target:c.objective.target}))||[],
      builderItems:this.content.catalog.items.size,nearElder:this.canTalk(),
      watchtowerReached:this.reachedWatchtower,
      latest:this.events.at(-1)||null,muted:this.audio.muted,volume:this.audio.volume,
      equipment:[...this.content.inventory.equipment],health:hero.health
    });
  }
+
+ recordChapterEvents(){
+   if(!this.chapters)return;
+   // Replay the bounded event history after every completion. Earlier combat
+   // counts toward later chapter objectives without double-counting.
+   let changed=true,iterations=0;
+   while(changed&&iterations++<this.chapters.chapters.length+1){
+     changed=false;
+     const c=this.chapters.current;if(!c)break;
+     const key=c.id;
+     for(let i=0;i<this.content.events.length;i++){
+       const event=this.content.events[i];
+       const eventKey=key+":"+i;
+       if(this.chapterEvents.has(eventKey))continue;
+       this.chapterEvents.add(eventKey);
+       if(event.type===c.objective.type&&event.id===c.objective.id){
+         this.chapters.record(event.type,event.id,event.quantity||1);
+       }
+     }
+     if(this.chapters.advance()){
+       changed=true;this.emit("chapter","Chapter cleared: "+c.title);
+     }
+   }
+ }
+ restoreLegacyChapterState(saved){
+   this.chapters.restore({version:1,index:0,progress:0,completed:[],current:this.chapters.chapters[0].id,finished:false});
+   // A Phase 27 save has no chapter history. Reconstruct known objective
+   // milestones conservatively using saved enemy state and quest progress.
+   this.content.events=[];
+   this.chapterEvents.clear();
+   const kills=saved.raiders.filter(r=>!r.alive).length;
+   for(let i=0;i<kills;i++)this.content.events.push({type:"defeat",id:"raider",index:i});
+   if(this.reachedWatchtower)this.content.events.push({type:"reach",id:"watchtower"});
+   if(this.content.quests.entries.get("rift-smith")?.status==="completed"||
+      this.content.quests.entries.get("rift-smith")?.status==="claimed")
+     this.content.events.push({type:"craft",id:"steel-blade"});
+   this.recordChapterEvents();
+ }
  saveData(){
    const demo=this.demo,p=demo.character.position,hero=demo.combat.actor("hero");
    return {position:{x:p.x,y:p.y,z:p.z},health:hero.health,stamina:hero.stamina,
+     ...(this.chapters?{chapters:this.chapters.snapshot(),chapterEvents:[...this.chapterEvents],eventHistory:this.content.events.map(e=>({...e}))}:{}),
      kills:demo.rules.get("kills"),wave:demo.wave,elapsed:demo.rules.get("elapsed"),
      inventory:this.content.inventory.snapshot(),quests:this.content.quests.snapshot(),
      raiders:demo.enemies.map(e=>{
@@ -151,6 +199,12 @@ class RiftfallCampaign{
    const demo=this.demo,hero=demo.combat.actor("hero");
    // Validate the entire saved progression before touching the live world.
    const previous=this.content.serialize();
+   const oldChapters=this.chapters?.snapshot();
+   const oldHistory=[...this.content.events],oldSeen=new Set(this.chapterEvents);
+   if(this.chapters&&saved.chapters){
+     // Validate chapter state in isolation before mutating the live game.
+     new chapters.ChapterDirector(this.chapters.chapters).restore(saved.chapters);
+   }
    this.content.restore({inventory:saved.inventory,quests:saved.quests});
    if(saved.wave>this.demo.wave)this.demo.ensureWave(saved.wave);
    try{
@@ -179,8 +233,18 @@ class RiftfallCampaign{
      const time=demo.rules.state.get("elapsed");
      if(time)demo.rules.state.set("elapsed",{...time,value:saved.elapsed});
      this.applyEquipment();this.reachedWatchtower=this.content.quests.entries.get("explorer")?.progress[0]>=1;
+     if(this.chapters){
+       if(saved.chapters){
+         this.chapters.restore(saved.chapters);
+         this.content.events=(saved.eventHistory||[]).map(e=>({...e}));
+         this.chapterEvents=new Set(saved.chapterEvents||[]);
+         this.recordChapterEvents();
+       }else this.restoreLegacyChapterState(saved);
+     }
    }catch(error){
      this.content.restore(previous);
+     if(oldChapters)this.chapters.restore(oldChapters);
+     this.content.events=oldHistory;this.chapterEvents=oldSeen;
      throw error;
    }
    this.emit("load","Loaded "+slot);return true;

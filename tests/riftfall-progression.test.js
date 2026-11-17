@@ -110,3 +110,22 @@ test("bounded Babylon hit VFX creates and disposes original particles",()=>{
  assert.ok(meshes.every(m=>m.disposed===true));
  fx.dispose();
 });
+
+test("Phase 28 saves chapter progression, validates event history, and preserves old saves",()=>{
+ const map=new Map(),storage={getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};
+ const store=new GameSaveStore(storage);
+ const c=content();
+ const base={position:{x:0,y:1.9,z:8},health:145,stamina:110,kills:1,wave:1,elapsed:0,
+   inventory:c.inventory.snapshot(),quests:c.quests.snapshot(),raiders:[]};
+ store.save("slot-1",base);
+ assert.equal(store.read("slot-1").chapters,undefined,"Older Phase 27 saves remain loadable");
+ const campaign={...base,chapters:{version:1,index:1,progress:0,completed:["approach"],current:"watchtower",finished:false},
+   eventHistory:[{type:"collect",id:"rift-shard",quantity:1},{type:"defeat",id:"raider",index:0}],
+   chapterEvents:["approach:0","approach:1"]};
+ store.save("slot-2",campaign);
+ assert.deepEqual(store.read("slot-2").chapters,campaign.chapters);
+ assert.deepEqual(store.read("slot-2").eventHistory,campaign.eventHistory);
+ assert.throws(()=>store.save("slot-2",{...campaign,eventHistory:[{type:"execute",id:"raider"}]}),/Invalid chapter event history/);
+ assert.throws(()=>store.save("slot-2",{...campaign,chapterEvents:["bad delimiter"]}),/Invalid chapter event ledger/);
+ assert.deepEqual(store.read("slot-2").chapters,campaign.chapters,"Invalid writes cannot overwrite existing slots");
+});

@@ -22,11 +22,11 @@ test("chapter director gates encounters and supports serial progression",()=>{
  assert.equal(d.advance(),true);
  assert.equal(d.record("craft","steel-blade"),true);
  assert.equal(d.advance(),true);
- assert.equal(d.record("defeat","rift-guardian"),true);
+ assert.equal(d.record("defeat","raider",7),true);
  assert.equal(d.advance(),true);
  assert.equal(d.finished,true);
  assert.equal(d.advance(),false);
- assert.equal(d.record("defeat","rift-guardian"),false);
+ assert.equal(d.record("defeat","raider"),false);
  assert.equal(events.at(-1).current,null);
 });
 test("chapter state roundtrips and rejects corrupt restore atomically",()=>{
@@ -53,5 +53,5 @@ test("chapter schema rejects invalid chaining, unsupported event types and dupli
  assert.throws(()=>d.record("defeat","raider",201),/Invalid event amount/);
  assert.throws(()=>buildChapters(source.replace('"defeat","raider",2','"teleport","raider",2')),/Unsupported/);
  assert.throws(()=>buildChapters(source.replace('"watchtower","The Northern Signal"','"approach","The Northern Signal"')),/Duplicate/);
- assert.throws(()=>buildChapters(source.replace('"guardian","The Last Rift"','"guardian","The Last Rift"').replace('"rift-guardian",1,""','"rift-guardian",1,"approach"')),/predecessor|Cyclic/);
+ assert.throws(()=>buildChapters(source.replace('"guardian","The Last Rift"','"guardian","The Last Rift"').replace('"raider",7,""','"raider",7,"approach"')),/predecessor|Cyclic/);
 });
