@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio, feat/phase13-canonical-expressions]
   pull_request:
 jobs:
   node:
@@ -16,6 +16,8 @@ jobs:
           node --check runtime/scroll-runtime.js
           node --check runtime/app-runtime.js
           node --check runtime/expressive-runtime.js
+          node --check runtime/canonical-runtime.js
+          node --check tests/canonical-runtime.test.js
           node --check runtime/creative-scene.js
           node --check runtime/phaser-adapter.js
           node --check runtime/babylon-adapter.js
