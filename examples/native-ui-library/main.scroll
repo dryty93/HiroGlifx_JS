@@ -607,6 +607,7 @@ ui library
         class annualValue "hg-pricing-amount";
         text annualValue "$19";
         element month div panel;
+        hide month annual;
         element monthValue strong month;
         class monthValue "hg-pricing-amount";
         text monthValue "$24";
