@@ -193,7 +193,7 @@ test("UI CLI discovers every installed experience and scaffolds native .scroll r
   const src=fs.readFileSync(file,"utf8");
   assert(src.includes("import native-ui"));
   assert(src.includes("component SplitHero experience page;"));
-  assert.equal(validateProject(dir),12);
+  assert.equal(validateProject(dir),13);
   assert.throws(()=>createUIPage(dir,"SplitHero","my-hero"),/already exists/);
   assert.throws(()=>createUIPage(dir,"NoSuchComponent","missing"),/Unknown UI component/);
   assert.throws(()=>createUIPage(dir,"SplitHero","../outside"),/Invalid UI route/);
