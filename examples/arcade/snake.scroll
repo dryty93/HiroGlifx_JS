@@ -1,0 +1,6 @@
+// HiroGlifx Arcade — snake
+// Replace the game type or customize its engine to make your own edition.
+.Main = ()
+    $ title = "Snake";
+    & game = arcade_game("snake");
+    break;
