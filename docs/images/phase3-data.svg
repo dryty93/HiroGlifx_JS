@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620">
+<rect width="1100" height="620" fill="#0c1220"/>
+<text x="45" y="55" fill="#eef4ff" font-family="Arial,sans-serif" font-size="29" font-weight="bold">HiroGlifx · Phase 3 — Persistent Collections</text>
+<text x="45" y="89" fill="#9eb0ce" font-family="Arial,sans-serif" font-size="16">Code-to-API visual guide · represents committed runtime commands, not a browser screenshot</text>
+<rect x="45" y="120" width="495" height="450" rx="16" fill="#142039" stroke="#344561"/>
+<text x="72" y="163" fill="#89b9ff" font-family="monospace" font-size="18">examples/data.scroll</text>
+<text x="72" y="211" fill="#e3f3ff" font-family="monospace" font-size="17">data.collection notes</text>
+<text x="72" y="252" fill="#e3f3ff" font-family="monospace" font-size="17">data.seed notes</text>
+<text x="84" y="285" fill="#9ff4c0" font-family="monospace" font-size="16">{&quot;title&quot;:&quot;Ship HiroGlifx&quot;}</text>
+<text x="72" y="349" fill="#e3f3ff" font-family="monospace" font-size="17">route GET /health json</text>
+<text x="84" y="381" fill="#9ff4c0" font-family="monospace" font-size="16">{&quot;ok&quot;:true}</text>
+<rect x="72" y="453" width="435" height="81" rx="12" fill="#223754"/>
+<text x="94" y="484" fill="#e2edff" font-family="Arial,sans-serif" font-size="17">Persistent JSON store</text>
+<text x="94" y="512" fill="#9fb7d7" font-family="Arial,sans-serif" font-size="14">Atomic writes · local development</text>
+<path d="M553 343H591" stroke="#60a5fa" stroke-width="4"/><path d="M579 331L594 343 579 355" fill="none" stroke="#60a5fa" stroke-width="4"/>
+<rect x="610" y="120" width="445" height="450" rx="16" fill="#142039" stroke="#344561"/>
+<text x="640" y="163" fill="#89b9ff" font-family="Arial,sans-serif" font-size="19" font-weight="bold">Generated API</text>
+<rect x="640" y="194" width="380" height="73" rx="10" fill="#1e3351"/><text x="658" y="222" fill="#9ff4c0" font-family="monospace" font-size="17">GET /api/notes</text><text x="658" y="249" fill="#c6d5ea" font-family="Arial,sans-serif" font-size="15">List existing notes</text>
+<rect x="640" y="287" width="380" height="73" rx="10" fill="#1e3351"/><text x="658" y="315" fill="#9ff4c0" font-family="monospace" font-size="17">POST /api/notes</text><text x="658" y="342" fill="#c6d5ea" font-family="Arial,sans-serif" font-size="15">Create a new note</text>
+<rect x="640" y="380" width="380" height="73" rx="10" fill="#1e3351"/><text x="658" y="408" fill="#9ff4c0" font-family="monospace" font-size="17">DELETE /api/notes/:id</text><text x="658" y="435" fill="#c6d5ea" font-family="Arial,sans-serif" font-size="15">Remove a note</text>
+<text x="640" y="506" fill="#f9c58c" font-family="Arial,sans-serif" font-size="15">Local-only; authentication follows in Phase 4</text>
+</svg>
