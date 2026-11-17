@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1250" height="700" viewBox="0 0 1250 700">
+<rect width="1250" height="700" fill="#0b1220"/>
+<text x="47" y="56" font-family="Arial" font-size="31" font-weight="bold" fill="#eef6ff">HiroGlifx Phase 14 — Browser Obby Builder</text>
+<text x="47" y="90" font-family="Arial" font-size="16" fill="#9fb9d6">Illustration derived from canonical .scroll code and 3D rendering adapter (not a browser screenshot)</text>
+<rect x="43" y="122" width="505" height="496" rx="16" fill="#172640" stroke="#426083"/>
+<text x="72" y="161" font-family="monospace" font-size="18" fill="#94caff">.Runner = (Actor)</text>
+<text x="88" y="197" font-family="monospace" font-size="17" fill="#a8f2d0"># speed = 8;</text>
+<text x="88" y="231" font-family="monospace" font-size="17" fill="#a8f2d0">: leap = self.jump();</text>
+<text x="72" y="265" font-family="monospace" font-size="17" fill="#dcecff">break;</text>
+<text x="72" y="312" font-family="monospace" font-size="19" fill="#94caff">.Main = ()</text>
+<text x="88" y="348" font-family="monospace" font-size="16" fill="#dcecff">&amp; world = obby_world();</text>
+<text x="88" y="381" font-family="monospace" font-size="16" fill="#a8f2d0">&amp; tile = obby_tile(...);</text>
+<text x="88" y="415" font-family="monospace" font-size="16" fill="#a8f2d0">&amp; hero = obby_player(...);</text>
+<text x="88" y="448" font-family="monospace" font-size="16" fill="#a8f2d0">&amp; runner = bp_create(...);</text>
+<text x="88" y="482" font-family="monospace" font-size="16" fill="#dcecff">@ win = obby_event(...);</text>
+<text x="72" y="517" font-family="monospace" font-size="17" fill="#dcecff">break;</text>
+<rect x="72" y="560" width="449" height="37" rx="8" fill="#254663"/>
+<text x="296" y="586" text-anchor="middle" font-family="Arial" font-size="17" fill="#bfe3ff">Canonical classes + typed events</text>
+<rect x="568" y="122" width="639" height="496" rx="16" fill="#15243b" stroke="#426083"/>
+<text x="596" y="160" font-family="Arial" font-size="19" fill="#94caff">Live Babylon.js 3D obstacle course</text>
+<path d="M605 490L1164 490L1115 385L702 370Z" fill="#0a182b"/>
+<path d="M658 407L742 381L801 418L716 455Z" fill="#60a5fa" stroke="#acd7ff" stroke-width="2"/>
+<path d="M778 352L846 337L894 366L818 384Z" fill="#60a5fa" stroke="#acd7ff" stroke-width="2"/>
+<path d="M886 315L946 308L988 331L925 340Z" fill="#ef4444" stroke="#ffc2c2" stroke-width="2"/>
+<path d="M968 276L1027 272L1054 291L994 299Z" fill="#22c55e" stroke="#c4f8d5" stroke-width="2"/>
+<path d="M1067 242L1116 240L1140 254L1087 259Z" fill="#facc15" stroke="#fff3a1" stroke-width="2"/>
+<rect x="698" y="344" width="28" height="63" rx="4" fill="#c4b5fd" stroke="#f3e8ff" stroke-width="2"/>
+<rect x="702" y="328" width="20" height="23" rx="5" fill="#fde68a"/>
+<text x="637" y="531" fill="#a7c8e8" font-family="Arial" font-size="16">WASD + Space</text>
+<text x="815" y="531" fill="#a7c8e8" font-family="Arial" font-size="16">Checkpoint</text>
+<text x="989" y="531" fill="#a7c8e8" font-family="Arial" font-size="16">Finish line</text>
+<rect x="598" y="555" width="570" height="39" rx="9" fill="#223b56"/>
+<text x="883" y="581" text-anchor="middle" font-family="Arial" font-size="17" fill="#dcecff">Jump • Avoid lava • Respawn • Reach the goal</text>
+<rect x="44" y="640" width="1163" height="36" rx="9" fill="#203a56"/>
+<text x="626" y="664" text-anchor="middle" fill="#d0eaff" font-family="Arial" font-size="16">Browser-only · canonical game objects · blueprint methods · event handles · Babylon.js renderer</text>
+</svg>
