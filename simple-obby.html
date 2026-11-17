@@ -247,6 +247,7 @@ async function build(){
  const world=rt.get("world");
  if(!world?.player||world.tiles.size<3)throw new Error("Your course needs more platforms");
  world.stages=design.stages.map((stage,i)=>({...stage,description:"Your custom stage",color:["#49dfff","#ff82bf","#ffe398","#7ff1c3","#ba9bff"][i]}));
+ world.moveSpeed=design.speed;world.jumpSpeed=design.jump;
  configureStageHUD();
  if($("courseEditor"))$("courseEditor").value=source;
  const policy=new HiroWorldRules.WorldRules(rulesSource,{name:"skybound-gameplay",services:{
