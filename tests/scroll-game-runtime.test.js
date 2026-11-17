@@ -78,3 +78,7 @@ test("native game scripts type-check declared and reassigned values",()=>{
  const bad='.Main = ()\n# x = 2;\n: tick(dt) = [\nx = "not number";\n]\n: draw() = [\nclear("#000000");\n]\nbreak;';
  assert.throws(()=>new ScrollGame(bad).tick(.02),/expects number/);
 });
+test("standard HiroGlifx project checker recognizes complete native game scripts",()=>{
+ const {resolveSource}=require("../runtime/package-manager");
+ assert.equal(resolveSource(process.cwd(),source),source);
+});
