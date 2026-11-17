@@ -99,7 +99,7 @@ button:disabled{opacity:.5}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-
    button.addEventListener("pointercancel",()=>pressed.delete(key));
    button.addEventListener("lostpointercapture",()=>pressed.delete(key));
  });
- fetch("./examples/obby-course.scroll").then(response=>{
+ fetch("./examples/skybound-course.scroll").then(response=>{
    if(!response.ok)throw new Error("Could not load example scroll");
    return response.text();
  }).then(text=>{el("source").value=text;return build();}).catch(error=>status(error.message));
