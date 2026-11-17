@@ -249,3 +249,433 @@ ui library
         set submitted true;
     ]
     break;
+
+
+// =============================================================
+// Experience components — imported as one line of HiroGlifx.
+// Render, visual treatments and interactions all live in .scroll.
+// =============================================================
+
+.StickyNavigation = (Component)
+    $ brand = "NOVA / STUDIO";
+    $ first = "Experiences";
+    $ second = "Showcase";
+    : render(self) = [
+        element shell header root;
+        class shell "hg-sticky-nav";
+        element nav nav shell;
+        class nav "hg-nav hg-wrap";
+        element brand a nav;
+        class brand "hg-brand";
+        attr brand href "/";
+        text brand "{brand}";
+        element links div nav;
+        class links "hg-links";
+        element first a links;
+        attr first href "/experiences";
+        text first "{first}";
+        element second a links;
+        attr second href "/studio";
+        text second "{second}";
+    ]
+    break;
+
+.CinematicHero = (Component)
+    $ eyebrow = "WELCOME TO THE NEXT CHAPTER";
+    $ title = "Make your next idea impossible to ignore.";
+    $ description = "Expressive digital experiences, composed entirely in native HiroGlifx.";
+    $ action = "Explore the collection";
+    $ href = "/experiences";
+    : render(self) = [
+        element hero section root;
+        class hero "hg-cinematic hg-experience";
+        element aurora div hero;
+        class aurora "hg-aurora";
+        motion aurora float;
+        element inner div hero;
+        class inner "hg-cinematic-inner";
+        element eyebrow p inner;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element title h1 inner;
+        class title "hg-display";
+        text title "{title}";
+        element description p inner;
+        class description "hg-lead";
+        text description "{description}";
+        element buttons div inner;
+        class buttons "hg-actions";
+        element action a buttons;
+        class action "hg-button hg-button-primary";
+        attr action href "{href}";
+        text action "{action}";
+    ]
+    break;
+
+.EditorialHero = (CinematicHero)
+    $ eyebrow = "INDEPENDENT BY DESIGN";
+    $ title = "Good ideas deserve extraordinary presentation.";
+    : render(self) = [
+        element hero section root;
+        class hero "hg-cinematic hg-experience";
+        element orb div hero;
+        class orb "hg-aurora";
+        motion orb glow;
+        element inner div hero;
+        class inner "hg-cinematic-inner";
+        element eyebrow p inner;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element title h1 inner;
+        class title "hg-editorial";
+        text title "{title}";
+        element description p inner;
+        class description "hg-lead";
+        text description "{description}";
+        element buttons div inner;
+        class buttons "hg-actions";
+        element action a buttons;
+        class action "hg-button hg-button-primary";
+        attr action href "{href}";
+        text action "{action}";
+    ]
+    break;
+
+.BentoTile = (Component)
+    $ title = "Remarkable details";
+    $ description = "A beautiful card that can be reused in any design.";
+    $ number = "01";
+    : render(self) = [
+        element tile article root;
+        class tile "hg-bento-tile";
+        motion tile hover-rise;
+        element title h3 tile;
+        class title "hg-bento-title";
+        text title "{title}";
+        element description p tile;
+        class description "hg-bento-desc";
+        text description "{description}";
+        element number span tile;
+        class number "hg-bento-number";
+        attr number aria-hidden "true";
+        text number "{number}";
+    ]
+    break;
+
+.BentoWide = (BentoTile)
+    : render(self) = [
+        element tile article root;
+        class tile "hg-bento-tile hg-bento-wide hg-bento-accent";
+        motion tile hover-rise;
+        element title h3 tile;
+        class title "hg-bento-title";
+        text title "{title}";
+        element description p tile;
+        class description "hg-bento-desc";
+        text description "{description}";
+        element number span tile;
+        class number "hg-bento-number";
+        attr number aria-hidden "true";
+        text number "{number}";
+    ]
+    break;
+
+.BentoMint = (BentoTile)
+    : render(self) = [
+        element tile article root;
+        class tile "hg-bento-tile hg-bento-mint";
+        motion tile hover-rise;
+        element title h3 tile;
+        class title "hg-bento-title";
+        text title "{title}";
+        element description p tile;
+        class description "hg-bento-desc";
+        text description "{description}";
+        element number span tile;
+        class number "hg-bento-number";
+        attr number aria-hidden "true";
+        text number "{number}";
+    ]
+    break;
+
+.BentoShowcase = (Component)
+    $ eyebrow = "BUILD WITHOUT LIMITS";
+    $ title = "Everything works together.";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element eyebrow p section;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{title}";
+        motion heading reveal;
+        element grid div section;
+        class grid "hg-bento";
+        component BentoWide wide grid;
+        prop wide title "One system. Every screen.";
+        prop wide description "Compose complete responsive experiences with inherited components and typed props.";
+        prop wide number "01";
+        component BentoTile small grid;
+        prop small title "Built to adapt.";
+        prop small description "Desktop, tablet and mobile all share the same native definitions.";
+        prop small number "02";
+        component BentoMint green grid;
+        prop green title "Motion with meaning.";
+        prop green description "Reveal-on-scroll and elevated interactions are first-class language primitives.";
+        prop green number "03";
+        component BentoWide second grid;
+        prop second title "Write once. Reuse beautifully.";
+        prop second description "Your application is HiroGlifx, not a pile of JavaScript components.";
+        prop second number "04";
+    ]
+    break;
+
+.MarqueeBand = (Component)
+    $ text = "DESIGN. BUILD. INSPIRE.";
+    : render(self) = [
+        element band section root;
+        class band "hg-experience";
+        attr band aria-label "Studio message";
+        element text div band;
+        class text "hg-strip";
+        motion text marquee;
+        element first span text;
+        text first "{text}";
+        element second span text;
+        attr second aria-hidden "true";
+        text second "{text}";
+        element third span text;
+        attr third aria-hidden "true";
+        text third "{text}";
+        element fourth span text;
+        attr fourth aria-hidden "true";
+        text fourth "{text}";
+    ]
+    break;
+
+.RevealStory = (Component)
+    $ eyebrow = "CHAPTER ONE";
+    $ title = "Every pixel has a purpose.";
+    $ description = "A refined editorial layout enters the viewport naturally.";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section hg-reveal-layout";
+        element prose div section;
+        motion prose reveal;
+        element eyebrow p prose;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element title h2 prose;
+        class title "hg-editorial";
+        text title "{title}";
+        element copy p prose;
+        class copy "hg-lead";
+        text copy "{description}";
+        element art div section;
+        class art "hg-orb";
+        attr art role "img";
+        attr art aria-label "Abstract luminous gradient sphere";
+        motion art float;
+    ]
+    break;
+
+.PhotoTile = (Component)
+    $ title = "Visual story";
+    $ description = "Every image has a meaningful description.";
+    $ src = "/assets/studio-placeholder.svg";
+    $ alt = "Abstract gradient artwork";
+    : render(self) = [
+        element tile article root;
+        class tile "hg-bento-tile hg-bento-tall";
+        motion tile hover-rise;
+        element photo img tile;
+        class photo "hg-image";
+        attr photo src "{src}";
+        attr photo alt "{alt}";
+        attr photo loading "lazy";
+        attr photo decoding "async";
+        element caption h3 tile;
+        class caption "hg-bento-title";
+        text caption "{title}";
+    ]
+    break;
+
+.ShowcaseCarousel = (Component)
+    # active = 0;
+    $ heading = "Featured experiences";
+    $ first = "Every project deserves an unforgettable first impression.";
+    $ second = "The details are where your story comes alive.";
+    $ third = "Make every interaction feel effortlessly human.";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element heading h2 section;
+        class heading "hg-title";
+        text heading "{heading}";
+        element carousel section section;
+        class carousel "hg-showcase";
+        attr carousel aria-label "Featured showcase";
+        element track div carousel;
+        class track "hg-track";
+        slide track active;
+        element first article track;
+        class first "hg-slide";
+        element firstLabel p first;
+        class firstLabel "hg-kicker";
+        text firstLabel "01 / 03  FEATURED";
+        element firstTitle h3 first;
+        class firstTitle "hg-title";
+        text firstTitle "{first}";
+        element second article track;
+        class second "hg-slide";
+        element secondLabel p second;
+        class secondLabel "hg-kicker";
+        text secondLabel "02 / 03  DESIGN";
+        element secondTitle h3 second;
+        class secondTitle "hg-title";
+        text secondTitle "{second}";
+        element third article track;
+        class third "hg-slide";
+        element thirdLabel p third;
+        class thirdLabel "hg-kicker";
+        text thirdLabel "03 / 03  CRAFT";
+        element thirdTitle h3 third;
+        class thirdTitle "hg-title";
+        text thirdTitle "{third}";
+        element controls div carousel;
+        class controls "hg-carousel-actions";
+        element count span controls;
+        class count "hg-muted";
+        attr count aria-live "polite";
+        text count "Current slide index: {active} of 0 to 2";
+        element next button controls;
+        class next "hg-button hg-button-primary";
+        attr next type "button";
+        text next "Next experience";
+        on next click next;
+    ]
+    : next(self) = [
+        cycle active 0 2;
+    ]
+    break;
+
+.FAQItem = (Component)
+    $ question = "Can I customize this component?";
+    $ answer = "Yes. Extend it, override it, or change its typed properties.";
+    ? open = false;
+    : render(self) = [
+        element item section root;
+        class item "hg-faq";
+        element toggle button item;
+        class toggle "hg-faq-toggle";
+        attr toggle type "button";
+        attr toggle aria-expanded "{open}";
+        text toggle "{question}";
+        on toggle click toggleOpen;
+        element answer p item;
+        class answer "hg-faq-answer";
+        text answer "{answer}";
+        show answer open;
+    ]
+    : toggleOpen(self) = [
+        toggle open;
+    ]
+    break;
+
+.PricingPanel = (Component)
+    $ title = "Studio";
+    $ description = "An entire design system, ready to compose.";
+    ? annual = false;
+    : render(self) = [
+        element panel section root;
+        class panel "hg-pricing";
+        motion panel reveal;
+        element label p panel;
+        class label "hg-kicker";
+        text label "{title}";
+        element headline h2 panel;
+        class headline "hg-title";
+        text headline "Beautiful UI with fewer lines.";
+        element description p panel;
+        class description "hg-muted";
+        text description "{description}";
+        element monthly div panel;
+        show monthly annual;
+        element annualValue strong monthly;
+        class annualValue "hg-pricing-amount";
+        text annualValue "$19";
+        element month div panel;
+        element monthValue strong month;
+        class monthValue "hg-pricing-amount";
+        text monthValue "$24";
+        element controls div panel;
+        class controls "hg-actions";
+        element toggle button controls;
+        class toggle "hg-button hg-button-primary";
+        attr toggle type "button";
+        attr toggle aria-pressed "{annual}";
+        text toggle "Switch monthly / yearly";
+        on toggle click changeCycle;
+    ]
+    : changeCycle(self) = [
+        toggle annual;
+    ]
+    break;
+
+.TestimonialQuote = (Component)
+    $ quote = "The most enjoyable way I have ever built an interface.";
+    $ person = "A HiroGlifx developer";
+    : render(self) = [
+        element quote figure root;
+        class quote "hg-card";
+        motion quote reveal;
+        element content blockquote quote;
+        class content "hg-testimonial";
+        text content "{quote}";
+        element credit figcaption quote;
+        class credit "hg-muted";
+        text credit "{person}";
+    ]
+    break;
+
+.KineticCTA = (Component)
+    $ eyebrow = "YOUR NEXT IDEA STARTS HERE";
+    $ title = "Build something worth remembering.";
+    $ action = "Launch the studio";
+    $ href = "/studio";
+    : render(self) = [
+        element section section root;
+        class section "hg-wrap hg-section";
+        element banner div section;
+        class banner "hg-cta-band";
+        motion banner spotlight;
+        element eyebrow p banner;
+        class eyebrow "hg-kicker";
+        text eyebrow "{eyebrow}";
+        element title h2 banner;
+        class title "hg-title";
+        text title "{title}";
+        element link a banner;
+        class link "hg-button hg-button-primary";
+        attr link href "{href}";
+        text link "{action}";
+    ]
+    break;
+
+.FloatingDock = (Component)
+    : render(self) = [
+        element dock nav root;
+        class dock "hg-actions";
+        attr dock aria-label "Quick links";
+        element first a dock;
+        class first "hg-button";
+        attr first href "/";
+        text first "Home";
+        element second a dock;
+        class second "hg-button hg-button-primary";
+        attr second href "/experiences";
+        text second "Experiences";
+    ]
+    break;
