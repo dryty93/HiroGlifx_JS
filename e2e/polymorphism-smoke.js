@@ -23,7 +23,7 @@ async function main(){
    await page.waitForFunction(()=>window.HiroPolySnapshot?.()?.roster===4,null,{timeout:30000});
    let state=await page.evaluate(()=>window.HiroPolySnapshot());
    assert.deepEqual(state.types,["Scout","Brute","Medic","Boss"]);
-   assert.equal(state.classCount,5);
+   assert.equal(state.classCount,6);
    await page.locator("#libraryTab").click();
    await page.waitForFunction(()=>document.querySelector("#code")?.textContent.includes(".Brute = (Enemy)"));
    await page.screenshot({path:path.join(artifacts,"polymorphism-library-desktop.png"),fullPage:true});
