@@ -61,6 +61,26 @@ To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonica
 
 This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
 
+## Play six browser arcade games and inspect the HiroGlifx source
+
+Open **[HiroGlifx Arcade](arcade.html)** for Pong, Snake, Breakout, Star Defense (an original Galaga-style shooter), local two-player chess, and Tic-Tac-Toe. All six run from canonical `.scroll` programs via the shared `arcade_game(...)` factory. Each game's visible source viewer loads the actual `examples/arcade/*.scroll` file and links to its JavaScript host engine. Chess supports legal moves, castling, en passant, promotions and end-of-game detection; this first version has **no chess AI**.
+
+**Blockhaven now also has a real source-code viewer:** expand **View Blockhaven's real HiroGlifx source** below the voxel game to copy its `.scroll` file or inspect its engine and renderer. See [Arcade documentation](docs/arcade.md) for controls and current limitations.
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# http://127.0.0.1:8000/arcade.html
+```
+
+```scroll
+.Main = ()
+    $ title = "Pong";
+    & game = arcade_game("pong");
+    break;
+```
+
+These are browser games with HiroGlifx entrypoints and trusted JavaScript game adapters—not yet gameplay written entirely inside the `.scroll` language.
+
 ## Blockhaven — original 3D voxel sandbox (browser)
 
 **[Play Blockhaven](blockhaven.html)** to explore a finite, procedurally generated world, mine and place blocks, switch materials and save the world in your browser. It uses Babylon.js for first-person WebGL rendering and canonical HiroGlifx variables to create the world.
