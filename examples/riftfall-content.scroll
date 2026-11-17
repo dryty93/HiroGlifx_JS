@@ -28,7 +28,7 @@
 
         // Quest(id,title,description,type,targetId,targetCount,prerequisite,xp,rewardId,rewardQty)
         push(quests,array("first-blood","Clear the approach","Defeat two Rift raiders.","defeat","raider",2,"",90,"healing-potion",2));
-        push(quests,array("rift-guardian","Rift Guardian","Defeat all seven guardians and recover the Sunstone.","defeat","raider",3,"first-blood",220,"sunstone",1));
+        push(quests,array("rift-guardian","Rift Guardian","Defeat all seven guardians and recover the Sunstone.","defeat","raider",7,"first-blood",220,"sunstone",1));
         push(quests,array("rift-smith","Rift Smith","Craft your own steel blade.","craft","steel-blade",1,"",150,"leather-armor",1));
         push(quests,array("explorer","The old watchtower","Reach the northern watchtower.","reach","watchtower",1,"",65,"healing-herb",2));
 
