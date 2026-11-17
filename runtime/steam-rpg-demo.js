@@ -221,7 +221,7 @@ class RPGDemo{
    this.character.speed=this.baseMovementSpeed*(this.combat.actor("hero").status.get("evade")?.ends>this.combat.elapsed?1.65:1);
    this.character.tick(dt);
    const pos=this.character.position,hero=this.combat.actor("hero");
-   this.level?.updateDetails(pos);
+   this.level?.updateDetails(pos,dt);
    this.level?.updatePhysics(pos);
    hero.x=pos.x;hero.z=pos.z;
    const moving=Math.hypot(sideways,forward);
