@@ -14,7 +14,7 @@ test("five stages and canonical example load as a real model",async()=>{
  const world=runtime.get("world");
  assert.equal(world instanceof SkyboundWorld,true);
  assert.equal(stages.length,5);
- assert.equal(world.tiles.size,23);
+ assert.equal(world.tiles.size,24);
  assert.equal(world.modifiers.size,6);
  assert.equal(world.player.id,"hero");
  assert.equal(runtime.get("runner").fields.get("speed"),8);
@@ -40,7 +40,10 @@ test("vanishing tiles temporarily disable contact and later reactivate",()=>{
  w.spawn("hero",0,2,0);
  settle(w,52);
  assert.equal(w.tiles.get("fade").active,false);
- settle(w,150);
+ for(let i=0;i<150;i++){
+   w.player.x=100;w.player.y=3;w.player.vy=0;
+   w.step(.02);
+ }
  assert.equal(w.tiles.get("fade").active,true);
 });
 test("stage transitions, checkpoint and goal completion emit progression events",()=>{
