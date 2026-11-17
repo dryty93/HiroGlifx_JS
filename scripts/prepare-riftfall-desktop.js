@@ -17,7 +17,8 @@ const requiredProjectFiles=[
  "runtime/game-ai.js","runtime/game-navmesh.js","runtime/game-region-stream.js",
  "runtime/riftfall-world.js","runtime/steam-rpg-demo.js","runtime/game-progression.js",
  "runtime/game-content.js","runtime/game-save.js","runtime/game-audio.js",
- "runtime/game-fx.js","runtime/game-chapters.js","runtime/riftfall-campaign.js",
+ "runtime/game-fx.js","runtime/game-chapters.js","runtime/game-physics-stream.js",
+ "runtime/game-performance.js","runtime/riftfall-campaign.js",
  "runtime/riftfall-ui.js"
 ];
 const vendorFiles=[...Object.values(external),"vendor/HavokPhysics.wasm"];
