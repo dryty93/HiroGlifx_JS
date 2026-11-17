@@ -80,3 +80,27 @@ test("extensions may add namespaced factories but no arbitrary method execution"
  assert.equal(rt.get("answer").value,42);
  assert.throws(()=>rt.register("eval",()=>{}),/namespaced/);
 });
+
+test("dev server and existing project check accept canonical .Main pages",async()=>{
+ const fs=require("node:fs"),os=require("node:os"),path=require("node:path");
+ const {makeProject,validateProject}=require("../hiro");
+ const {serveProject}=require("../runtime/dev-server");
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-canonical-"));
+ const project=path.join(temp,"app");
+ makeProject(project);
+ fs.writeFileSync(path.join(project,"app.scroll"),'.Main = ()\n# speed = 5;\n& hero = box("hero", 50, 50, "blue");\nbounce(hero, 600);\nbreak;');
+ let running;
+ try{
+   assert.equal(validateProject(project),2);
+   running=await serveProject(project,0,{watch:false});
+   const origin="http://127.0.0.1:"+running.server.address().port;
+   const shell=await (await fetch(origin+"/")).text();
+   assert.match(shell,/canonical-runtime\.js/);
+   const response=await fetch(origin+"/__hiro/page?path=/");
+   assert.equal(response.status,200);
+   assert.match(await response.text(),/# speed = 5;/);
+ }finally{
+   if(running)await running.close();
+   fs.rmSync(temp,{recursive:true,force:true});
+ }
+});
