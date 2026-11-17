@@ -78,7 +78,7 @@ test("Phase 25: armor, range, stamina, cooldown, weapon and status effects",()=>
  const events=w.events.map(e=>e.type);assert.ok(events.includes("defeat"));
  const other=w.create("archer",{team:"enemies",x:40,z:40});
  assert.equal(w.strike("hero","archer",{}).reason,"out-of-range");
- w.status("hero","poison",{duration:2,power:3});w.tick(.5);
+ w.status("hero","poison",{duration:2,power:3});for(let i=0;i<10;i++)w.tick(.05);
  assert.ok(hero.health<100);
  assert.throws(()=>w.equip("hero","unknown",{id:"weapon"}),/Invalid equipment/);
 });
