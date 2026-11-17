@@ -1,0 +1,31 @@
+ui application
+import native-ui
+
+// Each section is an imported native component. No HTML or JS here.
+.Main = ()
+    : render(self) = [
+        element page main root;
+        component StickyNavigation nav page;
+        component CinematicHero hero page;
+        prop hero eyebrow "HIROGLIFX / EXPERIENCES";
+        prop hero title "The web should make you feel something.";
+        prop hero description "Cinematic visuals. Effortless interactions. One expressive language.";
+        prop hero action "View the studio";
+        prop hero href "/studio";
+        component MarqueeBand statement page;
+        prop statement text "DESIGN IS AN EXPERIENCE.";
+        component BentoShowcase bento page;
+        prop bento eyebrow "IMAGINATION, MEET ENGINEERING";
+        prop bento title "Beyond the ordinary building blocks.";
+        component RevealStory story page;
+        prop story eyebrow "SCROLL, DISCOVER, EXPERIENCE";
+        prop story title "Make the little things extraordinary.";
+        prop story description "Motion and narrative are authored as native HiroGlifx components, not hidden in a JavaScript framework.";
+        component ShowcaseCarousel carousel page;
+        prop carousel heading "The power of a single import.";
+        component KineticCTA cta page;
+        prop cta title "Your vision. Our language.";
+        prop cta action "Open the studio";
+        prop cta href "/studio";
+    ]
+    break;
