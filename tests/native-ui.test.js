@@ -107,6 +107,7 @@ test("motion reveals and bounded slide state work with the browser abstraction",
  assert.equal(activeTrack().style["--hg-slide"],"0");
  const button=dom.nodes.filter(x=>x.id==="hg-1-button").at(-1);
  button.listeners.click();assert.equal(activeTrack().style["--hg-slide"],"1");
+ assert.equal(dom.nodes.filter(x=>x.id==="hg-1-panel").at(-1).classList.contains("hg-in-view"),true,"reveal stays visible after state change");
  const second=dom.nodes.filter(x=>x.id==="hg-1-button").at(-1);second.listeners.click();
  const third=dom.nodes.filter(x=>x.id==="hg-1-button").at(-1);third.listeners.click();
  assert.equal(activeTrack().style["--hg-slide"],"0");
