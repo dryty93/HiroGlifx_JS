@@ -1,0 +1,6 @@
+{
+  "name": "native-ui",
+  "version": "1.0.0",
+  "entry": "main.scroll",
+  "description": "Native polymorphic HiroGlifx browser components"
+}
