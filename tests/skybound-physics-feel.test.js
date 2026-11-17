@@ -41,7 +41,7 @@ test("coyote jump works shortly after leaving ledge",()=>{
 test("early jump buffers until the character lands",()=>{
  const w=new SkyboundWorld();
  w.tile("ground",0,0,0,7,"solid",1);w.spawn("hero",0,2,0);
- w.player.y=1.9;w.player.vy=-3;w.player.grounded=false;
+ w.player.y=1.15;w.player.vy=-3;w.player.grounded=false;
  assert.equal(w.jump(),false);
  for(let i=0;i<20;i++)w.step(1/120);
  assert.ok(w.telemetry.jumpCount>=1);
