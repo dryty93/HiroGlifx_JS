@@ -30,6 +30,7 @@ game "Soda Splash"
 theme soda
 speed 7
 jump 10
+sound bubbles
 player at 0 2 0
 
 stage 1 "BUBBLE RUN"
@@ -51,6 +52,7 @@ The compiler recognizes:
 | `game "Title"` | Name your game |
 | `theme sky/soda/candy/neon/ice` | Choose a predefined world palette |
 | `speed 7` and `jump 10` | Tune player control and jumps |
+| `sound bubbles/glass/arcade/soft/off` | Choose an original procedural feedback sound preset |
 | `player at X Y Z` | Set the starting location |
 | `stage 1 "Title"` | Start a course stage (1–5 consecutive stages) |
 | `platform ID at X Y Z size S` | Solid walkable surface |
