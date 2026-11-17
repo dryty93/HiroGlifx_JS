@@ -65,7 +65,7 @@
      const down=new this.B.Vector3(0,-1,0);
      const clamped=Math.min(this.maxDelta,dt),support=this.controller.checkSupport(clamped,down);
      this.grounded=support?.supportedState===2;
-     this.coyote=this.grounded?.1:Math.max(0,this.coyote-clamped);
+     this.coyote=this.grounded ? .1 : Math.max(0,this.coyote-clamped);
      this.jumpBuffer=Math.max(0,this.jumpBuffer-clamped);
      if(this.jumpBuffer>0&&(this.grounded||this.coyote>0)){
        this.vertical=this.jumpStrength;this.jumpBuffer=0;this.coyote=0;this.grounded=false;
