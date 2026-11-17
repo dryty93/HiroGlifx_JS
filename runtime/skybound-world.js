@@ -40,6 +40,7 @@
      this._motionX=0;this._motionZ=0;
      this.groundAcceleration=28;this.airAcceleration=16;
      this.groundFriction=33;this.airFriction=7;
+     this.motionRules=null;
    }
    tile(id,x,y,z,size=3,kind="solid",stage=1){
      const tile=super.tile(id,x,y,z,size,kind);
@@ -113,14 +114,32 @@
        if(mod.type==="moving"||mod.type==="spinner"){
          oldPositions.set(id,{x:tile.x,z:tile.z});
          const phase=this.motionTime*Math.PI*2/mod.period;
-         if(mod.type==="moving")tile[mod.axis]=mod.origin+Math.sin(phase)*mod.range;
-         else{
-           tile.x=mod.centerX+Math.sin(phase)*mod.range;
-           tile.z=mod.centerZ+Math.cos(phase)*mod.range;
+         if(mod.type==="moving"){
+           const offset=this.motionRules?.movingOffset?
+             this.motionRules.movingOffset(this.motionTime,mod.range,mod.period):
+             Math.sin(phase)*mod.range;
+           tile[mod.axis]=mod.origin+offset;
+         }else{
+           const xOffset=this.motionRules?.spinnerX?
+             this.motionRules.spinnerX(this.motionTime,mod.range,mod.period):
+             Math.sin(phase)*mod.range;
+           const zOffset=this.motionRules?.spinnerZ?
+             this.motionRules.spinnerZ(this.motionTime,mod.range,mod.period):
+             Math.cos(phase)*mod.range;
+           tile.x=mod.centerX+xOffset;
+           tile.z=mod.centerZ+zOffset;
          }
        }else if(mod.type==="vanishing"){
-         if(mod.started!==null&&this.motionTime-mod.started>=mod.delay){
-           tile.active=false;mod.started=null;mod.inactiveUntil=this.motionTime+2.3;
+         const vanish=mod.started!==null&&(
+           this.motionRules?.shouldVanish?
+             this.motionRules.shouldVanish(this.motionTime,mod.started,mod.delay):
+             this.motionTime-mod.started>=mod.delay
+         );
+         if(vanish){
+           tile.active=false;mod.started=null;
+           const delay=this.motionRules?.respawnDelay?this.motionRules.respawnDelay():2.3;
+           if(!Number.isFinite(delay)||delay<.2||delay>10)throw new Error("Invalid platform respawn delay");
+           mod.inactiveUntil=this.motionTime+delay;
          }
          if(!tile.active&&this.motionTime>=mod.inactiveUntil)tile.active=true;
        }
