@@ -19,7 +19,7 @@ async function main(){
    const page=await browser.newPage({viewport:{width,height:900}});
    const errors=[];page.on("pageerror",e=>errors.push(e.message));
    for(const [route,title] of [["/","Interfaces that feel"],["/dashboard","Your command center"],["/form","Join the next generation"]]){
-    await page.goto(base+route,{waitUntil:"networkidle"});
+    await page.goto(base+route,{waitUntil:"domcontentloaded"});
     await page.getByText(title,{exact:false}).waitFor();
     assert.equal(await page.locator("h1").count(),1);
     assert.equal(await page.locator("body").evaluate(el=>el.scrollWidth<=innerWidth+2),true,"horizontal overflow");
