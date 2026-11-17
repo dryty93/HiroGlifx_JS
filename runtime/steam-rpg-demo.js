@@ -12,7 +12,7 @@ class RPGDemo{
    this.rules=new root.HiroWorldRules.WorldRules(source,{name:"rpg-combat"});
    this.combat=new root.HiroCombat.CombatWorld();
    this.keys=new Set();this.enemies=[];this.last=0;this.disposed=false;this.attackFlash=0;this.combo=0;
-   this.snapshots=[];this.animationState="idle";this.ready=false;this.assetStatus="Loading glTF...";this.dynamicCrates=[];
+   this.campaign=null;this.hitReactions=new Map();this.snapshots=[];this.animationState="idle";this.ready=false;this.assetStatus="Loading glTF...";this.dynamicCrates=[];
  }
  async initialize(){
    const B=this.B;
@@ -101,7 +101,10 @@ class RPGDemo{
    }
    this.combat.onEvent(e=>{
      if(e.type==="defeat"&&e.actor!=="hero"){this.rules.run("afterEnemyDefeated");this.onEvent("Defeated "+e.actor);}
-     if(e.type==="hit")this.onEvent(e.attacker+" hit "+e.target+" ("+e.damage+")");
+     if(e.type==="hit"){
+       this.hitReactions.set(e.target,.22);
+       this.onEvent(e.attacker+" hit "+e.target+" ("+e.damage+")");
+     }
    });
    this.ready=true;
    this.engine.runRenderLoop(()=>{
@@ -138,9 +141,12 @@ class RPGDemo{
    }});
  }
  press(code,down){if(down)this.keys.add(code);else this.keys.delete(code);}
- start(){if(!this.ready)throw Error("RPG scene not initialized");this.playing=true;this.last=0;}
+ start(){if(!this.ready)throw Error("RPG scene not initialized");this.playing=true;this.last=0;
+   this.campaign?.enableAudio().catch(()=>{});
+ }
  pause(){this.playing=false;this.last=0;this.keys.clear();}
  attack(){
+   this.campaign?.attackCue();
    if(!this.ready||!this.playing||!this.combat.actor("hero").alive)return false;
    const hero=this.combat.actor("hero");
    const candidates=this.enemies.filter(e=>this.combat.actor(e.id).alive)
@@ -154,6 +160,8 @@ class RPGDemo{
  }
  tick(dt){
    this.rules.tick(dt);this.combat.tick(dt);
+   this.campaign?.tick(dt);
+   for(const [id,remaining] of this.hitReactions){if(remaining<=dt)this.hitReactions.delete(id);else this.hitReactions.set(id,remaining-dt);}
    const forward=(this.keys.has("KeyW")||this.keys.has("ArrowUp")?1:0)-
       (this.keys.has("KeyS")||this.keys.has("ArrowDown")?1:0);
    const sideways=(this.keys.has("KeyD")||this.keys.has("ArrowRight")?1:0)-
@@ -187,6 +195,9 @@ class RPGDemo{
    for(const e of this.enemies){
      const a=this.combat.actor(e.id);e.mesh.position.set(a.x,.8,a.z);
      e.mesh.setEnabled?.(a.alive);
+     const impacted=this.hitReactions.get(e.id)||0;
+     if(e.mesh.scaling){const pulse=impacted>0?1+.11*Math.sin((.22-impacted)*44):1;e.mesh.scaling.setAll?.(pulse);}
+     if(e.mesh.rotation)e.mesh.rotation.z=impacted>0?.11*Math.sin((.22-impacted)*24):0;
    }
    const desired={x:pos.x+9,y:pos.y+7,z:pos.z+10};
    const actual=root.HiroPhysics.cameraOcclusion({scene:this.scene,BABYLON:this.B,
@@ -202,12 +213,13 @@ class RPGDemo{
      health:Math.ceil(hero.health),stamina:Math.ceil(hero.stamina),enemies:this.enemies.filter(e=>this.combat.actor(e.id).alive).length,
      raiders:this.enemies.map(e=>({id:e.id,x:this.combat.actor(e.id).x,z:this.combat.actor(e.id).z,
        repaths:e.agent.repaths,alive:this.combat.actor(e.id).alive})),
-     kills:this.rules.get("kills"),done:this.rules.done,x:hero.x,z:hero.z});
+     kills:this.rules.get("kills"),done:this.rules.done,x:hero.x,z:hero.z,
+     campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
-   this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
+   this.campaign?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
 return {RPGDemo};

@@ -36,7 +36,7 @@ pre{white-space:pre-wrap;overflow:auto;max-height:450px;background:#07162a;color
 footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 @media(max-width:650px){canvas{aspect-ratio:1/1.05}.shell{padding:14px 12px 28px}.hud{inset:8px 8px auto}.chip{font-size:10px;padding:6px 9px}.keyboard{display:none}.touch{display:flex}}
-</style></head><body><div class="shell">
+</style><link rel="stylesheet" href="./riftfall-ui.css"></head><body><div class="shell">
 <nav><a class="logo" href="./showcase.html"><b>✦</b> HIROGLIFX <span style="font-size:11px;color:#a6c7ff;letter-spacing:.12em">RIFTFALL</span></a>
 <div><a href="./showcase.html">Project showcase</a><a href="./polymorphism.html">Polymorphism</a><a href="https://github.com/dryty93/HiroGlifx_JS">Source</a></div></nav>
 <header><div class="eyebrow">PHASES 23–26 · ACTION RPG VERTICAL SLICE</div><h1>RIFT<span>FALL</span></h1>
@@ -77,11 +77,19 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 <script src="./runtime/game-combat.js"></script>
 <script src="./runtime/game-ai.js"></script>
 <script src="./runtime/steam-rpg-demo.js"></script>
+<script src="./runtime/game-progression.js"></script>
+<script src="./runtime/game-content.js"></script>
+<script src="./runtime/game-save.js"></script>
+<script src="./runtime/game-audio.js"></script>
+<script src="./runtime/game-fx.js"></script>
+<script src="./runtime/riftfall-campaign.js"></script>
+<script src="./runtime/riftfall-ui.js"></script>
 <script>
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
-let demo=null,started=false;
+let demo=null,started=false,ui=null;
+window.HiroRiftfallContentSnapshot=()=>demo?.campaign?.snapshot()||null;
 window.HiroRiftfallSnapshot=()=>demo?.ready?demo.snapshot():null;
 function status(message){$("status").textContent=message;}
 function showOverlay(title,description,button){
@@ -91,21 +99,33 @@ function showOverlay(title,description,button){
 async function initialize(){
  $("start").disabled=true;status("Loading Havok and local glTF...");
  try{
-   const response=await fetch("./examples/steam-rpg-combat.scroll",{cache:"no-store"});
-   if(!response.ok)throw Error("HiroGlifx source not available");
-   const source=await response.text();$("source").textContent=source;
+   const [response,contentResponse]=await Promise.all([
+     fetch("./examples/steam-rpg-combat.scroll",{cache:"no-store"}),
+     fetch("./examples/riftfall-content.scroll",{cache:"no-store"})
+   ]);
+   if(!response.ok||!contentResponse.ok)throw Error("HiroGlifx combat/content source unavailable");
+   const source=await response.text(),contentSource=await contentResponse.text();
+   $("source").textContent=source;
+   if(ui){ui.dispose();ui=null;}
    if(demo)demo.dispose();
    demo=new HiroRPGDemo.RPGDemo({canvas:$("game"),BABYLON:window.BABYLON,HavokPhysics:window.HavokPhysics,source,
      onEvent:message=>status(message),
      onUpdate:s=>{
        $("health").textContent=s.health;$("stamina").textContent=s.stamina;
        $("enemies").textContent=s.enemies;$("mode").textContent=s.physics.toUpperCase();$("clip").textContent=s.animation;
+       ui?.update(s);
        if(s.done||s.health<=0){demo.pause();started=false;
          showOverlay(s.done?"Raiders defeated!":"You were defeated",
            s.done?"Your HiroGlifx combat logic completed the encounter. Restart to fight again.":"The raiders overwhelmed you. Restart to retry.",
            "↻ Play again");}
      }});
-   await demo.initialize();$("start").disabled=false;$("start").textContent="▶ Enter the arena";
+   await demo.initialize();
+   const storage=(()=>{try{return localStorage;}catch{return null;}})();
+   new HiroRiftfallCampaign.RiftfallCampaign({demo,source:contentSource,storage,onChange:(_snapshot,e)=>{if(e.type!=="inventory")status(e.message);}});
+   ui=new HiroRiftfallUI.RiftfallUI({stage:document.querySelector(".stage"),
+      toolbar:document.querySelector(".toolbar"),source:$("source"),combatSource:source,contentSource,
+      getDemo:()=>demo,status});
+   $("start").disabled=false;$("start").textContent="▶ Enter the arena";
    status("Ready. "+demo.assetStatus);
  }catch(error){
    status("Initialization failed: "+error.message);

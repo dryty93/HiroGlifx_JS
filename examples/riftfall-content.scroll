@@ -1,0 +1,50 @@
+// Riftfall — complete item, crafting, quest and dialogue definitions in HiroGlifx.
+// The engine parses these as data; game rules and rewards are not hard-coded in UI JS.
+.Main = ()
+    & items = array();
+    & recipes = array();
+    & quests = array();
+    & dialogue = array();
+    # experience = 0;
+    ? done = false;
+    $ message = "Collect, craft and finish the rift quests.";
+
+    : init() = [
+        // Item(id,kind,label,maxStack,weight,weaponDamage,armorDefense,heal)
+        push(items,array("training-sword","weapon","Traveler's Sword",1,3,7,0,0));
+        push(items,array("steel-blade","weapon","Riftsteel Blade",1,4,18,0,0));
+        push(items,array("leather-armor","armor","Leather Armor",1,6,0,15,0));
+        push(items,array("guardian-armor","armor","Guardian Mail",1,11,0,35,0));
+        push(items,array("healing-potion","consumable","Healing Potion",20,0.6,0,0,45));
+        push(items,array("wood","material","Timber",30,0.8,0,0,0));
+        push(items,array("rift-shard","material","Rift Shard",40,0.4,0,0,0));
+        push(items,array("healing-herb","material","Healing Herb",40,0.1,0,0,0));
+        push(items,array("sunstone","quest","Sunstone Relic",1,0.2,0,0,0));
+
+        // Recipe(output,quantity, array(ingredientId,qty),...)
+        push(recipes,array("steel-blade",1,array("rift-shard",2),array("wood",1)));
+        push(recipes,array("healing-potion",2,array("healing-herb",2),array("rift-shard",1)));
+        push(recipes,array("guardian-armor",1,array("rift-shard",4),array("wood",2)));
+
+        // Quest(id,title,description,type,targetId,targetCount,prerequisite,xp,rewardId,rewardQty)
+        push(quests,array("first-blood","Clear the approach","Defeat two Rift raiders.","defeat","raider",2,"",90,"healing-potion",2));
+        push(quests,array("rift-guardian","Rift Guardian","Defeat all three raiders and recover the Sunstone.","defeat","raider",3,"first-blood",220,"sunstone",1));
+        push(quests,array("rift-smith","Rift Smith","Craft your own steel blade.","craft","steel-blade",1,"",150,"leather-armor",1));
+        push(quests,array("explorer","The old watchtower","Reach the northern watchtower.","reach","watchtower",1,"",65,"healing-herb",2));
+
+        // Dialogue(id,speaker,text,choices); Choice(label,nextId,questToAccept)
+        push(dialogue,array("elder","Keeper Nara","The rift is growing. Can you keep the raiders from our gate?",array("I will stop them.","supply","first-blood"),array("Where is the forge?","forge","rift-smith"),array("I'll explore first.","explore","explorer")));
+        push(dialogue,array("supply","Keeper Nara","You can find Rift Shards on defeated enemies. Bring them to the forge."));
+        push(dialogue,array("forge","Keeper Nara","Craft a Riftsteel Blade using two shards and one timber."));
+        push(dialogue,array("explore","Keeper Nara","The watchtower lies north of this clearing."));
+    ]
+
+    : tick(dt) = [
+        // UI and engine events drive inventory and quest state.
+    ]
+
+    : draw() = [
+        // Babylon handles game rendering.
+    ]
+
+    break;
