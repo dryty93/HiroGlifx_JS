@@ -10,6 +10,7 @@
  "use strict";
  const ID=/^[A-Za-z][A-Za-z0-9_]{0,39}$/;
  const THEMES=Object.freeze(["sky","soda","candy","neon","ice"]);
+ const SOUNDS=Object.freeze(["bubbles","glass","arcade","soft","off"]);
  const LIMIT=100;
  const codeString=x=>JSON.stringify(x);
  function words(line){
@@ -28,7 +29,7 @@
  }
  function compile(source){
   if(typeof source!=="string"||source.length>24000||!source.trim())throw Error("Empty or oversized game directions");
-  const data={title:"My First Obby",theme:"sky",speed:6,jump:9.8,spawn:null,stages:[],tiles:[],finish:null};
+  const data={title:"My First Obby",theme:"sky",sound:"bubbles",speed:6,jump:9.8,spawn:null,stages:[],tiles:[],finish:null};
   const used=new Set();let stage=0;
   for(const [index,raw] of source.split(/\r?\n/).entries()){
    const line=raw.trim();
@@ -41,6 +42,9 @@
     }else if(op==="theme"){
      if(n!==2||!THEMES.includes(a[1]))throw Error("Choose a theme: "+THEMES.join(", "));
      data.theme=a[1];
+    }else if(op==="sound"){
+     if(n!==2||!SOUNDS.includes(a[1]))throw Error("Choose a sound: "+SOUNDS.join(", "));
+     data.sound=a[1];
     }else if(op==="speed"){
      if(n!==2)throw Error("Write: speed 7");
      data.speed=number(a[1],"Speed",2,14);
@@ -107,6 +111,7 @@
   'theme soda',
   'speed 7',
   'jump 10',
+  'sound bubbles',
   'player at 0 2 0',
   '',
   'stage 1 "BUBBLE RUN"',
@@ -128,5 +133,5 @@
   'finish goal at 44.4 0 4.3 size 5',
   ''
  ].join("\n");}
- return {compile,starter,THEMES};
+ return {compile,starter,THEMES,SOUNDS};
 });
