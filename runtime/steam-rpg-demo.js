@@ -200,6 +200,8 @@ class RPGDemo{
    const hero=this.combat.actor("hero");
    return Object.freeze({physics:"havok",asset:this.assetStatus,animation:this.animationState,
      health:Math.ceil(hero.health),stamina:Math.ceil(hero.stamina),enemies:this.enemies.filter(e=>this.combat.actor(e.id).alive).length,
+     raiders:this.enemies.map(e=>({id:e.id,x:this.combat.actor(e.id).x,z:this.combat.actor(e.id).z,
+       repaths:e.agent.repaths,alive:this.combat.actor(e.id).alive})),
      kills:this.rules.get("kills"),done:this.rules.done,x:hero.x,z:hero.z});
  }
  dispose(){
