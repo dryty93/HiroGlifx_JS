@@ -66,7 +66,7 @@ async function serveProject(project,port=3000,{watch=true}={}){
      }
      if(/^\/assets\/[A-Za-z0-9_./-]+$/.test(url.pathname)&&!url.pathname.includes("..")&&!url.pathname.includes("//")){
        const rel=url.pathname.slice(1);
-       const mime={".svg":"image/svg+xml",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".avif":"image/avif"};
+       const mime={".svg":"image/svg+xml",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".avif":"image/avif",".mp4":"video/mp4",".webm":"video/webm"};
        const type=mime[path.extname(rel).toLowerCase()];
        if(!type)return send(response,404,"Not found");
        const file=path.resolve(project,rel);
