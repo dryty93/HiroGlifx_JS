@@ -85,7 +85,7 @@
    const lines=String(source).split(/\r?\n/);
    lines.forEach((raw,i)=>{
      const line=raw.trim();
-     if(!line||line.startsWith("//")||line.startsWith("# "))return;
+     if(!line||line.startsWith("//"))return;
      if(/^\.Main\s*=\s*\(\)\s*$/.test(line)||/^\.Main\s*=\s*\[\s*$/.test(line)){
        if(block||seen)throw new SyntaxError("Line "+(i+1)+": duplicate/nested Main");
        block=true;seen=true;return;
