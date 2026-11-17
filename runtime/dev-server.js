@@ -3,22 +3,23 @@
 const fs=require("node:fs"),path=require("node:path"),http=require("node:http");
 const rootRuntime=path.resolve(__dirname);
 const {resolveSource}=require("./package-manager");
-const allowedRuntime=new Set(["scroll-runtime.js","app-runtime.js","expressive-runtime.js","canonical-runtime.js"]);
+const allowedRuntime=new Set(["scroll-runtime.js","app-runtime.js","expressive-runtime.js","canonical-runtime.js","native-ui.js"]);
 const html=[
 '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
 '<title>HiroGlifx App</title><style>*{box-sizing:border-box}body{font:16px system-ui;margin:0;background:#0b1220;color:#edf4ff}',
-'main{max-width:900px;margin:auto;padding:36px}main p{font-size:20px}button{padding:12px 20px;border:0;border-radius:8px;background:#60a5fa;cursor:pointer;margin:12px}',
+'#app{max-width:900px;margin:auto;padding:36px}#app p{font-size:20px}button{padding:12px 20px;border:0;border-radius:8px;background:#60a5fa;cursor:pointer;margin:12px}',
 'input{padding:12px;border:1px solid #6b809d;border-radius:8px;background:#1c3048;color:white}a{color:#95c5ff}#notice{margin:18px;color:#ffb4b4;white-space:pre-wrap}</style>',
-'</head><body><main id="app"></main><pre id="notice" role="status"></pre>',
+'</head><body><div id="app"></div><pre id="notice" role="status"></pre>',
 '<script src="/__hiro/runtime/scroll-runtime.js"></script>',
 '<script src="/__hiro/runtime/app-runtime.js"></script>',
 '<script src="/__hiro/runtime/expressive-runtime.js"></script>',
 '<script src="/__hiro/runtime/canonical-runtime.js"></script>',
+'<script src="/__hiro/runtime/native-ui.js"></script>',
 '<script>(function(){"use strict";const mount=document.querySelector("#app"),notice=document.querySelector("#notice");let instance=null;',
 'async function render(){try{const response=await fetch("/__hiro/page?path="+encodeURIComponent(location.pathname),{cache:"no-store"});',
 'if(!response.ok)throw new Error(response.status===404?"No page defined for "+location.pathname:"Cannot load page");',
 'const source=await response.text();if(instance)instance.dispose();mount.replaceChildren();',
-'instance=/^\\.Main\\s*=\\s*\\(\\)\\s*$/m.test(source) ? new HiroCanonical.CanonicalRuntime({document,mount}) : new HiroGlifxExpressive.ExpressiveRuntime({document,mount});await instance.execute(source);notice.textContent="";',
+'instance=/^ui application$/m.test(source) ? new HiroNativeUI.NativeUIRuntime({document,mount}) : /^\\.Main\\s*=\\s*\\(\\)\\s*$/m.test(source) ? new HiroCanonical.CanonicalRuntime({document,mount}) : new HiroGlifxExpressive.ExpressiveRuntime({document,mount});await instance.execute(source);notice.textContent="";',
 '}catch(error){notice.textContent=error.message;}}',
 'const events=new EventSource("/__hiro/events");events.addEventListener("reload",render);render();})();</script></body></html>'
 ].join("\n");
@@ -62,6 +63,16 @@ async function serveProject(project,port=3000,{watch=true}={}){
        const filename=url.pathname.slice("/__hiro/runtime/".length);
        if(!allowedRuntime.has(filename))return send(response,404,"Not found");
        return send(response,200,fs.readFileSync(path.join(rootRuntime,filename)),"text/javascript; charset=utf-8");
+     }
+     if(/^\/assets\/[A-Za-z0-9_./-]+$/.test(url.pathname)&&!url.pathname.includes("..")&&!url.pathname.includes("//")){
+       const rel=url.pathname.slice(1);
+       const mime={".svg":"image/svg+xml",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".avif":"image/avif"};
+       const type=mime[path.extname(rel).toLowerCase()];
+       if(!type)return send(response,404,"Not found");
+       const file=path.resolve(project,rel);
+       if(!file.startsWith(project+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile())return send(response,404,"Not found");
+       ensureSafeTarget(file,project);
+       return send(response,200,fs.readFileSync(file),type);
      }
      if(url.pathname==="/favicon.ico")return send(response,404,"Not found");
      if(!/^\/[a-zA-Z0-9/_-]*$/.test(url.pathname))return send(response,404,"Not found");

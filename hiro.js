@@ -48,6 +48,16 @@ function makeProject(target){
   fs.writeFileSync(path.join(target,".gitignore"),"node_modules/\n.env\ndata/\n");
   return target;
 }
+function makeNativeProject(target){
+ target=path.resolve(target);
+ if(fs.existsSync(target)&&fs.readdirSync(target).length)throw new Error("Target directory is not empty");
+ fs.mkdirSync(target,{recursive:true});
+ fs.cpSync(path.join(__dirname,"examples","native-ui"),target,{recursive:true});
+ installLocal(target,path.join(__dirname,"examples","native-ui-library"));
+ fs.writeFileSync(path.join(target,".gitignore"),"node_modules/\ndist/\n.env\n",{flag:"wx"});
+ validateProject(target);
+ return target;
+}
 function validateProject(project){
   const files=[path.join(project,"app.scroll")];
   const pages=path.join(project,"pages");
@@ -60,6 +70,37 @@ function validateProject(project){
   }
   return files.length;
 }
+
+/** Export native UI pages as dependency-free static browser documents. */
+function buildProject(project,destination=path.join(project,"dist")){
+ project=path.resolve(project);destination=path.resolve(destination);
+ if(destination===project||!destination.startsWith(project+path.sep))throw new Error("Build target must be inside project");
+ const files=[path.join(project,"app.scroll")],pages=path.join(project,"pages");
+ if(fs.existsSync(pages))for(const name of fs.readdirSync(pages))if(name.endsWith(".scroll"))files.push(path.join(pages,name));
+ const output=[];
+ for(const file of files){
+  const source=resolveSource(project,fs.readFileSync(file,"utf8"));
+  if(!/^ui application$/m.test(source))throw new Error("Static build currently supports native UI pages only");
+  const relative=file===files[0]?"index.html":path.join(path.basename(file,".scroll"),"index.html");
+  const markup='<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>HiroGlifx</title></head><body><div id="app"></div><script src="/assets/native-ui.js"></script><script>(function(){"use strict";const host=document.getElementById("app");new HiroNativeUI.NativeUIRuntime({document,mount:host}).execute('+
+  JSON.stringify(source).replace(/</g,"\\u003c")+
+  ');})();</script></body></html>';
+  const dest=path.join(destination,relative);fs.mkdirSync(path.dirname(dest),{recursive:true});fs.writeFileSync(dest,markup);output.push(dest);
+ }
+ fs.mkdirSync(path.join(destination,"assets"),{recursive:true});
+ fs.copyFileSync(path.join(__dirname,"runtime/native-ui.js"),path.join(destination,"assets/native-ui.js"));
+ const assets=path.join(project,"assets");
+ if(fs.existsSync(assets)){
+  for(const name of fs.readdirSync(assets)){
+   if(!/^[A-Za-z0-9_-]+\.(?:svg|png|jpg|jpeg|webp|avif)$/.test(name))continue;
+   const file=path.join(assets,name);
+   if(fs.lstatSync(file).isFile()&&!fs.lstatSync(file).isSymbolicLink())
+    fs.copyFileSync(file,path.join(destination,"assets",name));
+  }
+ }
+ return output;
+}
+
 async function main(argv=process.argv.slice(2)){
   const [command,location,...rest]=argv;
   if(command==="package"){
@@ -82,7 +123,8 @@ async function main(argv=process.argv.slice(2)){
   }
   if(command==="init"){
     if(!location)throw new Error("Usage: hiro init <project-directory>");
-    const dir=makeProject(location);
+    if(rest.length&&!(rest.length===1&&rest[0]==="--ui"))throw new Error("Usage: hiro init <directory> [--ui]");
+    const dir=rest[0]==="--ui"?makeNativeProject(location):makeProject(location);
     console.log("Created HiroGlifx project:",dir);
     console.log("Next: node hiro.js dev "+dir);
     return;
@@ -91,6 +133,10 @@ async function main(argv=process.argv.slice(2)){
     if(!location)throw new Error("Usage: hiro check <project-directory>");
     console.log("Validated",validateProject(path.resolve(location)),"page(s)");
     return;
+  }
+  if(command==="build"){
+    if(!location)throw new Error("Usage: hiro build <project-directory>");
+    const outputs=buildProject(path.resolve(location));console.log("Built",outputs.length,"native UI page(s) to",path.resolve(location,"dist"));return;
   }
   if(command==="dev"){
     if(!location)throw new Error("Usage: hiro dev <project-directory> [port]");
@@ -101,7 +147,7 @@ async function main(argv=process.argv.slice(2)){
     console.log("HiroGlifx app: http://127.0.0.1:"+live.server.address().port);
     return live;
   }
-  console.log("HiroGlifx CLI\n  hiro init <directory>\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
+  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
 }
 if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
-module.exports={main,makeProject,validateProject};
+module.exports={main,makeProject,makeNativeProject,validateProject,buildProject};

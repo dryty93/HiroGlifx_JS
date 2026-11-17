@@ -1,0 +1,68 @@
+ui application
+import native-ui
+
+.SignupForm = (Form)
+    $ title = "Join the next generation.";
+    $ name = "";
+    $ email = "";
+    $ message = "Your details stay in this demo.";
+    : render(self) = [
+        element form form root;
+        class form "hg-form";
+        element eyebrow p form;
+        class eyebrow "hg-eyebrow";
+        text eyebrow "EARLY ACCESS";
+        element heading h1 form;
+        class heading "hg-title";
+        text heading "{title}";
+        element intro p form;
+        class intro "hg-muted";
+        text intro "A real, keyboard accessible HiroGlifx form with native state and events.";
+        element nameLabel label form;
+        attr nameLabel for "signup-name";
+        text nameLabel "Your name";
+        element nameInput input form;
+        class nameInput "hg-input";
+        attr nameInput type "text";
+        attr nameInput name "name";
+        attr nameInput autocomplete "name";
+        attr nameInput aria-label "Your name";
+        attr nameInput required "true";
+        bind nameInput name;
+        element emailLabel label form;
+        attr emailLabel for "signup-email";
+        text emailLabel "Email address";
+        element emailInput input form;
+        class emailInput "hg-input";
+        attr emailInput type "email";
+        attr emailInput name "email";
+        attr emailInput autocomplete "email";
+        attr emailInput aria-label "Email address";
+        attr emailInput required "true";
+        bind emailInput email;
+        element actions div form;
+        class actions "hg-actions";
+        element submit button actions;
+        attr submit type "submit";
+        class submit "hg-button hg-button-primary";
+        text submit "Request early access";
+        element feedback p form;
+        attr feedback role "status";
+        attr feedback aria-live "polite";
+        class feedback "hg-note";
+        text feedback "{message}";
+        on form submit save;
+    ]
+    : save(self) = [
+        set message "Thanks {name}! We received your request for {email}.";
+        set submitted true;
+    ]
+    break;
+
+.Main = ()
+    : render(self) = [
+        element page main root;
+        component Navigation nav page;
+        component SignupForm signup page;
+    ]
+    break;

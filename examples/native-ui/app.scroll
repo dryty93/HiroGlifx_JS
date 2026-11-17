@@ -1,0 +1,55 @@
+ui application
+import native-ui
+// The entire page composition is native HiroGlifx.
+.FeatureCard = (Card)
+    $ title = "Built for makers";
+    $ description = "A better foundation for building great things.";
+    break;
+
+.Main = ()
+    : render(self) = [
+        element page main root;
+        component Navigation navigation page;
+        prop navigation brand "HiroGlifx";
+        element wrap section page;
+        class wrap "hg-wrap";
+        element hero section wrap;
+        class hero "hg-hero";
+        element eyebrow p hero;
+        class eyebrow "hg-eyebrow";
+        text eyebrow "THE NATIVE UI ERA";
+        element heading h1 hero;
+        class heading "hg-display";
+        text heading "Interfaces that feel as expressive as your imagination.";
+        element description p hero;
+        class description "hg-lead";
+        text description "Design high-performance web interfaces with reusable components, inheritance and real interactivity — all in HiroGlifx.";
+        element actions div hero;
+        class actions "hg-actions";
+        component Link start actions;
+        prop start label "Explore dashboard";
+        prop start href "/dashboard";
+        component Link form actions;
+        prop form label "Try the form";
+        prop form href "/form";
+        element section section wrap;
+        class section "hg-section";
+        element subtitle p section;
+        class subtitle "hg-eyebrow";
+        text subtitle "POWERFUL BY DESIGN";
+        element title h2 section;
+        class title "hg-title";
+        text title "One language. Endless interfaces.";
+        element cards div section;
+        class cards "hg-grid";
+        component FeatureCard first cards;
+        prop first title "Inheritance";
+        prop first description "Extend a component and override its behaviors without recreating the foundation.";
+        component FeatureCard second cards;
+        prop second title "Polymorphism";
+        prop second description "Methods dispatch to the concrete component type, including imported subclasses.";
+        component FeatureCard third cards;
+        prop third title "Native browser UI";
+        prop third description "Semantic DOM, keyboard interactions, responsive grids and secure text nodes.";
+    ]
+    break;
