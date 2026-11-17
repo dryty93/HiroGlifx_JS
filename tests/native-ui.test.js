@@ -169,6 +169,7 @@ test("comparison slider and tabbed showcase are bound to native typed state",()=
  assert.equal(dom.nodes.find(x=>x.style["--hg-wipe"]==="50")!==undefined,true);
  slider.value="75";slider.listeners.input();
  assert(dom.nodes.some(x=>x.style["--hg-wipe"]==="75"),"native slider did not update comparison");
+ assert.equal(dom.nodes.filter(x=>x.tagName==="INPUT"&&x.attributes.type==="range").length,1,"dragging must not remount range input");
  const tab=dom.nodes.filter(x=>x.tagName==="BUTTON"&&x.textContent==="Switch showcase view").at(-1);
  assert(tab,"tab control");
  tab.listeners.click();
