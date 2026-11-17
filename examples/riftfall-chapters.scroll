@@ -8,4 +8,10 @@
         push(chapters,array("forge","Riftsteel Oath","Craft a Riftsteel Blade before confronting the guardian.","craft","steel-blade",1,"guardian"));
         push(chapters,array("guardian","The Last Rift","Defeat the Rift Guardian to secure the valley.","defeat","rift-guardian",1,""));
     ]
+    : tick(dt) = [
+        // Chapter progression is event-driven; host services supply game ticks.
+    ]
+    : draw() = [
+        // Babylon supplies rendering; chapter definitions have no Canvas output.
+    ]
     break;
