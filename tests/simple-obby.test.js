@@ -1,7 +1,7 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
 const fs=require("node:fs"),path=require("node:path");
-const {compile,starter,THEMES}=require("../runtime/simple-obby");
+const {compile,starter,THEMES,SOUNDS}=require("../runtime/simple-obby");
 const {CanonicalRuntime}=require("../runtime/canonical-runtime");
 const {install:installObby}=require("../runtime/obby-canonical");
 const {install:installBlueprints}=require("../runtime/canonical-blueprints");
@@ -13,6 +13,7 @@ test("readable directions compile into native HiroGlifx canonical level objects"
  assert.equal(result.theme,"soda");
  assert.equal(result.speed,7);
  assert.equal(result.jump,10);
+ assert.equal(result.sound,"bubbles");
  assert.equal(result.stages.length,3);
  assert.equal(result.tiles.length,12);
  assert.match(result.canonical,/& world = obby_world\(\)/);
@@ -47,6 +48,7 @@ test("course editor starts from usable, single-source readable directions",()=>{
  const design=compile(starter());
  assert.deepEqual(design.tiles.map(t=>t.name),compile(example).tiles.map(t=>t.name));
  assert.deepEqual([...THEMES],["sky","soda","candy","neon","ice"]);
+ assert.deepEqual([...SOUNDS],["bubbles","glass","arcade","soft","off"]);
  assert(!starter().includes("function("));
  assert(!starter().includes("BABYLON"));
 });
@@ -76,6 +78,7 @@ test("game authoring rejects unsafe code, collisions and invalid course limits",
   "vanishing gone at 5 0 0 size 4 delay 90",
   "spinner hazard at 5 0 0 size 3 range Infinity period 3",
   "theme script",
+  "sound exploit",
   'stage 3 "Skipped"'
  ];
  for(const line of bad)assert.throws(()=>compile(base+line+"\n"+end),/Line \d+:/,line);
