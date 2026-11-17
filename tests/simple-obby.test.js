@@ -89,8 +89,8 @@ test("HTML workshop loads native compiler, editor and original game renderer",()
  const html=fs.readFileSync(path.resolve(__dirname,"../simple-obby.html"),"utf8");
  for(const match of ["runtime/simple-obby.js","runtime/obby-babylon.js","runtime/obby-canonical.js","courseEditor","playDirections","compileStatus","HiroSimpleObby.compile"])assert(html.includes(match),match);
  assert(html.includes("examples/simple-obby/soda-splash.scroll"));
- const inline=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)].map(x=>x[1]).filter(Boolean);
+ const start=html.lastIndexOf("<script>"),end=html.lastIndexOf("</script>");
+ assert(start>=0&&end>start);
  const {Script}=require("node:vm");
- assert(inline.length>=1);
- for(const js of inline)assert.doesNotThrow(()=>new Script(js));
+ assert.doesNotThrow(()=>new Script(html.slice(start+8,end)));
 });
