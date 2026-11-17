@@ -173,22 +173,40 @@ ui library
     break;
 
 .Modal = (Component)
-    $ message = "This is a reusable modal.";
+    $ message = "A fully native HiroGlifx modal.";
     : render(self) = [
-        element panel section root;
-        class panel "hg-card";
-        attr panel aria-label "Dialog controls";
-        element heading h2 panel;
+        element openButton button root;
+        class openButton "hg-button";
+        attr openButton type "button";
+        text openButton "{title}";
+        on openButton click toggleOpen;
+        element backdrop div root;
+        class backdrop "hg-modal-backdrop";
+        show backdrop open;
+        element dialog section backdrop;
+        class dialog "hg-modal";
+        attr dialog role "dialog";
+        attr dialog aria-modal "true";
+        attr dialog aria-label "{title}";
+        element heading h2 dialog;
         text heading "{title}";
-        element message p panel;
+        element message p dialog;
         text message "{message}";
-        element close button panel;
-        class close "hg-button";
-        text close "Toggle";
+        element close button dialog;
+        class close "hg-button hg-button-primary";
+        attr close type "button";
+        text close "Close dialog";
         on close click toggleOpen;
     ]
     : toggleOpen(self) = [
         toggle open;
+    ]
+    break;
+
+.ThemeButton = (Button)
+    $ label = "Switch theme";
+    : activate(self) = [
+        theme toggle;
     ]
     break;
 
