@@ -12,13 +12,14 @@ class RPGDemo{
    this.rules=new root.HiroWorldRules.WorldRules(source,{name:"rpg-combat"});
    this.combat=new root.HiroCombat.CombatWorld();
    this.keys=new Set();this.enemies=[];this.last=0;this.disposed=false;this.attackFlash=0;this.combo=0;
-   this.snapshots=[];this.animationState="idle";this.ready=false;this.assetStatus="Loading glTF...";
+   this.snapshots=[];this.animationState="idle";this.ready=false;this.assetStatus="Loading glTF...";this.dynamicCrates=[];
  }
  async initialize(){
    const B=this.B;
    this.engine=new B.Engine(this.canvas,true,{antialias:true});
    this.scene=new B.Scene(this.engine);
-   this.scene.clearColor=B.Color4.FromHexString("#142842ff");
+   this.scene.clearColor=B.Color4.FromHexString("#334b73ff");
+   if(typeof B.Scene.FOGMODE_EXP2==="number"){this.scene.fogMode=B.Scene.FOGMODE_EXP2;this.scene.fogDensity=.009;this.scene.fogColor=B.Color3.FromHexString("#334b73");}
    const light=new B.HemisphericLight("ambient",new B.Vector3(0,1,0),this.scene);light.intensity=.82;
    if(B.DirectionalLight){
      const sun=new B.DirectionalLight("sun",new B.Vector3(-.4,-1,.3),this.scene);sun.intensity=.85;
@@ -35,7 +36,32 @@ class RPGDemo{
      mesh.metadata={cameraOccluder:occluder};
      this.physics.staticBox(mesh);return mesh;
    };
-   platform("terrain",0,-.45,0,28,.9,28,"#4f9a7d");
+   platform("terrain",0,-.45,0,28,.9,28,"#3b766d");
+   // Procedural scenery is original and requires no third-party game art.
+   if(B.MeshBuilder.CreateSphere){
+     for(let i=0;i<20;i++){
+       const angle=i*Math.PI*2/20,radius=i%2===0?12.8:13.7;
+       const x=Math.cos(angle)*radius,z=Math.sin(angle)*radius;
+       const crown=B.MeshBuilder.CreateSphere("rift-shrub-"+i,{diameter:1.5+(i%3)*.3,segments:8},this.scene);
+       crown.position.set(x,.64,z);crown.scaling.y=.62;
+       crown.material=material("shrub-"+i,i%3===0?"#276e79":"#3e9984");
+       crown.isPickable=false;
+     }
+   }
+   if(B.MeshBuilder.CreateCylinder){
+     for(let i=0;i<8;i++){
+       const angle=i*Math.PI/4,x=Math.cos(angle)*11,z=Math.sin(angle)*11;
+       const pillar=B.MeshBuilder.CreateCylinder("rift-pillar-"+i,{diameter:1.0,height:2.0+(i%3)*.6,tessellation:6},this.scene);
+       pillar.position.set(x,1,z);
+       pillar.material=material("pillar-"+i,i%2===0?"#536782":"#607b97");
+       pillar.isPickable=false;
+     }
+   }
+   for(const [i,x,z] of [[0,-8,3],[1,8,5]]){
+     const crate=B.MeshBuilder.CreateBox("physics-crate-"+i,{size:1.15},this.scene);
+     crate.position.set(x,3,z);crate.material=material("crate-"+i,"#cb9a69");
+     this.dynamicCrates.push(this.physics.dynamicBox(crate,{mass:3,restitution:.16}));
+   }
    platform("stone-west",-4,.65,.1,2,1.3,2,"#70859b");
    platform("stone-east",4,.65,-1,2,1.3,2,"#75869d");
    platform("stone-center",0,.65,-3,2.3,1.3,1.5,"#70809b");
