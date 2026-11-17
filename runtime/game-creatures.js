@@ -52,7 +52,7 @@ class CreatureVisual{
     }
     this.core=sphere("rift-core",.38,[0,.09,-.38],glow);
    }
-   parent.visibility=.025;
+   if(parent.material)parent.material.alpha=.025;
   }catch(e){this.dispose();throw e;}
  }
  tick(dt,{moving=false,warning=false,defeated=false}={}){
