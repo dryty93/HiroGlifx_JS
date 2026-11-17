@@ -190,6 +190,7 @@ class RPGDemo{
    this.character.setInput(sideways,-forward);
    this.character.tick(dt);
    const pos=this.character.position,hero=this.combat.actor("hero");
+   this.level?.updateDetails(pos);
    hero.x=pos.x;hero.z=pos.z;
    const moving=Math.hypot(sideways,forward);
    this.attackFlash=Math.max(0,this.attackFlash-dt);
@@ -236,12 +237,13 @@ class RPGDemo{
        repaths:e.agent.repaths,alive:this.combat.actor(e.id).alive})),
      kills:this.rules.get("kills"),done:this.rules.done,x:hero.x,z:hero.z,
      wave:this.wave,chapter:this.level?.waveTitle(this.wave)||"Riftfall",navMode:this.navMode,recastQueries:this.navQueries,
+     visualRegions:this.level?.details?.snapshot()||null,
      campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
-   this.campaign?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
+   this.campaign?.dispose();this.level?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
 return {RPGDemo};
