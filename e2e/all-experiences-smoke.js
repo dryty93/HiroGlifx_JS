@@ -3,7 +3,7 @@ const {chromium}=require("playwright");
 const {spawn}=require("node:child_process");
 const fs=require("node:fs"),path=require("node:path"),assert=require("node:assert/strict");
 const base="http://127.0.0.1:18799",root=path.resolve(__dirname,"..");
-const groups=["foundation","navigation","hero","visual","story","conversion","utility"];
+const groups=["foundation","navigation","hero","visual","story","conversion","utility","rain"];
 async function ready(){for(let i=0;i<120;i++){try{if((await fetch(base+"/showcase")).ok)return;}catch{}await new Promise(r=>setTimeout(r,100));}throw Error("showcase server unavailable");}
 async function main(){
  const server=spawn(process.execPath,[path.join(root,"hiro.js"),"showcase","18799"],{stdio:"pipe"});
@@ -23,11 +23,11 @@ async function main(){
    assert.equal(await page.locator("main").count(),1,"no duplicate main landmarks");
    const library=fs.readFileSync(path.join(root,"examples/native-ui-library/main.scroll"),"utf8");
    const names=[...library.matchAll(/^\.([A-Za-z_]\w*)\s*=\s*\(/gm)].map(m=>m[1]);
-   assert.equal(names.length,66);
+   assert.equal(names.length,84);
    const componentCounts=await page.evaluate(()=>[...document.querySelectorAll("[data-hiro-component]")].reduce((acc,el)=>{acc[el.dataset.hiroComponent]=(acc[el.dataset.hiroComponent]||0)+1;return acc;},{}));
    for(const name of names)assert(componentCounts[name]>=1,"missing live "+name);
-   assert.equal(await page.locator(".hg-showcase-demo").count(),66);
-   assert.equal(await page.locator(".hg-showcase-code").count(),66);
+   assert.equal(await page.locator(".hg-showcase-demo").count(),84);
+   assert.equal(await page.locator(".hg-showcase-code").count(),84);
    for(const slug of groups){
     const area=page.locator("#hg-showcase-"+slug);
     await area.waitFor();await area.scrollIntoViewIfNeeded();
@@ -63,7 +63,7 @@ async function main(){
    assert.deepEqual(errors,[],"browser errors");
    await page.close();
   }
-  console.log("All 66 HiroGlifx native classes rendered, interactive and photographed at mobile and desktop widths.");
+  console.log("All 84 HiroGlifx native classes rendered, interactive and photographed at mobile and desktop widths.");
  }finally{if(browser)await browser.close();server.kill("SIGTERM");}
 }
 main().catch(err=>{console.error(err);process.exitCode=1;});
