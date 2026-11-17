@@ -7,9 +7,9 @@ const allowedRuntime=new Set(["scroll-runtime.js","app-runtime.js","expressive-r
 const html=[
 '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
 '<title>HiroGlifx App</title><style>*{box-sizing:border-box}body{font:16px system-ui;margin:0;background:#0b1220;color:#edf4ff}',
-'main{max-width:900px;margin:auto;padding:36px}main p{font-size:20px}button{padding:12px 20px;border:0;border-radius:8px;background:#60a5fa;cursor:pointer;margin:12px}',
+'#app{max-width:900px;margin:auto;padding:36px}#app p{font-size:20px}button{padding:12px 20px;border:0;border-radius:8px;background:#60a5fa;cursor:pointer;margin:12px}',
 'input{padding:12px;border:1px solid #6b809d;border-radius:8px;background:#1c3048;color:white}a{color:#95c5ff}#notice{margin:18px;color:#ffb4b4;white-space:pre-wrap}</style>',
-'</head><body><main id="app"></main><pre id="notice" role="status"></pre>',
+'</head><body><div id="app"></div><pre id="notice" role="status"></pre>',
 '<script src="/__hiro/runtime/scroll-runtime.js"></script>',
 '<script src="/__hiro/runtime/app-runtime.js"></script>',
 '<script src="/__hiro/runtime/expressive-runtime.js"></script>',
