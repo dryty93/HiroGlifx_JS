@@ -48,6 +48,16 @@ function makeProject(target){
   fs.writeFileSync(path.join(target,".gitignore"),"node_modules/\n.env\ndata/\n");
   return target;
 }
+function makeNativeProject(target){
+ target=path.resolve(target);
+ if(fs.existsSync(target)&&fs.readdirSync(target).length)throw new Error("Target directory is not empty");
+ fs.mkdirSync(target,{recursive:true});
+ fs.cpSync(path.join(__dirname,"examples","native-ui"),target,{recursive:true});
+ installLocal(target,path.join(__dirname,"examples","native-ui-library"));
+ fs.writeFileSync(path.join(target,".gitignore"),"node_modules/\ndist/\n.env\n",{flag:"wx"});
+ validateProject(target);
+ return target;
+}
 function validateProject(project){
   const files=[path.join(project,"app.scroll")];
   const pages=path.join(project,"pages");
@@ -113,7 +123,8 @@ async function main(argv=process.argv.slice(2)){
   }
   if(command==="init"){
     if(!location)throw new Error("Usage: hiro init <project-directory>");
-    const dir=makeProject(location);
+    if(rest.length&&!(rest.length===1&&rest[0]==="--ui"))throw new Error("Usage: hiro init <directory> [--ui]");
+    const dir=rest[0]==="--ui"?makeNativeProject(location):makeProject(location);
     console.log("Created HiroGlifx project:",dir);
     console.log("Next: node hiro.js dev "+dir);
     return;
@@ -136,7 +147,7 @@ async function main(argv=process.argv.slice(2)){
     console.log("HiroGlifx app: http://127.0.0.1:"+live.server.address().port);
     return live;
   }
-  console.log("HiroGlifx CLI\n  hiro init <directory>\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
+  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
 }
 if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
-module.exports={main,makeProject,validateProject,buildProject};
+module.exports={main,makeProject,makeNativeProject,validateProject,buildProject};
