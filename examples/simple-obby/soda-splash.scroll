@@ -1,0 +1,26 @@
+// Simple HiroGlifx directions: edit and press Play.
+// This is a complete game course, NOT JavaScript or a scene mockup.
+game "Soda Splash"
+theme soda
+speed 7
+jump 10
+sound bubbles
+player at 0 2 0
+
+stage 1 "BUBBLE RUN"
+platform start at 0 0 0 size 5
+platform ice1 at 4.5 0 0 size 3.5
+platform ice2 at 8.9 0 1.2 size 3.2
+checkpoint save1 at 13.2 0 1.2 size 3.8
+
+stage 2 "MOVING ICE"
+moving glide1 at 17.8 0 1.2 size 3.4 axis z range 1.2 period 3.2
+platform ice3 at 22.2 0 1.2 size 3.5
+vanishing flash1 at 26.6 0 1.2 size 3.4 delay 1.5
+checkpoint save2 at 31 0 1.2 size 4
+
+stage 3 "THE FINAL SPLASH"
+spinner whirl at 35.2 0 1.2 size 2 range 1.5 period 4
+platform leap1 at 35.5 0 4.3 size 3.3
+platform leap2 at 40 0 4.3 size 3.4
+finish goal at 44.4 0 4.3 size 5

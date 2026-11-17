@@ -128,6 +128,34 @@ function createUIPage(project,component,slug){
  fs.writeFileSync(file,source,{flag:"wx"});
  return file;
 }
+function serveSimpleObby(port=8000){
+ const http=require("node:http"),{compile}=require("./runtime/simple-obby");
+ if(!Number.isInteger(Number(port))||Number(port)<1024||Number(port)>65535)throw Error("Port must be 1024-65535");
+ const mime={".html":"text/html; charset=utf-8",".js":"application/javascript; charset=utf-8",".css":"text/css; charset=utf-8",".scroll":"text/plain; charset=utf-8",".json":"application/json; charset=utf-8"};
+ const root=path.resolve(__dirname);
+ const server=http.createServer((req,res)=>{
+  try{
+   const url=new URL(req.url,"http://localhost");
+   if(req.method!=="GET"||/%2f|%5c|%00/i.test(url.pathname))throw Error("Invalid request");
+   const name=decodeURIComponent(url.pathname==="/"?"/simple-obby.html":url.pathname);
+   const allowed=name==="/simple-obby.html"||
+    /^\/runtime\/[a-z][a-z0-9-]*\.js$/.test(name)||
+    /^\/examples\/simple-obby\/[a-z][a-z0-9-]*\.scroll$/.test(name)||
+    name==="/examples/skybound-gameplay.scroll";
+   if(!allowed){res.writeHead(404);res.end("Not found");return;}
+   const target=path.resolve(root,"."+name);
+   if(!target.startsWith(root+path.sep)||!fs.existsSync(target)||!fs.statSync(target).isFile()||fs.lstatSync(target).isSymbolicLink())
+    throw Error("Not found");
+   const body=fs.readFileSync(target);
+   res.writeHead(200,{"Content-Type":mime[path.extname(name)]||"application/octet-stream",
+      "Cache-Control":"no-store","X-Content-Type-Options":"nosniff","Content-Security-Policy":"default-src 'self' https://cdn.babylonjs.com; script-src 'self' 'unsafe-inline' https://cdn.babylonjs.com; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; media-src 'self'; object-src 'none'; base-uri 'none'"});
+   res.end(body);
+  }catch(error){res.writeHead(404);res.end("Not found");}
+ });
+ server.listen(Number(port),"127.0.0.1",()=>console.log("HiroGlifx 3D game editor: http://127.0.0.1:"+server.address().port+"/simple-obby.html"));
+ return server;
+}
+
 async function main(argv=process.argv.slice(2)){
   const [command,location,...rest]=argv;
   if(command==="ui"){
@@ -143,6 +171,27 @@ async function main(argv=process.argv.slice(2)){
       const filename=createUIPage(project,component,slug);console.log("Created",filename);return;
     }
     throw Error("Unknown UI command "+action);
+  }
+  if(command==="game"){
+    const action=location;
+    if(action==="check"){
+      if(!rest[0])throw Error("Usage: hiro game check <file.scroll>");
+      const {compile}=require("./runtime/simple-obby");
+      const course=compile(fs.readFileSync(path.resolve(rest[0]),"utf8"));
+      console.log("Valid game:",course.title,"("+course.count+" objects in "+course.stages.length+" stages)");
+      return;
+    }
+    if(action==="new"){
+      if(!rest[0]||!rest[0].endsWith(".scroll"))throw Error("Usage: hiro game new <file.scroll>");
+      const target=path.resolve(rest[0]),{starter}=require("./runtime/simple-obby");
+      fs.mkdirSync(path.dirname(target),{recursive:true});
+      fs.writeFileSync(target,starter(),{flag:"wx"});
+      console.log("Created readable game:",target);return;
+    }
+    if(!action||action==="play"||/^\d+$/.test(action)){
+      return serveSimpleObby(!action||action==="play"?8000:Number(action));
+    }
+    throw Error("Usage: hiro game [port] | hiro game new <file.scroll> | hiro game check <file.scroll>");
   }
   if(command==="showcase"){
     const os=require("node:os");
@@ -201,7 +250,7 @@ async function main(argv=process.argv.slice(2)){
     console.log("HiroGlifx app: http://127.0.0.1:"+live.server.address().port);
     return live;
   }
-  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro showcase [port]\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro ui list <project>\n  hiro ui add <project> <Component> <route>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
+  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro showcase [port]\n  hiro game [port]\n  hiro game new <file.scroll>\n  hiro game check <file.scroll>\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro ui list <project>\n  hiro ui add <project> <Component> <route>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
 }
 if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
-module.exports={main,makeProject,makeNativeProject,validateProject,buildProject,uiClasses,createUIPage};
+module.exports={main,makeProject,makeNativeProject,validateProject,buildProject,uiClasses,createUIPage,serveSimpleObby};

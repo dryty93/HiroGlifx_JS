@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a1230"><meta name="description" content="Soda Splash: an editable 3D obstacle game built with simple HiroGlifx directions.">
+<title>Soda Splash — Build a 3D Obby With Simple HiroGlifx Directions</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;color:#f8fbff;background:#071023}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;overflow-x:hidden;background:radial-gradient(ellipse 100% 80% at 80% -30%,#203c77 0%,transparent 70%),#071023}
+a{color:inherit}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid #a8e2ff;outline-offset:3px}
+.shell{max-width:1600px;margin:auto;padding:24px clamp(16px,4vw,58px) 36px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:20px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:900;font-size:19px;letter-spacing:.01em}
+.brandmark{width:38px;height:38px;background:linear-gradient(135deg,#62b3ff,#8552ff);border-radius:12px;display:grid;place-items:center;box-shadow:0 8px 28px #3c77ff55}
+.brandmark svg{width:22px;height:22px}.nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.nav a,.pill{font-size:13px;font-weight:700;text-decoration:none;border:1px solid #416185;background:#172847aa;color:#d9e9ff;padding:10px 15px;border-radius:999px}
+.nav a:hover,.pill:hover{background:#29466f}
+.headline{display:flex;align-items:end;justify-content:space-between;gap:18px;margin:4px 0 23px;flex-wrap:wrap}
+.eyebrow{text-transform:uppercase;letter-spacing:.18em;color:#84d9fb;font-size:12px;font-weight:900}
+h1{font-size:clamp(38px,5vw,68px);letter-spacing:-.055em;margin:5px 0;line-height:1.04}
+h1 span{background:linear-gradient(95deg,#a4e4ff,#b7a1ff,#ffdbaa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{max-width:620px;font-size:16px;color:#b5c7e4;margin:12px 0 0;line-height:1.6}
+.headline-side{display:flex;gap:10px}.metric{background:#152647;border:1px solid #304b75;border-radius:16px;padding:14px 18px;min-width:115px}
+.metric strong{display:block;font-size:24px}.metric span{color:#a4bcd9;font-size:12px;font-weight:700}
+.game-frame{position:relative;background:#14274d;isolation:isolate;border:1px solid #44689b;border-radius:24px;box-shadow:0 25px 80px #0008,0 0 0 7px #d5ebff07;overflow:hidden}
+.game-frame:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 74% 12%,#7fc7ff28,transparent 32%);z-index:2}
+#game{width:100%;display:block;aspect-ratio:16/8.1;touch-action:none;background:linear-gradient(150deg,#3559a4,#132146);outline:none}
+.hud{position:absolute;z-index:5;inset:15px 15px auto;display:flex;align-items:start;justify-content:space-between;gap:14px;pointer-events:none}
+.hud-left,.hud-right{display:flex;gap:8px;flex-wrap:wrap}
+.hud-item{background:#071830c9;border:1px solid #9bcaff40;backdrop-filter:blur(16px);border-radius:14px;padding:9px 14px;color:#fff;font-size:13px;font-weight:700}
+.hud-item b{color:#c9f3ff}.hud-right .hud-item{min-width:88px;text-align:center}
+.stage-bar{position:absolute;z-index:5;left:16px;right:16px;bottom:14px;display:flex;gap:5px;pointer-events:none}
+.stage-segment{flex:1;height:9px;border-radius:99px;background:#ffffff29;border:1px solid #ffffff22;transition:background .25s}
+.stage-segment.complete{background:#75dfff}
+.stage-segment.current{background:#f9d873;box-shadow:0 0 15px #f9d873a0}
+.overlay{position:absolute;z-index:10;inset:0;display:grid;place-items:center;padding:22px;background:linear-gradient(120deg,#0b163de8,#17265abb 60%,#14213de5);backdrop-filter:blur(7px);text-align:center}
+.overlay[hidden]{display:none}
+.overlay-card{max-width:540px}
+.star-icon{font-size:50px;display:block;filter:drop-shadow(0 4px 19px #75cfff)}
+.overlay h2{font-size:clamp(29px,4vw,50px);line-height:1.08;margin:12px 0;letter-spacing:-.035em}
+.overlay p{color:#c5d5f1;line-height:1.6;font-size:15px}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}
+.primary,.secondary{border:0;border-radius:13px;padding:14px 22px;font-weight:900}
+.primary{background:linear-gradient(110deg,#7dd8ff,#a5a0ff);color:#08152e;box-shadow:0 10px 30px #5c98ff66}
+.primary:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.secondary{background:#233a65;color:#e8f3ff;border:1px solid #6285b4}
+.game-status{margin:14px 2px 0;min-height:25px;color:#a2ebd5;font-size:14px;font-weight:700}
+.controls-wrap{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;padding:15px 3px 0}
+.controls-info{display:flex;gap:17px;flex-wrap:wrap;color:#adc3e1;font-size:13px}
+kbd{padding:4px 7px;background:#253d60;border:1px solid #5b779d;border-bottom-width:3px;border-radius:6px;font-weight:900;color:white}
+.control-buttons{display:flex;gap:8px}
+.control-buttons button{background:#203759;border:1px solid #5576a3;color:#d9edff;padding:10px 14px;border-radius:10px;font-weight:800}
+.control-buttons button:hover{background:#2e5282}
+.mobile-pad{display:none;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:10px}
+.mobile-pad button{width:65px;height:55px;border-radius:13px;background:#29456d;border:1px solid #8ec2ff;color:white;font-size:24px;touch-action:none}
+.mobile-pad .jump{width:112px;background:#7450d0}
+.grid-bottom{display:grid;grid-template-columns:1.35fr 1fr;gap:15px;margin-top:25px}
+.panel{background:#14243dd9;border:1px solid #2f4e70;border-radius:20px;padding:22px}
+.panel h3{font-size:20px;letter-spacing:-.015em;margin:0 0 8px}.panel p{color:#b3c7df;font-size:14px;line-height:1.6}
+.stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:19px}
+.stage-card{background:#1e3555;border:1px solid #416085;padding:12px;border-radius:12px;min-height:95px}
+.stage-card b{display:block;color:#a5c7fc;font-size:19px}.stage-card small{display:block;color:#d4e7fb;font-weight:700;margin-top:5px;font-size:12px}
+.stage-card.active{border-color:#f5d57a;background:#344268}
+.stage-card.finished{border-color:#5de1ce}
+.links{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.links a{font-size:13px;color:#bfe5ff;border-bottom:1px solid #76b2e5;text-decoration:none}
+footer{font-size:12px;color:#7994b7;margin:23px 0 0;text-align:center}
+.source-embed{margin-top:20px;background:#14243dd9;border:1px solid #345373;border-radius:17px;padding:18px}.source-embed summary{cursor:pointer;color:#91ddff;font-weight:900}.source-embed pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:480px;overflow:auto;background:#091629;padding:17px;border-radius:12px;color:#b9f1da;font:12px/1.6 ui-monospace,monospace}.source-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.source-actions button{border:1px solid #698abd;background:#27446d;color:#eff8ff;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}.source-actions a{color:#a9ddff}
+@media(max-width:760px){.shell{padding:15px 14px 30px}.game-frame{border-radius:16px}#game{aspect-ratio:1/1.08}
+.hud{inset:9px 9px auto}.hud-item{font-size:11px;padding:7px 9px;border-radius:9px}.stage-bar{bottom:8px}
+.grid-bottom{grid-template-columns:1fr}.stages{grid-template-columns:repeat(5,minmax(0,1fr))}
+.stage-card{padding:7px;min-height:84px}.stage-card small{font-size:10px}.stage-card b{font-size:16px}
+.mobile-pad{display:flex}.controls-info{display:none}.headline-side{display:none}.panel{padding:17px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.course-workshop{margin-top:24px;border-radius:24px;overflow:hidden;border:1px solid #5783b8;background:#111e37;box-shadow:0 24px 65px #0006}
+.workshop-header{padding:22px 27px;border-bottom:1px solid #34547d;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;background:linear-gradient(110deg,#1b2852,#193b51)}
+.workshop-header h2{margin:0;font-size:clamp(23px,3vw,32px);letter-spacing:-.04em}.workshop-header p{margin:7px 0 0;color:#b6d5ee;font-size:14px}
+.editor-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr)}
+.editor-area{padding:24px;border-right:1px solid #34547d}
+.editor-area textarea{width:100%;min-height:510px;resize:vertical;background:#09172c;color:#a8f8db;border:1px solid #3e6588;border-radius:16px;padding:18px;font:14px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}
+.editor-help{padding:27px}.editor-help h3{font-size:20px;margin:0 0 16px}.editor-help code{display:block;white-space:pre-wrap;overflow-wrap:anywhere;color:#b4f3f8;background:#112948;border:1px solid #345b85;border-radius:10px;margin:9px 0 18px;padding:11px;font-size:12px}
+.editor-help p{color:#bdd3eb;font-size:14px;line-height:1.6}.workshop-actions{display:flex;gap:10px;flex-wrap:wrap;padding:0 24px 24px}
+#compileStatus{margin:0 24px 25px;color:#99ffd3;font-weight:700;font-size:14px;min-height:25px}
+@media(max-width:900px){.editor-layout{grid-template-columns:1fr}.editor-area{border-right:0;border-bottom:1px solid #34547d}.editor-area textarea{min-height:430px}}
+</style></head><body>
+<div class="shell">
+<header class="top"><a class="brand" href="./showcase.html"><span class="brandmark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 17L12 4l8 13M7 12h10"/></svg></span>HIROGLIFX <span style="color:#8dbefc;font-size:10px;letter-spacing:.15em">STUDIO</span></a>
+<nav class="nav"><a href="./showcase.html">Explore projects</a><a href="#courseWorkshop">Edit the game</a><a href="https://github.com/dryty93/HiroGlifx_JS">View source</a></nav></header>
+<div class="headline"><div><div class="eyebrow">A playable HiroGlifx original · 3D browser game</div><h1>SODA <span>SPLASH</span></h1>
+<p class="subtitle">Write simple lines to create platforms, jumps, checkpoints and obstacles. Edit the course below, then press Build & Play.</p></div>
+<div class="headline-side"><div class="metric"><strong>3</strong><span>STAGES</span></div><div class="metric"><strong id="bestMetric">—</strong><span>PERSONAL BEST</span></div></div></div>
+<section aria-label="Soda Splash Obby game" class="game-frame">
+<canvas id="game" width="1280" height="680" tabindex="0" aria-label="Soda Splash 3D game canvas"></canvas>
+<div class="hud"><div class="hud-left"><div class="hud-item" id="stageLabel">01 · BUBBLE RUN</div><div class="hud-item" id="modeLabel">READY</div></div>
+<div class="hud-right"><div class="hud-item">⏱ <b id="timer">0:00.0</b></div><div class="hud-item">☠ <b id="deaths">0</b></div><div class="hud-item">★ <b id="score">0</b></div></div></div>
+<div class="stage-bar" aria-label="Five-stage progress"><div class="stage-segment current"></div><div class="stage-segment"></div><div class="stage-segment"></div></div>
+<div class="overlay" id="overlay"><div class="overlay-card"><span class="star-icon" aria-hidden="true">✦</span>
+<div class="eyebrow" id="overlayEyebrow">THE HIROGLIFX GAME BUILDER</div><h2 id="overlayTitle">A game you can remake in minutes.</h2>
+<p id="overlayDescription">Use WASD or the arrow keys to move. Press Space to jump. Reach green checkpoints and avoid red hazards on your way to the golden gate.</p>
+<div class="actions"><button class="primary" id="startButton">▶ Start adventure</button><button class="secondary" id="editorButton">View the code</button></div></div></div>
+</section>
+<div id="status" class="game-status" role="status" aria-live="polite">Preparing your course…</div>
+<div class="controls-wrap"><div class="controls-info"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump</span><span><kbd>R</kbd> Respawn</span><span><kbd>ESC</kbd> Pause</span></div>
+<div class="control-buttons"><button id="muteButton" aria-pressed="false">♫ Sound on</button><button id="restartButton">↻ Restart</button><button id="fullscreenButton">⛶ Fullscreen</button></div></div>
+<div class="mobile-pad" aria-label="Touch game controls"><button data-move="ArrowLeft" aria-label="Move left">←</button><button data-move="ArrowUp" aria-label="Move forward">↑</button><button data-move="ArrowDown" aria-label="Move backward">↓</button><button data-move="ArrowRight" aria-label="Move right">→</button><button class="jump" id="jumpButton">JUMP</button></div>
+<div class="grid-bottom"><section class="panel"><div class="eyebrow">THE ADVENTURE</div><h3>Three stages to the finish</h3><p>Change the platforms and hazards to make your own course. Green checkpoints save your progress.</p>
+<div class="stages" id="stageCards"><div class="stage-card active"><b>01</b><small>Bubble Run</small></div><div class="stage-card"><b>02</b><small>Moving Ice</small></div><div class="stage-card"><b>03</b><small>Final Splash</small></div></div></section>
+<section class="panel"><div class="eyebrow">MADE WITH HIROGLIFX</div><h3>A game built with the language itself</h3><p>Soda Splash uses simple directions compiled to native HiroGlifx. The reusable engine handles physics and 3D graphics while you design the world.</p>
+<div class="links"><a href="./obby-playground.html">Edit the course</a><a href="./showcase.html">See other HiroGlifx demos</a><a href="./docs/skybound-showcase.md">How it works</a></div></section></div>
+
+<section class="course-workshop" id="courseWorkshop" aria-label="Edit your HiroGlifx 3D game">
+ <div class="workshop-header"><div><div class="eyebrow">THE HIROGLIFX GAME BUILDER</div><h2>Create a game with simple directions.</h2><p>Edit the course and hit Build &amp; Play. No JavaScript, shaders or physics code required.</p></div><span class="pill">Plain readable .scroll</span></div>
+ <div class="editor-layout">
+  <div class="editor-area"><label for="courseEditor" class="eyebrow">YOUR GAME DIRECTIONS</label><textarea id="courseEditor" spellcheck="false" aria-label="Game directions" placeholder="Loading your game..."></textarea></div>
+  <aside class="editor-help"><h3>Game-building vocabulary</h3><p>Start a stage and create a platform:</p><code>stage 1 "Bubble Run"
+platform start at 0 0 0 size 5</code><p>Try moving and disappearing obstacles:</p><code>moving glide at 8 0 0 size 3 axis z range 1 period 3
+vanishing ice at 12 0 0 size 3 delay 1.5</code><p>Save progress and reach the goal:</p><code>checkpoint safe at 16 0 0 size 4
+spinner hazard at 20 0 0 size 2 range 1 period 3
+finish goal at 24 0 0 size 5</code><p>You can also change <strong>theme soda</strong> to <strong>theme candy</strong>, or <strong>jump 10</strong> to <strong>jump 12</strong>.</p></aside>
+ </div>
+ <div class="workshop-actions"><button class="primary" id="playDirections">▶ Build &amp; Play My Game</button><button class="secondary" id="resetDirections">↺ Restore Example</button><button class="secondary" id="copyDirections">Copy Directions</button></div>
+ <p id="compileStatus" role="status" aria-live="polite">Your game is ready to edit.</p>
+</section>
+
+<details class="source-embed" id="skyboundSourcePanel"><summary>View Soda Splash’s complete HiroGlifx gameplay and course scripts</summary><p>The game’s scoring, stage difficulty and reward logic is now implemented in the gameplay file. The separate course file defines all platform geometry. Babylon and the generic physics engine remain JavaScript.</p><div class="source-actions"><button id="showSkyboundRules">Full gameplay rules</button><button id="showSkyboundCourse">Course / classes</button><a id="skyboundSourceLink" href="./examples/skybound-gameplay.scroll" target="_blank" rel="noopener">Open source</a></div><pre id="skyboundSourceCode">Loading HiroGlifx source…</pre></details>
+<footer>Built in HiroGlifx · Browser-first, responsive, original game prototype · No account required</footer>
+</div>
+<script src="./runtime/scroll-game-runtime.js"></script>
+<script src="./runtime/scroll-world-rules.js"></script>
+<script src="./runtime/scroll-runtime.js"></script>
+<script src="./runtime/canonical-runtime.js"></script>
+<script src="./runtime/obby-world.js"></script>
+<script src="./runtime/skybound-world.js"></script>
+<script src="./runtime/obby-canonical.js"></script>
+<script src="./runtime/canonical-blueprints.js"></script>
+<script src="./runtime/obby-babylon.js"></script>
+<script src="./runtime/simple-obby.js"></script>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id),keys=new Set();
+let segments=[...document.querySelectorAll(".stage-segment")];
+let cards=[...document.querySelectorAll(".stage-card")];
+let runtime=null,model=null,renderer=null,started=false,paused=true,ready=false,source=null,events=[],raf=0,lastStage=1,muted=false,audio=null;
+let rules=null,rulesSource=null,sourceMode="course",design=null;
+function showSkyboundCode(mode){
+ sourceMode=mode;
+ $("skyboundSourceCode").textContent=mode==="rules"?rulesSource:source;
+ $("skyboundSourceLink").href=mode==="rules"?"./examples/skybound-gameplay.scroll":"./examples/simple-obby/soda-splash.scroll";
+}
+$("showSkyboundRules").onclick=()=>showSkyboundCode("rules");
+$("showSkyboundCourse").onclick=()=>showSkyboundCode("course");
+const bestKey="hiroglifx-simple-obby-v1";
+$("playDirections").addEventListener("click",async()=>{
+ try{
+   const candidate=$("courseEditor").value;HiroSimpleObby.compile(candidate);
+   source=candidate;await build();await start();$("compileStatus").textContent="✓ New course compiled and playing!";
+ }catch(e){$("compileStatus").textContent="⚠ "+e.message;announce(e.message);}
+});
+$("resetDirections").addEventListener("click",async()=>{
+ try{
+  const response=await fetch("./examples/simple-obby/soda-splash.scroll",{cache:"no-store"});
+  if(!response.ok)throw Error("Example not found");
+  source=await response.text();$("courseEditor").value=source;
+  await build();$("compileStatus").textContent="✓ Example restored.";
+ }catch(e){$("compileStatus").textContent="⚠ "+e.message;}
+});
+$("copyDirections").addEventListener("click",async()=>{
+ try{await navigator.clipboard.writeText($("courseEditor").value);$("compileStatus").textContent="✓ Directions copied.";}
+ catch{$("compileStatus").textContent="Select and copy your directions manually.";}
+});
+// Read-only state snapshot for browser QA and performance diagnostics.
+window.HiroSodaSplashSnapshot=()=>model?Object.freeze({x:model.player.x,z:model.player.z,stage:model.currentStage,time:model.elapsed,completed:model.completed,score:rules?.get("score")??0,rulesLoaded:!!rules}):null;
+window.HiroSimpleObbySnapshot=()=>design?Object.freeze({
+ title:design.title,theme:design.theme,stages:design.stages.length,
+ objects:model?.tiles.size||0,started,paused,sceneReady:!!renderer?.scene,
+ speed:model?.moveSpeed||0,jump:model?.jumpSpeed||0,
+ player:model?.player?{x:model.player.x,y:model.player.y,z:model.player.z,grounded:model.player.grounded}:null
+}):null;
+function configureStageHUD(){
+ const bar=document.querySelector(".stage-bar"),tiles=$("stageCards");
+ bar.replaceChildren();tiles.replaceChildren();
+ for(const stage of design.stages){
+  const seg=document.createElement("div");seg.className="stage-segment";bar.appendChild(seg);
+  const card=document.createElement("div");card.className="stage-card";
+  const number=document.createElement("b");number.textContent=String(stage.id).padStart(2,"0");
+  const title=document.createElement("small");title.textContent=stage.name;
+  card.append(number,title);tiles.appendChild(card);
+ }
+ segments=[...bar.querySelectorAll(".stage-segment")];
+ cards=[...tiles.querySelectorAll(".stage-card")];
+}
+function best(){try{return Number(localStorage.getItem(bestKey))||0;}catch{return 0;}}
+function setBest(value){try{localStorage.setItem(bestKey,String(value));}catch{}}
+function time(value){const minutes=Math.floor(value/60),seconds=(value%60).toFixed(1).padStart(4,"0");return minutes+":"+seconds;}
+function updateBest(){const v=best();$("bestMetric").textContent=v?v.toFixed(1)+"s":"—";}
+function sound(frequency=440,duration=.13){
+ const preset=design?.sound||"bubbles";
+ if(muted||preset==="off"||typeof window.AudioContext!=="function"&&typeof window.webkitAudioContext!=="function")return;
+ try{
+  audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+  if(audio.state==="suspended")audio.resume();
+  const now=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();
+  const filter=audio.createBiquadFilter();filter.type="lowpass";filter.frequency.value=preset==="soft"?1100:4200;
+  osc.type=preset==="arcade"?"square":preset==="soft"?"triangle":"sine";
+  const start=preset==="bubbles"?frequency*.8:preset==="glass"?frequency*1.6:frequency;
+  const finish=preset==="bubbles"?frequency*1.25:Math.max(80,frequency*.68);
+  osc.frequency.setValueAtTime(start,now);
+  osc.frequency.exponentialRampToValueAtTime(finish,now+duration);
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(preset==="arcade"?.025:.052,now+.012);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  osc.connect(filter).connect(gain).connect(audio.destination);osc.start(now);osc.stop(now+duration+.01);
+ }catch{}
+}
+function announce(text){$("status").textContent=text;}
+function overlay(title,description,eyebrow,button){
+ $("overlayTitle").textContent=title;$("overlayDescription").textContent=description;
+ $("overlayEyebrow").textContent=eyebrow;$("startButton").textContent=button;
+ $("overlay").hidden=false;
+}
+function hideOverlay(){$("overlay").hidden=true;}
+function hud(){
+ if(!model)return;
+ const s=model.summary();$("stageLabel").textContent=String(s.stage).padStart(2,"0")+" · "+s.stageName.toUpperCase();
+ $("timer").textContent=time(s.time);$("deaths").textContent=s.deaths;
+ $("score").textContent=rules?.get("score")??0;
+ $("modeLabel").textContent=model.completed?"COMPLETE":paused?"PAUSED":"LIVE";
+ segments.forEach((segment,i)=>{
+  segment.classList.toggle("complete",i+1<s.stage);
+  segment.classList.toggle("current",i+1===s.stage);
+ });
+ cards.forEach((card,i)=>{card.classList.toggle("finished",i+1<s.stage);card.classList.toggle("active",i+1===s.stage);});
+}
+function teardown(){
+ cancelAnimationFrame(raf);keys.clear();for(const unsub of events)unsub();events=[];
+ if(renderer)renderer.stop();renderer=null;
+ if(runtime)runtime.dispose();runtime=null;model=null;rules=null;ready=false;started=false;paused=true;
+}
+async function build(){
+ teardown();
+ if(!window.BABYLON)throw new Error("Babylon.js could not load. An internet connection is required.");
+ if(!source||!rulesSource){
+   const [course,gameplay]=await Promise.all([
+     fetch("./examples/simple-obby/soda-splash.scroll",{cache:"no-store"}),
+     fetch("./examples/skybound-gameplay.scroll",{cache:"no-store"})
+   ]);
+   if(!course.ok||!gameplay.ok)throw new Error("Could not fetch Soda Splash's HiroGlifx sources");
+   source=await course.text();rulesSource=await gameplay.text();
+ }
+ const rt=HiroObbyCanonical.install(new HiroCanonical.CanonicalRuntime());
+ design=HiroSimpleObby.compile(source);
+ const code=HiroBlueprints.install(rt,design.canonical);
+ await rt.execute(code);
+ const world=rt.get("world");
+ if(!world?.player||world.tiles.size<3)throw new Error("Your course needs more platforms");
+ world.stages=design.stages.map((stage,i)=>({...stage,description:"Your custom stage",color:["#49dfff","#ff82bf","#ffe398","#7ff1c3","#ba9bff"][i]}));
+ world.moveSpeed=design.speed;world.jumpSpeed=design.jump;
+ configureStageHUD();
+ if($("courseEditor"))$("courseEditor").value=source;
+ const policy=new HiroWorldRules.WorldRules(rulesSource,{name:"skybound-gameplay",services:{
+   world_configure:(speed,jumpForce)=>{
+     world.moveSpeed=design.speed;world.jumpSpeed=design.jump;return design.speed;
+   }
+ }});
+ world.motionRules={
+   movingOffset:(time,range,period)=>policy.run("movingOffset",time,range,period),
+   spinnerX:(time,range,period)=>policy.run("spinnerX",time,range,period),
+   spinnerZ:(time,range,period)=>policy.run("spinnerZ",time,range,period),
+   shouldVanish:(time,started,delay)=>policy.run("shouldVanish",time,started,delay),
+   respawnDelay:()=>policy.run("respawnDelay")
+ };
+ const view=new HiroObbyBabylon.ObbyBabylonAdapter({
+   BABYLON:window.BABYLON,canvas:$("game"),world,theme:design.theme,
+   onBeforeStep:dt=>policy.tick(dt)
+ });
+ view.start();view.paused=true;
+ runtime=rt;model=world;renderer=view;rules=policy;ready=true;lastStage=1;showSkyboundCode(sourceMode);
+ events.push(world.on("jump",()=>{policy.run("onJump");sound(680,.085);}));
+ events.push(world.on("land",({tile})=>{if(tile!=="start")sound(480+(world.tiles.get(tile)?.stage||1)*95,.085);}));
+ events.push(world.on("checkpoint",({tile})=>{policy.run("onCheckpoint");sound(840,.2);announce("✓ Checkpoint saved: "+tile);}));
+ events.push(world.on("stage",({stage,title})=>{policy.run("onStage",stage);lastStage=stage;sound(700+stage*80,.22);announce("STAGE "+stage+" — "+title);}));
+ events.push(world.on("respawn",()=>{policy.run("onRespawn");sound(190,.24);announce("Try again! Your checkpoint is saved.");}));
+ events.push(world.on("finish",()=>{
+  policy.run("onFinish");
+  renderer.paused=true;paused=true;const old=best();
+  if(!old||world.elapsed<old){setBest(world.elapsed);updateBest();}
+  sound(1100,.45);overlay("You reached the summit!","Your time: "+time(world.elapsed)+" · Score "+policy.get("score")+" · "+world.dead+" respawns. "+
+  ((!old||world.elapsed<old)?"New personal best!":"Think you can beat your best time?"),"SODA SPLASH COMPLETE","↻ Play again");
+ }));
+ announce("Soda Splash is ready. Press Start adventure.");
+ hud();raf=requestAnimationFrame(tick);
+}
+function tick(){
+ if(model&&started&&!paused&&!model.completed){
+  let x=0,z=0;
+  // Forward follows the actual course direction (+X); A/D strafe across platforms.
+  if(keys.has("ArrowUp")||keys.has("KeyW"))x++;
+  if(keys.has("ArrowDown")||keys.has("KeyS"))x--;
+  if(keys.has("ArrowLeft")||keys.has("KeyA"))z++;
+  if(keys.has("ArrowRight")||keys.has("KeyD"))z--;
+  const length=Math.hypot(x,z)||1;
+  model.setInput(x/length,z/length);
+ }else if(model){model.setInput(0,0);}
+ hud();raf=requestAnimationFrame(tick);
+}
+async function start(){
+ if(!ready||model?.completed){
+  announce("Building your next run…");
+  try{await build();}catch(error){announce(error.message);return;}
+ }
+ started=true;paused=false;renderer.paused=false;renderer.last=0;keys.clear();hideOverlay();
+ $("game").focus();announce("Go! Reach the gold finish platform.");
+}
+function togglePause(){
+ if(!started||!renderer||model?.completed)return;
+ paused=!paused;renderer.paused=paused;renderer.last=0;
+ if(paused)overlay("Adventure paused","Your run is safe. Resume whenever you're ready.","TAKE A BREATHER","▶ Resume");
+ else hideOverlay();
+}
+function jump(){
+ if(!model||paused||model.completed)return;
+ model.jump();
+}
+$("startButton").addEventListener("click",start);
+$("editorButton").addEventListener("click",()=>location.href="#courseWorkshop");
+$("restartButton").addEventListener("click",()=>{build().then(start).catch(e=>announce(e.message));});
+$("fullscreenButton").addEventListener("click",()=>{
+ const frame=document.querySelector(".game-frame");
+ if(!document.fullscreenElement)frame.requestFullscreen?.().catch(e=>announce(e.message));
+ else document.exitFullscreen?.();
+});
+$("muteButton").addEventListener("click",()=>{
+ muted=!muted;$("muteButton").textContent=muted?"♫ Sound off":"♫ Sound on";
+ $("muteButton").setAttribute("aria-pressed",String(muted));
+});
+window.addEventListener("keydown",e=>{
+ const editable=e.target.matches("input,textarea,select")||e.target.isContentEditable;
+ if(editable)return;
+ if(["ArrowRight","ArrowLeft","ArrowUp","ArrowDown","Space"].includes(e.code))e.preventDefault();
+ if(e.code==="Space"&&!e.repeat)jump();
+ if(e.code==="KeyR"&&!e.repeat&&model){model.reset();announce("Respawned at checkpoint.");}
+ if(e.code==="Escape"&&!e.repeat)togglePause();
+ keys.add(e.code);
+});
+window.addEventListener("keyup",e=>keys.delete(e.code));
+window.addEventListener("blur",()=>{keys.clear();if(renderer&&!paused)togglePause();});
+$("jumpButton").addEventListener("pointerdown",e=>{e.preventDefault();jump();});
+document.querySelectorAll("[data-move]").forEach(button=>{
+ const code=button.dataset.move;
+ button.addEventListener("pointerdown",e=>{e.preventDefault();keys.add(code);button.setPointerCapture(e.pointerId);});
+ for(const event of ["pointerup","pointercancel","lostpointercapture"])button.addEventListener(event,()=>keys.delete(code));
+});
+updateBest();
+build().catch(error=>{announce(error.message);overlay("Couldn't load Soda Splash",error.message,"STARTUP ERROR","↻ Retry");});
+})();
+</script></body></html>
