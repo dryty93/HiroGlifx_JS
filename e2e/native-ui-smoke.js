@@ -27,6 +27,12 @@ async function main(){
     if(route==="/dashboard"){
      const button=page.getByRole("button",{name:"Clicked 0 times"});await button.click();
      await page.getByRole("button",{name:"Clicked 1 times"}).waitFor();
+     await page.getByRole("button",{name:"Polymorphic UI details"}).click();
+     await page.getByRole("dialog",{name:"Polymorphic UI details"}).waitFor();
+     await page.getByRole("button",{name:"Close dialog"}).click();
+     assert.equal(await page.getByRole("dialog").count(),0);
+     await page.getByRole("button",{name:"Switch theme"}).click();
+     assert.equal(await page.locator("html").getAttribute("data-hg-theme"),"light");
     }
     if(route==="/form"){
      await page.getByRole("textbox",{name:"Your name"}).fill("Taylor");
