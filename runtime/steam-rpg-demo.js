@@ -140,6 +140,7 @@ class RPGDemo{
    this.attackFlash=Math.max(0,this.attackFlash-dt);
    this.animationState=this.attackFlash>0?"attack":!this.character.grounded?"jump":moving?"run":"idle";
    this.animations?.update({speed:moving*5,grounded:this.character.grounded,attacking:this.attackFlash>0,dead:!hero.alive});
+   this.animations?.tick(dt);
    if(this.keys.has("KeyJ"))this.attack();
    for(const enemy of this.enemies){
      const a=this.combat.actor(enemy.id);
