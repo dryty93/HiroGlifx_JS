@@ -48,7 +48,7 @@ class RiftfallUI{
    this.close=this.el("button",{type:"button"},"Close");
    this.listen(this.close,"click",()=>this.hide());
    head.append(this.heading,this.close);
-   this.description=this.el("p");
+   this.description=this.el("p",{id:"rpgDescription"});
    this.entries=this.el("div",{id:"rpgEntries"});
    dialog.append(head,this.description,this.entries);modal.appendChild(dialog);
    this.stage.appendChild(modal);this.nodes.push(modal);
