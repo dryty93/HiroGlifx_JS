@@ -38,5 +38,56 @@ class RecastNavigation{
  }
  dispose(){for(const crowd of this.crowds)crowd.dispose?.();this.crowds=[];this.plugin.dispose?.();}
 }
-return {RecastNavigation,DEFAULT_CONFIG:config};
+
+class RouteBudget{
+ constructor({path,fallback,maxQueriesPerSecond=20,ttl=.3,errorLimit=3}={}){
+   if(typeof path!=="function"||typeof fallback!=="function"||
+      !Number.isInteger(maxQueriesPerSecond)||maxQueriesPerSecond<1||maxQueriesPerSecond>100||
+      !Number.isFinite(ttl)||ttl<0||ttl>5||
+      !Number.isInteger(errorLimit)||errorLimit<1||errorLimit>20)
+     throw Error("Invalid Recast route budget");
+   this.path=path;this.fallback=fallback;this.maxQueries=maxQueriesPerSecond;
+   this.ttl=ttl;this.errorLimit=errorLimit;this.disabled=false;
+   this.calls=0;this.fallbacks=0;this.errors=0;this.cacheHits=0;this.failures=0;
+   this.window=-1;this.windowCalls=0;this.cache=new Map();this.lastError=null;
+ }
+ route(from,to,now=0){
+   for(const p of [from,to])if(!p||!Number.isFinite(p.x)||!Number.isFinite(p.z)||Math.abs(p.x)>10000||Math.abs(p.z)>10000)
+     throw Error("Invalid navigation position");
+   if(!Number.isFinite(now)||now<0)throw Error("Invalid route time");
+   const fallback=()=>{
+     this.fallbacks++;
+     const route=this.fallback(from,to);
+     return Array.isArray(route)?route:[];
+   };
+   if(this.disabled)return fallback();
+   const second=Math.floor(now);
+   if(second!==this.window){this.window=second;this.windowCalls=0;}
+   const key=[Math.round(from.x),Math.round(from.z),Math.round(to.x),Math.round(to.z)].join(":");
+   const cached=this.cache.get(key);
+   if(cached&&cached.expires>=now){this.cacheHits++;return cached.route.map(p=>({...p}));}
+   if(this.windowCalls>=this.maxQueries)return fallback();
+   this.windowCalls++;this.calls++;
+   try{
+     const result=this.path(from,to);
+     if(!Array.isArray(result)||result.length<2||result.length>500||
+        result.some(p=>!p||!Number.isFinite(p.x)||!Number.isFinite(p.z)))
+       throw Error("Recast returned invalid or empty route");
+     const route=result.map(p=>({x:p.x,z:p.z}));
+     this.failures=0;
+     if(this.cache.size>=64)this.cache.delete(this.cache.keys().next().value);
+     this.cache.set(key,{route,expires:now+this.ttl});
+     return route.map(p=>({...p}));
+   }catch(error){
+     this.errors++;this.failures++;this.lastError=String(error.message||error).slice(0,200);
+     if(this.failures>=this.errorLimit){this.disabled=true;this.cache.clear();}
+     return fallback();
+   }
+ }
+ stats(){return Object.freeze({mode:this.disabled?"a-star":"recast",queries:this.calls,
+   fallbacks:this.fallbacks,errors:this.errors,cacheHits:this.cacheHits,
+   disabled:this.disabled,lastError:this.lastError});}
+ dispose(){this.disabled=true;this.cache.clear();}
+}
+return {RecastNavigation,RouteBudget,DEFAULT_CONFIG:config};
 });
