@@ -137,6 +137,8 @@ class RPGDemo{
      const route=this.navRouter?((from,to)=>this.navRouter.route(from,to,this.combat.elapsed)):null;
      const agent=new root.HiroAI.NavigationAgent({grid:this.nav,position:{x,z},speed,route});
      const actor={id,mesh,agent,index,stage,decision:null,attackTime:0};
+     if(root.HiroCreatureArt?.CreatureVisual)
+       actor.visual=new root.HiroCreatureArt.CreatureVisual({BABYLON:B,scene:this.scene,parent:mesh,color,guardian:stage===3});
      actor.decision=this.makeBehavior(actor);this.enemies.push(actor);
    }
    this.wave=stage;this.level.waveStart(stage);
@@ -244,6 +246,7 @@ class RPGDemo{
      const a=this.combat.actor(enemy.id);
      if(!a.alive){enemy.mesh.setEnabled?.(false);continue;}
      const d=Math.hypot(hero.x-a.x,hero.z-a.z);
+     enemy.visual?.tick(dt,{moving:a.alive&&hero.alive&&d>2,warning:this.telegraphs.has(enemy.id),defeated:!a.alive});
      if(hero.alive)enemy.decision.tick({distance:d,target:{x:hero.x,z:hero.z},dt},dt);
      a.x=enemy.agent.position.x;a.z=enemy.agent.position.z;
    }
@@ -293,6 +296,7 @@ class RPGDemo{
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
+   for(const enemy of this.enemies)enemy.visual?.dispose();
    this.campaign?.dispose();this.attackWindows.dispose();this.telegraphs.dispose();this.level?.dispose();this.navRouter?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
