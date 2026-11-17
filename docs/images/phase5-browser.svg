@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620"><rect width="1100" height="620" fill="#0c1220"/>
+<text x="48" y="58" fill="#f0f5ff" font-family="Arial" font-size="30" font-weight="bold">HiroGlifx · Phase 5 — Browser Automation Policy</text>
+<text x="48" y="89" fill="#a4b6d0" font-family="Arial" font-size="16">Code-derived interaction illustration · not a captured browser screenshot</text>
+<rect x="46" y="129" width="468" height="432" rx="15" fill="#152139" stroke="#425672"/>
+<text x="72" y="173" fill="#90beff" font-family="monospace" font-size="18">examples/automation.scroll</text>
+<text x="72" y="226" fill="#e0ebfa" font-family="monospace" font-size="16">browser.open "https://example.com"</text>
+<text x="72" y="270" fill="#e0ebfa" font-family="monospace" font-size="16">browser.wait "h1"</text>
+<text x="72" y="314" fill="#e0ebfa" font-family="monospace" font-size="16">browser.screenshot "example.png"</text>
+<rect x="72" y="382" width="412" height="133" rx="12" fill="#223957"/>
+<text x="98" y="423" fill="#a6e9c6" font-family="Arial" font-size="19" font-weight="bold">Allowed domains</text>
+<text x="98" y="459" fill="#d4e4f9" font-family="monospace" font-size="17">example.com</text>
+<text x="98" y="486" fill="#a3b7ce" font-family="Arial" font-size="14">Other domains are denied</text>
+<path d="M523 340H589" stroke="#60a5fa" stroke-width="4"/><path d="M578 329l15 11-15 11" fill="none" stroke="#60a5fa" stroke-width="4"/>
+<rect x="607" y="129" width="445" height="432" rx="15" fill="#152139" stroke="#425672"/>
+<text x="633" y="173" fill="#90beff" font-family="Arial" font-size="20" font-weight="bold">Operator approval</text>
+<rect x="632" y="200" width="395" height="111" rx="12" fill="#233952"/>
+<text x="656" y="237" fill="#f0f5ff" font-family="Arial" font-size="20">Approve click "#submit"?</text>
+<rect x="656" y="258" width="120" height="35" rx="8" fill="#205a4a"/><text x="691" y="282" fill="#dcfff2" font-family="Arial" font-size="16">Yes</text>
+<rect x="789" y="258" width="120" height="35" rx="8" fill="#543448"/><text x="829" y="282" fill="#ffe2e5" font-family="Arial" font-size="16">No</text>
+<text x="632" y="357" fill="#c7d8eb" font-family="Arial" font-size="17">Audit trail</text>
+<rect x="632" y="380" width="395" height="111" rx="11" fill="#1e324c"/>
+<text x="650" y="413" fill="#a6e9c6" font-family="monospace" font-size="16">open — ok</text>
+<text x="650" y="444" fill="#ffd6aa" font-family="monospace" font-size="16">click — approval required</text>
+<text x="650" y="475" fill="#c7d8eb" font-family="Arial" font-size="14">Typed text excluded from audit</text>
+</svg>
