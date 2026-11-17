@@ -1630,3 +1630,641 @@ ui library
         text link "{action}";
     ]
     break;
+
+// Design Inspiration (Raindrop public collection, Nov 2026): original native components.
+.AnnouncementRibbon = (Component)
+    $ message = "New: HiroGlifx design components.";
+    ? visible = true;
+    : render(self) = [
+        element banner aside root;
+        class banner "hg-rain-announcement";
+        show banner visible;
+        attr banner aria-label "Announcement";
+        element copy p banner;
+        text copy "{message}";
+        element close button banner;
+        class close "hg-rain-ghost";
+        attr close type "button";
+        attr close aria-label "Dismiss announcement";
+        text close "×";
+        on close click dismiss;
+    ]
+    : dismiss(self) = [
+        set visible false;
+    ]
+    break;
+
+.MegaNavigation = (Component)
+    $ brand = "Hiro Studio";
+    ? expanded = false;
+    : render(self) = [
+        element nav nav root;
+        class nav "hg-rain-meganav";
+        attr nav aria-label "Studio navigation";
+        element line div nav;
+        class line "hg-rain-meganav-line";
+        element brand strong line;
+        text brand "{brand}";
+        element toggle button line;
+        class toggle "hg-rain-nav-toggle";
+        attr toggle type "button";
+        attr toggle aria-expanded "{expanded}";
+        text toggle "Explore products +";
+        on toggle click toggleMenu;
+        element menu div nav;
+        class menu "hg-rain-mega-panel";
+        show menu expanded;
+        element link0 a menu;
+        class link0 "hg-rain-mega-link";
+        attr link0 href "/catalog";
+        text link0 "Products";
+        element link1 a menu;
+        class link1 "hg-rain-mega-link";
+        attr link1 href "/showcase";
+        text link1 "Experiences";
+        element link2 a menu;
+        class link2 "hg-rain-mega-link";
+        attr link2 href "/catalog-heroes";
+        text link2 "Design Systems";
+        element link3 a menu;
+        class link3 "hg-rain-mega-link";
+        attr link3 href "/catalog-conversion";
+        text link3 "Documentation";
+    ]
+    : toggleMenu(self) = [
+        toggle expanded;
+    ]
+    break;
+
+.FullscreenNavigation = (Component)
+    ? open = false;
+    $ brand = "Hiro Design";
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-fullnav";
+        element trigger button shell;
+        class trigger "hg-button";
+        attr trigger type "button";
+        attr trigger aria-expanded "{open}";
+        text trigger "Open full-screen menu";
+        on trigger click toggleMenu;
+        element overlay div shell;
+        class overlay "hg-rain-fullnav-overlay";
+        show overlay open;
+        element heading h2 overlay;
+        class heading "hg-editorial";
+        text heading "{brand}";
+        element link0 a overlay;
+        class link0 "hg-rain-fullnav-link";
+        attr link0 href "/";
+        text link0 "Home";
+        element link1 a overlay;
+        class link1 "hg-rain-fullnav-link";
+        attr link1 href "/showcase";
+        text link1 "All Experiences";
+        element link2 a overlay;
+        class link2 "hg-rain-fullnav-link";
+        attr link2 href "/raindrop-inspiration";
+        text link2 "Collection";
+        element close button overlay;
+        class close "hg-button hg-button-primary";
+        attr close type "button";
+        text close "Close menu";
+        on close click toggleMenu;
+    ]
+    : toggleMenu(self) = [
+        toggle open;
+    ]
+    break;
+
+.BreadcrumbTrail = (Component)
+    : render(self) = [
+        element nav nav root;
+        class nav "hg-rain-breadcrumbs";
+        attr nav aria-label "Breadcrumb";
+        element home a nav;
+        attr home href "/";
+        text home "Home";
+        element divider span nav;
+        attr divider aria-hidden "true";
+        text divider "/";
+        element parent a nav;
+        attr parent href "/catalog";
+        text parent "Catalog";
+        element divider2 span nav;
+        attr divider2 aria-hidden "true";
+        text divider2 "/";
+        element current span nav;
+        attr current aria-current "page";
+        text current "Native components";
+    ]
+    break;
+
+.SidebarWorkspace = (Component)
+    ? collapsed = false;
+    $ heading = "Workspace";
+    : render(self) = [
+        element layout div root;
+        class layout "hg-rain-workspace";
+        element aside aside layout;
+        class aside "hg-rain-sidebar";
+        element toggle button aside;
+        class toggle "hg-button";
+        attr toggle type "button";
+        attr toggle aria-expanded "{collapsed}";
+        text toggle "Toggle sidebar";
+        on toggle click toggleMenu;
+        element links nav aside;
+        hide links collapsed;
+        attr links aria-label "Workspace pages";
+        element link0 div links;
+        class link0 "hg-rain-sidebar-link";
+        text link0 "Overview";
+        element link1 div links;
+        class link1 "hg-rain-sidebar-link";
+        text link1 "Projects";
+        element link2 div links;
+        class link2 "hg-rain-sidebar-link";
+        text link2 "Reports";
+        element link3 div links;
+        class link3 "hg-rain-sidebar-link";
+        text link3 "Settings";
+        element main section layout;
+        class main "hg-rain-workspace-panel";
+        element title h3 main;
+        text title "{heading}";
+        element desc p main;
+        text desc "A reusable collapsible navigation shell, composed entirely in .scroll.";
+    ]
+    : toggleMenu(self) = [
+        toggle collapsed;
+    ]
+    break;
+
+.CommandPalette = (Component)
+    ? open = false;
+    $ query = "";
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-command";
+        element trigger button shell;
+        class trigger "hg-button";
+        attr trigger type "button";
+        text trigger "Open command palette";
+        on trigger click toggleOpen;
+        element panel div shell;
+        class panel "hg-rain-command-panel";
+        show panel open;
+        attr panel role "dialog";
+        attr panel aria-modal "false";
+        attr panel aria-label "Command palette";
+        element heading h3 panel;
+        text heading "Search commands";
+        element input input panel;
+        class input "hg-input";
+        attr input type "search";
+        attr input placeholder "Type a command…";
+        attr input aria-label "Command search";
+        bind input query;
+        element status p panel;
+        class status "hg-muted";
+        text status "Search query: {query}";
+        element result0 p panel;
+        class result0 "hg-rain-command-result";
+        text result0 "View projects";
+        element result1 p panel;
+        class result1 "hg-rain-command-result";
+        text result1 "Open documentation";
+        element result2 p panel;
+        class result2 "hg-rain-command-result";
+        text result2 "Search library";
+        element close button panel;
+        class close "hg-button";
+        attr close type "button";
+        text close "Close search";
+        on close click toggleOpen;
+    ]
+    : toggleOpen(self) = [
+        toggle open;
+    ]
+    break;
+
+.AnimatedPillTabs = (Component)
+    ? selected = false;
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-pilltab";
+        element tabs div shell;
+        class tabs "hg-rain-pilltab-row";
+        attr tabs role "group";
+        attr tabs aria-label "Design views";
+        element first button tabs;
+        class first "hg-rain-pilltab-button";
+        attr first type "button";
+        text first "Design";
+        on first click selectFirst;
+        element second button tabs;
+        class second "hg-rain-pilltab-button";
+        attr second type "button";
+        text second "Develop";
+        on second click selectSecond;
+        element design div shell;
+        class design "hg-rain-pilltab-card";
+        hide design selected;
+        text design "Design: explore type, spacing, visual hierarchy and layout.";
+        element develop div shell;
+        class develop "hg-rain-pilltab-card";
+        show develop selected;
+        text develop "Develop: reusable classes, polymorphism and native behaviors.";
+    ]
+    : selectFirst(self) = [
+        set selected false;
+    ]
+    : selectSecond(self) = [
+        set selected true;
+    ]
+    break;
+
+.ToastNotification = (Component)
+    ? visible = false;
+    $ message = "Changes saved successfully.";
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-toast-shell";
+        element launch button shell;
+        class launch "hg-button hg-button-primary";
+        attr launch type "button";
+        text launch "Show notification";
+        on launch click toggleToast;
+        element toast div shell;
+        class toast "hg-rain-toast";
+        show toast visible;
+        attr toast role "status";
+        attr toast aria-live "polite";
+        element check span toast;
+        text check "✓";
+        element message span toast;
+        text message "{message}";
+        element dismiss button toast;
+        class dismiss "hg-rain-ghost";
+        attr dismiss type "button";
+        attr dismiss aria-label "Dismiss notification";
+        text dismiss "×";
+        on dismiss click toggleToast;
+    ]
+    : toggleToast(self) = [
+        toggle visible;
+    ]
+    break;
+
+.RewardCardPack = (Component)
+    ? revealed = false;
+    $ reward = "+250 points";
+    $ label = "Mystery pack";
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-reward-shell";
+        element heading h3 shell;
+        text heading "{label}";
+        element card button shell;
+        class card "hg-rain-reward-card";
+        attr card type "button";
+        attr card aria-pressed "{revealed}";
+        on card click reveal;
+        element front div card;
+        class front "hg-rain-reward-front";
+        hide front revealed;
+        element star span front;
+        class star "hg-rain-reward-star";
+        text star "✦";
+        element frontLabel span front;
+        text frontLabel "Tap to reveal";
+        element back div card;
+        class back "hg-rain-reward-back";
+        show back revealed;
+        element badge span back;
+        class badge "hg-rain-reward-star";
+        text badge "★";
+        element reward strong back;
+        text reward "{reward}";
+        element instructions p shell;
+        class instructions "hg-muted";
+        text instructions "Tap the pack again to reset.";
+    ]
+    : reveal(self) = [
+        toggle revealed;
+    ]
+    break;
+
+.IdleMascot = (Component)
+    $ title = "Woolly";
+    $ description = "A tiny character relaxing in a grassy meadow.";
+    : render(self) = [
+        element scene figure root;
+        class scene "hg-rain-meadow";
+        element cloud1 span scene;
+        class cloud1 "hg-rain-cloud hg-rain-cloud-one";
+        attr cloud1 aria-hidden "true";
+        element cloud2 span scene;
+        class cloud2 "hg-rain-cloud hg-rain-cloud-two";
+        attr cloud2 aria-hidden "true";
+        element grass div scene;
+        class grass "hg-rain-grass";
+        attr grass aria-hidden "true";
+        element body div scene;
+        class body "hg-rain-sheep-body";
+        attr body role "img";
+        attr body aria-label "Illustrated sheep gently grazing on grass";
+        element head span body;
+        class head "hg-rain-sheep-head";
+        attr head aria-hidden "true";
+        element ear span body;
+        class ear "hg-rain-sheep-ear";
+        attr ear aria-hidden "true";
+        element leg1 span body;
+        class leg1 "hg-rain-sheep-leg hg-rain-leg-one";
+        attr leg1 aria-hidden "true";
+        element leg2 span body;
+        class leg2 "hg-rain-sheep-leg hg-rain-leg-two";
+        attr leg2 aria-hidden "true";
+        element caption figcaption scene;
+        class caption "hg-rain-meadow-caption";
+        text caption "{title} — {description}";
+    ]
+    break;
+
+.HoverCardStack = (Component)
+    $ title = "Discover the deck";
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-stack-shell";
+        element title h3 shell;
+        text title "{title}";
+        element stack div shell;
+        class stack "hg-rain-stack";
+        element card0 article stack;
+        class card0 "hg-rain-stack-card hg-rain-stack-card-0";
+        element text0 strong card0;
+        text text0 "Compose";
+        element card1 article stack;
+        class card1 "hg-rain-stack-card hg-rain-stack-card-1";
+        element text1 strong card1;
+        text text1 "Create";
+        element card2 article stack;
+        class card2 "hg-rain-stack-card hg-rain-stack-card-2";
+        element text2 strong card2;
+        text text2 "Explore";
+    ]
+    break;
+
+.SkeletonMorph = (Component)
+    ? loaded = false;
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-skeleton-shell";
+        element placeholder div shell;
+        class placeholder "hg-rain-skeleton";
+        hide placeholder loaded;
+        element line1 span placeholder;
+        class line1 "hg-rain-skeleton-line";
+        element line2 span placeholder;
+        class line2 "hg-rain-skeleton-line hg-rain-skeleton-short";
+        element line3 span placeholder;
+        class line3 "hg-rain-skeleton-line";
+        element content article shell;
+        class content "hg-rain-loaded-card";
+        show content loaded;
+        element heading h3 content;
+        text heading "Your interface is ready.";
+        element desc p content;
+        text desc "A skeleton-to-content state change with no custom JavaScript.";
+        element toggle button shell;
+        class toggle "hg-button";
+        attr toggle type "button";
+        text toggle "Toggle loading state";
+        on toggle click toggleState;
+    ]
+    : toggleState(self) = [
+        toggle loaded;
+    ]
+    break;
+
+.ShimmerHeadline = (Component)
+    $ label = "Interfaces with feeling.";
+    : render(self) = [
+        element title h2 root;
+        class title "hg-rain-shimmer";
+        text title "{label}";
+    ]
+    break;
+
+.GradientMeshBackground = (Component)
+    $ headline = "Crafted in motion.";
+    : render(self) = [
+        element hero section root;
+        class hero "hg-rain-gradient-hero";
+        element orb div hero;
+        class orb "hg-rain-gradient-orb";
+        attr orb aria-hidden "true";
+        element eyebrow p hero;
+        class eyebrow "hg-kicker";
+        text eyebrow "MOTION MADE NATIVE";
+        element heading h2 hero;
+        class heading "hg-editorial";
+        text heading "{headline}";
+    ]
+    break;
+
+.DashboardAnalytics = (Component)
+    $ heading = "Workspace analytics";
+    $ primary = "24,680";
+    $ secondary = "+18.4%";
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-analytics";
+        element top div shell;
+        class top "hg-rain-analytics-top";
+        element title h3 top;
+        text title "{heading}";
+        element indicator span top;
+        class indicator "hg-rain-growth";
+        text indicator "{secondary}";
+        element body div shell;
+        class body "hg-rain-analytics-body";
+        element metric strong body;
+        class metric "hg-rain-big-number";
+        text metric "{primary}";
+        element spark div body;
+        class spark "hg-rain-spark";
+        attr spark role "img";
+        attr spark aria-label "Illustrative upward bar trend";
+        element bar0 span spark;
+        class bar0 "hg-rain-bar hg-rain-bar-0";
+        element bar1 span spark;
+        class bar1 "hg-rain-bar hg-rain-bar-1";
+        element bar2 span spark;
+        class bar2 "hg-rain-bar hg-rain-bar-2";
+        element bar3 span spark;
+        class bar3 "hg-rain-bar hg-rain-bar-3";
+        element bar4 span spark;
+        class bar4 "hg-rain-bar hg-rain-bar-4";
+        element bar5 span spark;
+        class bar5 "hg-rain-bar hg-rain-bar-5";
+        element bar6 span spark;
+        class bar6 "hg-rain-bar hg-rain-bar-6";
+        element bar7 span spark;
+        class bar7 "hg-rain-bar hg-rain-bar-7";
+        element bar8 span spark;
+        class bar8 "hg-rain-bar hg-rain-bar-8";
+        element bar9 span spark;
+        class bar9 "hg-rain-bar hg-rain-bar-9";
+    ]
+    break;
+
+.SuccessBurst = (Component)
+    ? celebrated = false;
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-success-shell";
+        element action button shell;
+        class action "hg-button hg-button-primary";
+        attr action type "button";
+        text action "Celebrate success";
+        on action click celebrate;
+        element scene div shell;
+        class scene "hg-rain-confetti";
+        show scene celebrated;
+        attr scene role "status";
+        attr scene aria-live "polite";
+        element message h3 scene;
+        text message "Achievement unlocked!";
+        element piece0 span scene;
+        class piece0 "hg-rain-piece hg-rain-piece-0";
+        attr piece0 aria-hidden "true";
+        element piece1 span scene;
+        class piece1 "hg-rain-piece hg-rain-piece-1";
+        attr piece1 aria-hidden "true";
+        element piece2 span scene;
+        class piece2 "hg-rain-piece hg-rain-piece-2";
+        attr piece2 aria-hidden "true";
+        element piece3 span scene;
+        class piece3 "hg-rain-piece hg-rain-piece-3";
+        attr piece3 aria-hidden "true";
+        element piece4 span scene;
+        class piece4 "hg-rain-piece hg-rain-piece-4";
+        attr piece4 aria-hidden "true";
+        element piece5 span scene;
+        class piece5 "hg-rain-piece hg-rain-piece-5";
+        attr piece5 aria-hidden "true";
+        element piece6 span scene;
+        class piece6 "hg-rain-piece hg-rain-piece-6";
+        attr piece6 aria-hidden "true";
+        element piece7 span scene;
+        class piece7 "hg-rain-piece hg-rain-piece-7";
+        attr piece7 aria-hidden "true";
+        element piece8 span scene;
+        class piece8 "hg-rain-piece hg-rain-piece-8";
+        attr piece8 aria-hidden "true";
+        element piece9 span scene;
+        class piece9 "hg-rain-piece hg-rain-piece-9";
+        attr piece9 aria-hidden "true";
+        element piece10 span scene;
+        class piece10 "hg-rain-piece hg-rain-piece-10";
+        attr piece10 aria-hidden "true";
+        element piece11 span scene;
+        class piece11 "hg-rain-piece hg-rain-piece-11";
+        attr piece11 aria-hidden "true";
+        element reset button scene;
+        class reset "hg-button";
+        attr reset type "button";
+        text reset "Reset";
+        on reset click celebrate;
+    ]
+    : celebrate(self) = [
+        toggle celebrated;
+    ]
+    break;
+
+.StarRating = (Component)
+    # rating = 0;
+    $ title = "Rate this experience";
+    : render(self) = [
+        element shell section root;
+        class shell "hg-rain-rating";
+        element heading h3 shell;
+        text heading "{title}";
+        element group div shell;
+        class group "hg-rain-rating-buttons";
+        attr group role "group";
+        attr group aria-label "Rating selection";
+        element star0 button group;
+        class star0 "hg-rain-star-button";
+        attr star0 type "button";
+        attr star0 aria-label "Rate 1 out of 5";
+        text star0 "★";
+        on star0 click rate0;
+        element star1 button group;
+        class star1 "hg-rain-star-button";
+        attr star1 type "button";
+        attr star1 aria-label "Rate 2 out of 5";
+        text star1 "★";
+        on star1 click rate1;
+        element star2 button group;
+        class star2 "hg-rain-star-button";
+        attr star2 type "button";
+        attr star2 aria-label "Rate 3 out of 5";
+        text star2 "★";
+        on star2 click rate2;
+        element star3 button group;
+        class star3 "hg-rain-star-button";
+        attr star3 type "button";
+        attr star3 aria-label "Rate 4 out of 5";
+        text star3 "★";
+        on star3 click rate3;
+        element star4 button group;
+        class star4 "hg-rain-star-button";
+        attr star4 type "button";
+        attr star4 aria-label "Rate 5 out of 5";
+        text star4 "★";
+        on star4 click rate4;
+        element status p shell;
+        class status "hg-muted";
+        attr status aria-live "polite";
+        text status "Current rating: {rating} out of 5";
+    ]
+    : rate0(self) = [
+        set rating "1";
+    ]
+    : rate1(self) = [
+        set rating "2";
+    ]
+    : rate2(self) = [
+        set rating "3";
+    ]
+    : rate3(self) = [
+        set rating "4";
+    ]
+    : rate4(self) = [
+        set rating "5";
+    ]
+    break;
+
+.MotionButtonRow = (Component)
+    : render(self) = [
+        element row div root;
+        class row "hg-rain-motion-buttons";
+        element hover button row;
+        class hover "hg-button hg-rain-sweep-button";
+        attr hover type "button";
+        text hover "Sweep to reveal";
+        element glow button row;
+        class glow "hg-button hg-rain-glow-button";
+        attr glow type "button";
+        text glow "Glow on hover";
+        element bounce button row;
+        class bounce "hg-button hg-rain-bounce-button";
+        attr bounce type "button";
+        text bounce "Bounce on press";
+    ]
+    break;
+
