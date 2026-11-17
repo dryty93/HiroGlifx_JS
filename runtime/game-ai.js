@@ -93,15 +93,20 @@ class BehaviorTree{
  }
 }
 class NavigationAgent{
- constructor({grid,speed=2.5,position={x:1,z:1}}){
+ constructor({grid,speed=2.5,position={x:1,z:1},route=null}){
    if(!(grid instanceof NavigationGrid))throw Error("Agent requires NavigationGrid");
-   this.grid=grid;this.speed=finite(speed,"speed");this.position={...position};this.path=[];this.lastGoal=null;this.repaths=0;
+   this.grid=grid;this.speed=finite(speed,"speed");this.position={...position};
+   if(route!==null&&typeof route!=="function")throw Error("Invalid external navigation path provider");
+   this.route=route;this.path=[];this.lastGoal=null;this.repaths=0;
  }
  navigate(target){
    const targetCell=this.grid.cell(target.x,target.z);
    const id=key(targetCell.x,targetCell.z);
    if(id!==this.lastGoal||!this.path.length){
-     this.path=this.grid.path(this.position,target);
+     const path=this.route?this.route(this.position,target):this.grid.path(this.position,target);
+     if(!Array.isArray(path)||path.length>500||path.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.z)))
+       throw Error("Invalid navigation route result");
+     this.path=path;
      this.lastGoal=id;this.repaths++;
    }
    return this.path.length>0;
