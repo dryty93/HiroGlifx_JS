@@ -36,26 +36,7 @@ The **new canonical-expression subset** brings typed variable declarations back 
     break;
 ```
 
-**Rule:** `bounce(hero, 900);` plays at once. `& intro = bounce(hero, 900);` creates a reusable controller, but doesn't play until `intro.play()` is called. Symbol meanings: `#` number, `# HiroGlifx
-
-**A tiny, extensible language for interactive web apps, animations, and browser workflows.**
-
-HiroGlifx is a JavaScript-powered experimental language with a legacy symbolic VM and a newer beginner-friendly scroll runtime. It is a **local development preview**, not a production-hardened framework.
-
-## Quick start
-
-Requires Node.js 20+.
-
-~~~bash
-git clone https://github.com/dryty93/HiroGlifx_JS.git
-cd HiroGlifx_JS
-node hiro.js init my-app
-node hiro.js dev my-app
-~~~
-
-Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
-
- string, `?` boolean, `&` object.
+**Rule:** `bounce(hero, 900);` plays immediately. `& intro = bounce(hero, 900);` saves an animation controller and waits for `intro.play()`. Symbols: `#` number, `$` string, `?` boolean, `&` object.
 
 To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonical-playground.html](canonical-playground.html) locally. Alternatively replace your `app.scroll` with canonical `.Main = ()` code and run `node hiro.js check my-app` and `node hiro.js dev my-app`; the dev server now dispatches to the corresponding runtime.
 
