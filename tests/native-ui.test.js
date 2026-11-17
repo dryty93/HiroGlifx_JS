@@ -8,7 +8,7 @@ function page(name){return fs.readFileSync(path.join(ROOT,"examples/native-ui",n
 function makeProject(){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-"));
  fs.mkdirSync(path.join(dir,"pages"));fs.copyFileSync(path.join(ROOT,"examples/native-ui/app.scroll"),path.join(dir,"app.scroll"));
- for(const name of ["dashboard","form","experiences","studio"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
+ for(const name of ["dashboard","form","experiences","studio","catalog","catalog-heroes","catalog-portfolios","catalog-stories","catalog-conversion"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
  installLocal(dir,path.join(ROOT,"examples/native-ui-library"));return dir;
 }
 function fakeDOM(){
@@ -70,8 +70,8 @@ test("text escaping, malicious attributes, handlers and input form events",()=>{
 test("production build emits standalone route pages without unsafe inline source injection",()=>{
  const {buildProject}=require("../hiro");const dir=makeProject();
  try{
-  const files=buildProject(dir);assert.equal(files.length,5);
-  for(const route of ["index.html","dashboard/index.html","form/index.html","experiences/index.html","studio/index.html"]){
+  const files=buildProject(dir);assert.equal(files.length,10);
+  for(const route of ["index.html","dashboard/index.html","form/index.html","experiences/index.html","studio/index.html","catalog/index.html","catalog-heroes/index.html","catalog-portfolios/index.html","catalog-stories/index.html","catalog-conversion/index.html"]){
    const content=fs.readFileSync(path.join(dir,"dist",route),"utf8");
    assert(content.includes("HiroNativeUI.NativeUIRuntime"));
    assert(content.includes("/assets/native-ui.js"));
@@ -131,10 +131,51 @@ test("one-command UI starter installs the experience package and all preview rou
  const parent=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-starter-")),dir=path.join(parent,"new-studio");
  try{
   makeNativeProject(dir);
-  assert.equal(validateProject(dir),5);
+  assert.equal(validateProject(dir),10);
   assert(fs.existsSync(path.join(dir,"hiro.lock.json")));
   assert(fs.existsSync(path.join(dir,"packages/native-ui/main.scroll")));
   assert(fs.existsSync(path.join(dir,"assets/studio-placeholder.svg")));
-  assert.equal(buildProject(dir).length,5);
+  assert.equal(buildProject(dir).length,10);
  }finally{fs.rmSync(parent,{recursive:true,force:true});}
+});
+
+
+test("all 28 new native experience classes compile with typed inherited API",()=>{
+ const ui=compile(LIB);
+ const names=["ExperienceBlock","SplitHero","GlassHero","ProductHero","PosterHero","OrbitHero","VideoHero","CollagePortfolio","HorizontalPortfolio","EditorialPortfolio","CaseStudyFeature","StickyScrollytelling","TimelineStory","ProcessSteps","StatsStrip","BeforeAfterSlider","ProductMockup","IntegrationCloud","FeatureSpotlight","QuoteWall","MagazineGrid","PeopleGrid","TabbedShowcase","ComparisonTable","NewsletterCTA","MagneticCTA","MegaFooter","NotFoundExperience"];
+ for(const name of names){
+  const cls=ui.classes.get(name);
+  assert(cls&&cls.methods.has("render"),"missing native render for "+name);
+  assert(cls.fields.has("title"),"missing inherited typed title for "+name);
+ }
+ assert.equal(names.length,28);
+ assert.notEqual(ui.classes.get("ProductHero").methods.get("render"),ui.classes.get("SplitHero").methods.get("render"));
+ assert.notEqual(ui.classes.get("EditorialPortfolio").methods.get("render"),ui.classes.get("CollagePortfolio").methods.get("render"));
+});
+test("all native catalog category routes compile through verified package imports",()=>{
+ const dir=makeProject();
+ try{
+  for(const file of ["catalog","catalog-heroes","catalog-portfolios","catalog-stories","catalog-conversion"]){
+   const src=resolveSource(dir,page("pages/"+file+".scroll"));
+   assert(compile(src).classes.has("Main"),file);
+  }
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+test("comparison slider and tabbed showcase are bound to native typed state",()=>{
+ const src="ui application\n"+LIB.replace(/^ui library\s*/,"")+"\n.Main = ()\n : render(self) = [\n element page main root;\n component BeforeAfterSlider compare page;\n component TabbedShowcase tabs page;\n ]\n break;";
+ const dom=fakeDOM(),runtime=new NativeUIRuntime(dom).execute(src);
+ const slider=dom.nodes.find(x=>x.tagName==="INPUT"&&x.attributes.type==="range");
+ assert(slider,"native comparison slider missing");
+ assert.equal(dom.nodes.find(x=>x.style["--hg-wipe"]==="50")!==undefined,true);
+ slider.value="75";slider.listeners.input();
+ assert(dom.nodes.some(x=>x.style["--hg-wipe"]==="75"),"native slider did not update comparison");
+ const tab=dom.nodes.filter(x=>x.tagName==="BUTTON"&&x.textContent==="Switch showcase view").at(-1);
+ assert(tab,"tab control");
+ tab.listeners.click();
+ assert(dom.nodes.filter(x=>x.tagName==="ARTICLE").some(x=>x.style.display==="none"),"tab visibility should change");
+ runtime.dispose();
+});
+test("unsafe CSS variable expressions are prohibited by the native compiler",()=>{
+ assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n stylevar panel --unsafe width;\n ]\n break;'),/Invalid render command/);
+ assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n motion panel javascript;\n ]\n break;'),/Invalid render command/);
 });
