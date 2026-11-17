@@ -1,0 +1,10 @@
+# Build a page with a clickable, animated box.
+page "My HiroGlifx App"
+background "#101827"
+text heading "Hello from HiroGlifx"
+box square 90 90 blue
+center square
+animate square bounce 1300 infinite
+button change "Spin and recolor"
+on click change => color square purple
+on click change => animate square spin 700
