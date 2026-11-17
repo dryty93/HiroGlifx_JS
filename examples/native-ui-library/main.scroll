@@ -726,12 +726,12 @@ ui library
 // Experience Catalog v2: all visual templates below are native .scroll classes.
 
 .ExperienceBlock = (Component)
-    $ eyebrow = "EXPLORE";;
-    $ description = "Unforgettable experiences with native HiroGlifx.";;
-    $ action = "Discover more";;
-    $ href = "/experiences";;
-    $ src = "/assets/studio-placeholder.svg";;
-    $ alt = "Abstract studio visual";;
+    $ eyebrow = "EXPLORE";
+    $ description = "Unforgettable experiences with native HiroGlifx.";
+    $ action = "Discover more";
+    $ href = "/experiences";
+    $ src = "/assets/studio-placeholder.svg";
+    $ alt = "Abstract studio visual";
     $ label = "Featured";
     : render(self) = [
         element section section root;
@@ -1157,8 +1157,8 @@ ui library
     break;
 
 .StatsStrip = (ExperienceBlock)
-    $ metricOne = "98%";;
-    $ metricTwo = "24/7";;
+    $ metricOne = "98%";
+    $ metricTwo = "24/7";
     $ metricThree = "4.9/5";
     : render(self) = [
         element section section root;
