@@ -12,7 +12,14 @@ function fixture(){
      :"// placeholder project asset");
  }
  const vendorRoot=path.join(root,"vendor");fs.mkdirSync(vendorRoot,{recursive:true});
- for(const file of vendorFiles)fs.writeFileSync(path.join(vendorRoot,path.basename(file)),Buffer.from([0,1,2]));
+ const crypto=require("node:crypto"),lock={source:"pinned-npm",packages:{},files:{}};
+ for(const file of vendorFiles){
+   const basename=path.basename(file),bytes=basename.endsWith(".wasm")?
+     Buffer.from([0,97,115,109,1,0,0,0]):Buffer.from("BABYLON function Recast Havok".repeat(55));
+   fs.writeFileSync(path.join(vendorRoot,basename),bytes);
+   lock.files[basename]={sha256:crypto.createHash("sha256").update(bytes).digest("hex"),bytes:bytes.length};
+ }
+ fs.writeFileSync(path.join(vendorRoot,"vendor-lock.json"),JSON.stringify(lock));
  return {root,vendorRoot};
 }
 test("offline desktop staging requires all vendored third-party assets",()=>{
@@ -31,7 +38,7 @@ test("offline manifest hashes local resources and removes CDN script links",()=>
    assert.equal(Object.keys(manifest.files).length,files);
    assert.match(fs.readFileSync(path.join(output,"riftfall.html"),"utf8"),/\.\/vendor\/babylon\.js/);
    assert.doesNotMatch(fs.readFileSync(path.join(output,"riftfall.html"),"utf8"),/https?:\/\//);
-   assert.equal(manifest.files["vendor/recast.wasm"].length,64);
+   assert.equal(manifest.files["vendor/HavokPhysics.wasm"].length,64);
    assert.throws(()=>stage({root,vendorRoot,output:root}),/Unsafe/);
  }finally{fs.rmSync(root,{force:true,recursive:true});}
 });

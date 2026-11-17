@@ -14,6 +14,8 @@ class RPGDemo{
    this.rules=new root.HiroWorldRules.WorldRules(source,{name:"rpg-combat"});
    this.combat=new root.HiroCombat.CombatWorld();
    this.telegraphs=new root.HiroCombat.TelegraphQueue();
+   this.attackWindows=new root.HiroAttackWindows.AttackWindows();
+   this.profiler=new root.HiroGamePerformance.FrameProfiler();
    this.evadeReady=0;this.parryReady=0;
    this.keys=new Set();this.enemies=[];this.last=0;this.disposed=false;this.attackFlash=0;this.combo=0;
    this.campaign=null;this.hitReactions=new Map();this.snapshots=[];this.animationState="idle";this.ready=false;this.assetStatus="Loading glTF...";this.dynamicCrates=[];
@@ -43,7 +45,7 @@ class RPGDemo{
 
    if(!this.levelSource)throw Error("Missing authored HiroGlifx level source");
    this.level=new root.HiroRiftfallWorld.RiftfallWorld(this.levelSource);
-   const geometry=this.level.build({BABYLON:B,scene:this.scene,physics:this.physics,material});
+   const geometry=this.level.build({BABYLON:B,scene:this.scene,physics:this.physics,material,physicsStreaming:true});
    this.nav=geometry.navigation;
    // Dynamic physics props are real Havok rigid bodies.
    for(const [i,x,z] of [[0,-8,3],[1,8,5],[2,-2,-26],[3,6,-47]]){
@@ -106,10 +108,15 @@ class RPGDemo{
    this.engine.runRenderLoop(()=>{
      if(this.disposed)return;
      const now=typeof performance!=="undefined"?performance.now():Date.now();
-     const dt=this.last?Math.min(.05,Math.max(0,(now-this.last)/1000)):0;this.last=now;
+     const rawFrameMs=this.last?Math.max(0,now-this.last):0;
+     const dt=this.last?Math.min(.05,rawFrameMs/1000):0;this.last=now;
      if(this.playing&&dt)this.tick(dt);
      this.sync();
      this.scene.render();
+     if(this.playing&&dt)this.profiler.sample({frameMs:rawFrameMs,
+       activeMeshes:this.scene.meshes?.length||0,
+       activeColliders:this.physics.aggregates?.length||0,
+       navQueries:this.navRouter?.stats().queries||0});
    });
    this._resize=()=>this.engine?.resize();
    if(typeof window!=="undefined")window.addEventListener("resize",this._resize);
@@ -130,6 +137,8 @@ class RPGDemo{
      const route=this.navRouter?((from,to)=>this.navRouter.route(from,to,this.combat.elapsed)):null;
      const agent=new root.HiroAI.NavigationAgent({grid:this.nav,position:{x,z},speed,route});
      const actor={id,mesh,agent,index,stage,decision:null,attackTime:0};
+     if(root.HiroCreatureArt?.CreatureVisual)
+       actor.visual=new root.HiroCreatureArt.CreatureVisual({BABYLON:B,scene:this.scene,parent:mesh,color,guardian:stage===3});
      actor.decision=this.makeBehavior(actor);this.enemies.push(actor);
    }
    this.wave=stage;this.level.waveStart(stage);
@@ -191,21 +200,29 @@ class RPGDemo{
    this.onEvent("Parry window opened.");return true;
  }
  attack(){
-   this.campaign?.attackCue();
-   if(!this.ready||!this.playing||!this.combat.actor("hero").alive)return false;
+   if(!this.ready||!this.playing||!this.combat.actor("hero").alive||
+      this.attackWindows.has("hero"))return false;
    const hero=this.combat.actor("hero");
    const candidates=this.enemies.filter(e=>this.combat.actor(e.id).alive)
      .sort((a,b)=>Math.hypot(a.agent.position.x-hero.x,a.agent.position.z-hero.z)-
                    Math.hypot(b.agent.position.x-hero.x,b.agent.position.z-hero.z));
-   if(!candidates.length)return false;
-   const result=this.combat.strike("hero",candidates[0].id,{damage:this.rules.run("heroDamage",this.combo),
-     range:this.rules.get("range"),cost:this.rules.get("staminaCost"),cooldown:this.rules.get("cooldown")});
-   if(result.hit){this.combo=Math.min(5,this.combo+1);this.attackFlash=.25;return true;}
-   return false;
+   if(!candidates.length||hero.stamina<this.rules.get("staminaCost"))return false;
+   const windup=this.rules.get("heroWindup"),recovery=this.rules.get("heroRecovery");
+   const accepted=this.attackWindows.begin("hero",{windup,recovery,onImpact:()=>{
+     const target=candidates[0];
+     if(!this.combat.actor(target.id).alive)return;
+     const result=this.combat.strike("hero",target.id,{
+       damage:this.rules.run("heroDamage",this.combo),range:this.rules.get("range"),
+       cost:this.rules.get("staminaCost"),cooldown:this.rules.get("cooldown")});
+     this.combo=result.hit?Math.min(5,this.combo+1):0;
+   }});
+   if(accepted){this.campaign?.attackCue();this.attackFlash=windup+recovery;}
+   return accepted;
  }
  tick(dt){
    this.rules.tick(dt);this.combat.tick(dt);
    this.telegraphs.tick(dt);
+   this.attackWindows.tick(dt);
    this.campaign?.tick(dt);
    for(const [id,remaining] of this.hitReactions){if(remaining<=dt)this.hitReactions.delete(id);else this.hitReactions.set(id,remaining-dt);}
    const forward=(this.keys.has("KeyW")||this.keys.has("ArrowUp")?1:0)-
@@ -216,7 +233,8 @@ class RPGDemo{
    this.character.speed=this.baseMovementSpeed*(this.combat.actor("hero").status.get("evade")?.ends>this.combat.elapsed?1.65:1);
    this.character.tick(dt);
    const pos=this.character.position,hero=this.combat.actor("hero");
-   this.level?.updateDetails(pos);
+   this.level?.updateDetails(pos,dt);
+   this.level?.updatePhysics(pos);
    hero.x=pos.x;hero.z=pos.z;
    const moving=Math.hypot(sideways,forward);
    this.attackFlash=Math.max(0,this.attackFlash-dt);
@@ -228,6 +246,7 @@ class RPGDemo{
      const a=this.combat.actor(enemy.id);
      if(!a.alive){enemy.mesh.setEnabled?.(false);continue;}
      const d=Math.hypot(hero.x-a.x,hero.z-a.z);
+     enemy.visual?.tick(dt,{moving:a.alive&&hero.alive&&d>2,warning:this.telegraphs.has(enemy.id),defeated:!a.alive});
      if(hero.alive)enemy.decision.tick({distance:d,target:{x:hero.x,z:hero.z},dt},dt);
      a.x=enemy.agent.position.x;a.z=enemy.agent.position.z;
    }
@@ -270,12 +289,15 @@ class RPGDemo{
      telegraphs:this.enemies.filter(e=>this.telegraphs.has(e.id)).map(e=>e.id),
      defense:{evading:hero.status.get("evade")?.ends>this.combat.elapsed,parrying:hero.status.get("parry")?.ends>this.combat.elapsed},
      visualRegions:this.level?.details?.snapshot()||null,
+     physicalRegions:this.level?.colliderStream?.snapshot()||null,
+     performance:this.profiler.snapshot(),
      campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
-   this.campaign?.dispose();this.telegraphs.dispose();this.level?.dispose();this.navRouter?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
+   for(const enemy of this.enemies)enemy.visual?.dispose();
+   this.campaign?.dispose();this.attackWindows.dispose();this.telegraphs.dispose();this.level?.dispose();this.navRouter?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
 return {RPGDemo};

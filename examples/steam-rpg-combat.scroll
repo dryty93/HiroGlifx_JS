@@ -10,6 +10,8 @@
     # enemyAggro = 24;
     # enemyCooldown = 1.3;
     # enemyWindup = 0.42;
+    # heroWindup = 0.13;
+    # heroRecovery = 0.35;
     # evadeDuration = 0.35;
     # evadeCost = 22;
     # evadeCooldown = 0.9;

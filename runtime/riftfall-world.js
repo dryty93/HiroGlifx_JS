@@ -5,9 +5,11 @@
  const world=typeof module==="object"&&module.exports?require("./scroll-world-rules"):root.HiroWorldRules;
  const ai=typeof module==="object"&&module.exports?require("./game-ai"):root.HiroAI;
  const stream=typeof module==="object"&&module.exports?require("./game-region-stream"):root.HiroRegionStream;
- const api=factory(world,ai,stream);
+ const physicsStream=typeof module==="object"&&module.exports?require("./game-physics-stream"):root.HiroPhysicsStream;
+ const art=typeof module==="object"&&module.exports?require("./game-art-direction"):root.HiroRiftfallArt;
+ const api=factory(world,ai,stream,physicsStream,art);
  if(typeof module==="object"&&module.exports)module.exports=api;else root.HiroRiftfallWorld=api;
-})(typeof globalThis!=="undefined"?globalThis:this,function(world,ai,stream){
+})(typeof globalThis!=="undefined"?globalThis:this,function(world,ai,stream,physicsStream,art){
 "use strict";
 const numeric=(n,min,max,label)=>{
  if(typeof n!=="number"||!Number.isFinite(n)||n<min||n>max)throw Error("Invalid "+label);
@@ -24,13 +26,18 @@ class RiftfallWorld{
    if(!Array.isArray(this.regions)||this.regions.length<2||this.regions.length>12||
      !Array.isArray(this.obstacles)||this.obstacles.length>70||
      !Array.isArray(this.encounters)||this.encounters.length>50)throw Error("Invalid Riftfall level source");
-   this.worldMeshes=[];this.nav=null;this.currentWave=1;this.details=null;
+   this.worldMeshes=[];this.nav=null;this.currentWave=1;this.details=null;this.colliderStream=null;
  }
  waveTitle(stage){return this.rules.run("chapterTitle",stage);}
  threshold(stage){return this.rules.run("waveThreshold",stage);}
  waveStart(stage){this.currentWave=stage;return this.rules.run("waveStart",stage);}
- updateDetails(position){return this.details?.update(position)||{regions:[],count:0};}
- dispose(){this.details?.dispose();this.details=null;}
+ updateDetails(position,dt=0){
+   const current=this.details?.update(position)||{regions:[],count:0};
+   if(dt>0)for(const record of this.details?.loaded?.values()||[])record.tick?.(dt);
+   return current;
+ }
+ updatePhysics(position){return this.colliderStream?.update(position)||null;}
+ dispose(){this.colliderStream?.dispose();this.colliderStream=null;this.details?.dispose();this.details=null;}
  spawns(stage){
    return this.encounters.map((row,i)=>{
      if(!Array.isArray(row)||row.length!==7)throw Error("Invalid encounter definition");
@@ -43,14 +50,19 @@ class RiftfallWorld{
        speed:numeric(speed,.1,20,"enemy speed"),color:color(tint)};
    }).filter(Boolean);
  }
- build({BABYLON:B,scene,physics,material}){
+ build({BABYLON:B,scene,physics,material,physicsStreaming=false}){
    if(!B?.MeshBuilder?.CreateBox||!scene||!physics||typeof material!=="function")throw Error("Invalid world builder host");
    this.nav=new ai.NavigationGrid({width:44,height:92,originX:-22,originZ:-68,cellSize:1});
    let meshCount=0;
+   const colliderEntries=[];
+   const regionAt=(x,z)=>this.regions.reduce((nearest,row)=>
+     !nearest||Math.hypot(row[2]-x,row[3]-z)<Math.hypot(nearest[2]-x,nearest[3]-z)?row:nearest,null)[0];
    const box=(id,x,y,z,w,h,d,tint,occlude=true)=>{
      const mesh=B.MeshBuilder.CreateBox(id,{width:w,height:h,depth:d},scene);
      mesh.position.set(x,y,z);mesh.material=material(id,color(tint));
-     mesh.metadata={cameraOccluder:occlude,riftfallWorld:true};physics.staticBox(mesh);
+     mesh.metadata={cameraOccluder:occlude,riftfallWorld:true};
+     if(physicsStreaming)colliderEntries.push({regionId:regionAt(x,z),mesh});
+     else physics.staticBox(mesh);
      this.worldMeshes.push(mesh);return mesh;
    };
    for(const entry of this.regions){
@@ -79,6 +91,7 @@ class RiftfallWorld{
      create:row=>{
        const [id,,cx,cz,w,d,tint]=row;
        const meshes=[],mat=material("detail-"+id,tint);
+       let illustration=null;
        try{
          if(B.MeshBuilder.CreateSphere)for(let i=0;i<12;i++){
            const a=i*2.39996322973,r=.28+.56*((i*7%13)/13);
@@ -92,11 +105,21 @@ class RiftfallWorld{
            m.position.set(cx+Math.cos(a)*w*.38,1,cz+Math.sin(a)*d*.38);
            m.material=mat;m.isPickable=false;meshes.push(m);
          }
-         return {dispose(){for(const m of meshes)m.dispose?.();mat?.dispose?.();}};
-       }catch(error){for(const m of meshes)m.dispose?.();mat?.dispose?.();throw error;}
+         if(B.StandardMaterial&&B.Color3&&B.MeshBuilder.CreateCylinder)
+           illustration=new art.RegionArt({BABYLON:B,scene,row,quality:"medium"});
+         return {tick(dt){illustration?.tick(dt);},
+           dispose(){illustration?.dispose();for(const m of meshes)m.dispose?.();mat?.dispose?.();}};
+       }catch(error){illustration?.dispose();for(const m of meshes)m.dispose?.();mat?.dispose?.();throw error;}
      }
    });
    this.details.update({x:0,z:8});
+   if(physicsStreaming){
+     if(typeof physics.releaseAggregate!=="function")throw Error("Physics stream requires aggregate release API");
+     this.colliderStream=new physicsStream.PhysicsRegionStream({regions:this.regions,entries:colliderEntries,
+       radius:9,maxRegions:2,create:mesh=>physics.staticBox(mesh),
+       release:aggregate=>physics.releaseAggregate(aggregate)});
+     this.colliderStream.update({x:0,z:8});
+   }
    return {navigation:this.nav,meshes:this.worldMeshes,count:meshCount,regions:this.regions.length};
  }
 }
