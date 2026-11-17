@@ -7,6 +7,7 @@ const path=require("node:path");
 const crypto=require("node:crypto");
 const {parseExtended}=require("./expressive-runtime");
 const {parse:parseCanonical}=require("./canonical-runtime");
+const {parseProgram:parseScrollGame}=require("./scroll-game-runtime");
 const NAME=/^[a-z][a-z0-9-]{0,39}$/;
 const VERSION=/^\d+\.\d+\.\d+$/;
 const IMPORT=/^import\s+([a-z][a-z0-9-]{0,39})\s*;?$/;
@@ -155,7 +156,9 @@ function resolveSource(project,source){
  // A canonical expression page is validated directly; legacy libraries are not yet compatible.
  if(/^\.Main\s*=\s*\(\)\s*$/m.test(source)){
    if(/^\s*import\s+/m.test(source))throw new Error("Canonical package imports are not implemented");
-   parseCanonical(source);return source;
+   if(/^\s*:\s*tick\s*\(dt\)\s*=\s*\[$/m.test(source))parseScrollGame(source);
+   else parseCanonical(source);
+   return source;
  }
  const lock=readLocked(project);
  const ordered=[],visited=new Set();
