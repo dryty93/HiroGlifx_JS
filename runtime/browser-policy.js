@@ -50,6 +50,10 @@ function createPolicyAdapter(page,options={}) {
       current();
       return invoke("wait",{selector},()=>base.wait(selector));
     },
+    hover:selector=>{ current();return invoke("hover",{selector},()=>base.hover(selector)); },
+    press:(selector,key)=>{ current();return invoke("press",{selector,key},()=>base.press(selector,key),true); },
+    scroll:selector=>{ current();return invoke("scroll",{selector},()=>base.scroll(selector)); },
+    read:selector=>{ current();return invoke("read",{selector},()=>base.read(selector)); },
     screenshot:filename=> {
       current();
       return invoke("screenshot",{file:filename},()=>base.screenshot(filename));

@@ -58,7 +58,13 @@
     spin: [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
     fade: [{ opacity: 1 }, { opacity: 0 }, { opacity: 1 }],
     pulse: [{ transform: "scale(1)" }, { transform: "scale(1.13)" }, { transform: "scale(1)" }],
-    slide: [{ transform: "translateX(-60px)", opacity: 0 }, { transform: "translateX(0)", opacity: 1 }]
+    slide: [{ transform: "translateX(-60px)", opacity: 0 }, { transform: "translateX(0)", opacity: 1 }],
+    shake: [{transform:"translateX(0)"},{transform:"translateX(-12px)"},{transform:"translateX(12px)"},{transform:"translateX(0)"}],
+    flip: [{transform:"rotateY(0deg)"},{transform:"rotateY(180deg)"},{transform:"rotateY(360deg)"}],
+    float: [{transform:"translateY(0)"},{transform:"translateY(-15px)"},{transform:"translateY(0)"}],
+    pop: [{transform:"scale(0.4)",opacity:0},{transform:"scale(1.12)",opacity:1},{transform:"scale(1)"}],
+    swing: [{transform:"rotate(-12deg)"},{transform:"rotate(12deg)"},{transform:"rotate(0deg)"}],
+    zoom: [{transform:"scale(1)"},{transform:"scale(1.4)"},{transform:"scale(1)"}]
   };
   class Runtime {
     constructor(options = {}) {
@@ -142,10 +148,14 @@
         case "browser.click":
         case "browser.type":
         case "browser.wait":
-        case "browser.screenshot": {
+        case "browser.screenshot":
+        case "browser.hover":
+        case "browser.press":
+        case "browser.scroll":
+        case "browser.read": {
           if (!this.browser) throw new Error("Browser adapter required");
           const action = command.split(".")[1];
-          requireArgs(args, action === "type" ? 2 : 1, command);
+          requireArgs(args, ["type","press"].includes(action) ? 2 : 1, command);
           if (typeof this.browser[action] !== "function") throw new Error("Browser method unavailable: " + action);
           if (action === "open") args[0] = safeUrl(args[0]);
           return this.browser[action](...args);

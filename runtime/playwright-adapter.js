@@ -7,6 +7,10 @@ function createPlaywrightAdapter(page) {
     click: selector => page.locator(selector).click(),
     type: (selector, value) => page.locator(selector).fill(value),
     wait: selector => page.locator(selector).waitFor({ state: "visible", timeout: 10000 }),
+    hover: selector => page.locator(selector).hover(),
+    press: (selector, key) => page.locator(selector).press(key),
+    scroll: selector => page.locator(selector).scrollIntoViewIfNeeded(),
+    read: selector => page.locator(selector).innerText(),
     screenshot: path => {
       if (!/^[\w./-]+\.png$/.test(path) || path.startsWith("/") || path.split("/").includes(".."))
         throw new Error("Screenshot must be a relative .png path");

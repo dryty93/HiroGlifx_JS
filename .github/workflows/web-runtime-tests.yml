@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl]
   pull_request:
 jobs:
   node:
@@ -15,6 +15,10 @@ jobs:
         run: |
           node --check runtime/scroll-runtime.js
           node --check runtime/app-runtime.js
+          node --check runtime/expressive-runtime.js
+          node --check runtime/dev-server.js
+          node --check hiro.js
+          node --check tests/expressive-cli.test.js
           node --check runtime/preview-policy.js
           node --check tests/preview-policy.test.js
           node --check runtime/data-server.js
