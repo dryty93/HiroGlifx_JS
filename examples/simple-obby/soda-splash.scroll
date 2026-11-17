@@ -4,6 +4,7 @@ game "Soda Splash"
 theme soda
 speed 7
 jump 10
+sound bubbles
 player at 0 2 0
 
 stage 1 "BUBBLE RUN"
