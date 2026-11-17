@@ -14,6 +14,7 @@ class RPGDemo{
    this.rules=new root.HiroWorldRules.WorldRules(source,{name:"rpg-combat"});
    this.combat=new root.HiroCombat.CombatWorld();
    this.telegraphs=new root.HiroCombat.TelegraphQueue();
+   this.profiler=new root.HiroGamePerformance.FrameProfiler();
    this.evadeReady=0;this.parryReady=0;
    this.keys=new Set();this.enemies=[];this.last=0;this.disposed=false;this.attackFlash=0;this.combo=0;
    this.campaign=null;this.hitReactions=new Map();this.snapshots=[];this.animationState="idle";this.ready=false;this.assetStatus="Loading glTF...";this.dynamicCrates=[];
@@ -110,6 +111,10 @@ class RPGDemo{
      if(this.playing&&dt)this.tick(dt);
      this.sync();
      this.scene.render();
+     if(this.playing&&dt)this.profiler.sample({frameMs:dt*1000,
+       activeMeshes:this.scene.meshes?.length||0,
+       activeColliders:this.physics.aggregates?.length||0,
+       navQueries:this.navRouter?.stats().queries||0});
    });
    this._resize=()=>this.engine?.resize();
    if(typeof window!=="undefined")window.addEventListener("resize",this._resize);
@@ -272,6 +277,7 @@ class RPGDemo{
      defense:{evading:hero.status.get("evade")?.ends>this.combat.elapsed,parrying:hero.status.get("parry")?.ends>this.combat.elapsed},
      visualRegions:this.level?.details?.snapshot()||null,
      physicalRegions:this.level?.colliderStream?.snapshot()||null,
+     performance:this.profiler.snapshot(),
      campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
