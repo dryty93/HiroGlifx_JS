@@ -185,6 +185,13 @@ async function build(){
      world.moveSpeed=speed;world.jumpSpeed=jumpForce;return speed;
    }
  }});
+ world.motionRules={
+   movingOffset:(time,range,period)=>policy.run("movingOffset",time,range,period),
+   spinnerX:(time,range,period)=>policy.run("spinnerX",time,range,period),
+   spinnerZ:(time,range,period)=>policy.run("spinnerZ",time,range,period),
+   shouldVanish:(time,started,delay)=>policy.run("shouldVanish",time,started,delay),
+   respawnDelay:()=>policy.run("respawnDelay")
+ };
  const view=new HiroObbyBabylon.ObbyBabylonAdapter({
    BABYLON:window.BABYLON,canvas:$("game"),world,
    onBeforeStep:dt=>policy.tick(dt)
