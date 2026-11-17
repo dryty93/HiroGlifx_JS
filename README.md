@@ -23,11 +23,13 @@ Build polished, responsive landing pages and interactive sites using **native .s
 
 ~~~bash
 node hiro.js init my-studio --ui
+node hiro.js ui list my-studio
+node hiro.js ui add my-studio SplitHero campaign
 node hiro.js dev my-studio 3000
 node hiro.js build my-studio
 ~~~
 
-The --ui starter includes five live examples: /, /dashboard, /form, /experiences and /studio. See [the native experience component guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
+The --ui starter includes ten live examples, including /catalog and the hero, portfolio, storytelling and conversion collections. It provides 28 additional high-level experience classes. See [the complete native experience catalog](docs/native-experience-catalog.md) and [the native UI guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
 
 ## Canonical variable syntax — Phase 13
 
