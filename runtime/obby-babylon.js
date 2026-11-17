@@ -17,7 +17,7 @@
      this.B=BABYLON;this.canvas=canvas;this.world=world;
      this.engine=null;this.scene=null;this.meshes=new Map();
      this.last=0;this.active=false;this.paused=false;
-     this.decorations=[];this.camerapos=null;this._resize=null;
+     this.decorations=[];this.limbs=[];this.camerapos=null;this._resize=null;
    }
    start(){
      if(this.active)throw new Error("Renderer already active");
@@ -26,11 +26,11 @@
      this.engine=engine;
      if(typeof engine.setHardwareScalingLevel==="function")engine.setHardwareScalingLevel(Math.min(2,Math.max(1,(typeof devicePixelRatio!=="undefined"?devicePixelRatio:1))));
      this.scene=new B.Scene(engine);
-     this.scene.clearColor=B.Color4.FromHexString("#111b37ff");
+     this.scene.clearColor=B.Color4.FromHexString("#3b65aaff");
      if(typeof B.Scene.FOGMODE_EXP2==="number"){
        this.scene.fogMode=B.Scene.FOGMODE_EXP2;
-       this.scene.fogDensity=.005;
-       this.scene.fogColor=B.Color3.FromHexString("#182b53");
+       this.scene.fogDensity=.007;
+       this.scene.fogColor=B.Color3.FromHexString("#5175b5");
      }
      this.camera=new B.ArcRotateCamera("follow",Math.PI*1.08,Math.PI/3.05,19,new B.Vector3(0,0,0),this.scene);
      if(typeof this.camera.lowerRadiusLimit!=="undefined")this.camera.lowerRadiusLimit=11;
@@ -67,9 +67,37 @@
      this.avatar=create("player",p.x,p.y,p.z,.76,p.height,.66,"#8b5cf6");
      this.head=create("head",p.x,p.y+.95,p.z,.65,.65,.65,"#fcd9a8");
      if(typeof B.MeshBuilder.CreateSphere==="function"){
-       const orb=B.MeshBuilder.CreateSphere("checkpoint-aura",{diameter:.24,segments:8},this.scene);
-       orb.material=material("checkpoint-aura","#ffffff",{glow:true});
-       this.decorations.push(orb);
+       // Stylized low-poly avatar details, only when full Babylon primitives are present.
+       const limbs=[
+         ["left-arm",-.53,-.12,0,.20,.74,.24,"#b59dff"],
+         ["right-arm",.53,-.12,0,.20,.74,.24,"#b59dff"],
+         ["left-leg",-.22,-.88,0,.25,.60,.28,"#3e3b99"],
+         ["right-leg",.22,-.88,0,.25,.60,.28,"#3e3b99"]
+       ];
+       for(const [name,dx,dy,dz,w,h,d,color] of limbs){
+         const mesh=create(name,p.x+dx,p.y+dy,p.z+dz,w,h,d,color);
+         this.limbs.push({mesh,dx,dy,dz});
+       }
+       // A few low-poly clouds create the floating-world depth without image assets.
+       const cloudMaterial=material("soft-cloud","#e5f5ff");
+       if("emissiveColor" in cloudMaterial)cloudMaterial.emissiveColor=B.Color3.FromHexString("#516a95");
+       if("alpha" in cloudMaterial)cloudMaterial.alpha=.72;
+       for(let n=0;n<13;n++){
+         const x=n*7-12,z=(n%2===0?-12:13)+(n%3-1)*2,y=-5+(n%4)*1.9;
+         for(let k=0;k<3;k++){
+           const cloud=B.MeshBuilder.CreateSphere("cloud-"+n+"-"+k,{diameter:4.5+(k%2)*1.8,segments:8},this.scene);
+           cloud.position=new B.Vector3(x+k*2.4,y+(k===1?.5:0),z+(k-1)*.7);
+           cloud.scaling.y=.32;
+           cloud.material=cloudMaterial;
+           cloud.isPickable=false;
+           this.decorations.push(cloud);
+         }
+       }
+       // Sunny beacon at the end of the course; does not participate in physics.
+       const sun=B.MeshBuilder.CreateSphere("sky-sun",{diameter:13,segments:12},this.scene);
+       sun.position=new B.Vector3(100,45,-62);
+       sun.material=material("sky-sun","#ffe6a4",{glow:true});
+       sun.isPickable=false;this.decorations.push(sun);
      }
      this.active=true;
      this._resize=()=>{if(this.engine)this.engine.resize();};
@@ -96,9 +124,11 @@
        if(typeof mesh.setEnabled==="function")mesh.setEnabled(tile.active!==false);
        if(tile.kind==="lava"&&mesh.rotation)mesh.rotation.y=(this.world.motionTime||0)*1.25;
      }
-     if(this.decorations.length){
-       const marker=this.decorations[0];
-       marker.position.set(p.x,p.y+1.9+Math.sin((this.world.elapsed||0)*4)*.1,p.z);
+     for(const {mesh,dx,dy,dz} of this.limbs){
+       // Small jump lift/swing makes the simple avatar feel less rigid.
+       const jumping=!p.grounded;
+       mesh.position.set(p.x+dx,p.y+dy+(jumping?.09:0),p.z+dz);
+       if(mesh.rotation)mesh.rotation.z=jumping?(dx<0?.13:-.13):0;
      }
      const B=this.B;
      const goal=new B.Vector3(p.x+3,p.y+1.05,p.z);
@@ -114,7 +144,7 @@
      if(this.scene)this.scene.dispose();
      if(this.engine)this.engine.dispose();
      this.active=false;this.scene=null;this.engine=null;this.last=0;this._resize=null;
-     this.meshes.clear();this.decorations=[];
+     this.meshes.clear();this.decorations=[];this.limbs=[];
    }
  }
  return {ObbyBabylonAdapter};
