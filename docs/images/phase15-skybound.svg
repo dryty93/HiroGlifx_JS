@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="810" viewBox="0 0 1440 810">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#101a41"/><stop offset=".58" stop-color="#284c97"/><stop offset="1" stop-color="#0e1740"/></linearGradient>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6b9ce8"/><stop offset=".8" stop-color="#273f7b"/></linearGradient>
+<linearGradient id="blue" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#95e8ff"/><stop offset="1" stop-color="#5288e7"/></linearGradient>
+<linearGradient id="violet" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ceb4ff"/><stop offset="1" stop-color="#7a65e5"/></linearGradient>
+<linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff5aa"/><stop offset="1" stop-color="#e8a734"/></linearGradient>
+<filter id="shadow"><feDropShadow dx="0" dy="16" stdDeviation="12" flood-opacity=".42"/></filter>
+<filter id="glow"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1440" height="810" fill="#071023"/>
+<rect x="48" y="24" width="1344" height="62" rx="20" fill="#14274b" stroke="#375887"/>
+<rect x="67" y="36" width="39" height="39" rx="13" fill="#745ee9"/>
+<text x="86" y="64" font-family="Arial" font-size="24" fill="#fff" text-anchor="middle" font-weight="bold">✦</text>
+<text x="121" y="62" fill="#f2f8ff" font-family="Arial" font-size="20" font-weight="bold">HIROGLIFX</text>
+<text x="263" y="62" fill="#8fc4ff" font-family="Arial" font-size="12" letter-spacing="3">STUDIO</text>
+<text x="1011" y="61" fill="#d6e9ff" font-family="Arial" font-size="16">Explore projects</text>
+<text x="1180" y="61" fill="#d6e9ff" font-family="Arial" font-size="16">Open editor</text>
+<text x="65" y="134" fill="#80dcff" font-family="Arial" font-size="14" font-weight="bold" letter-spacing="3">A PLAYABLE HIROGLIFX ORIGINAL</text>
+<text x="65" y="202" fill="#f0f8ff" font-family="Arial" font-size="64" font-weight="bold" letter-spacing="-3">SKYBOUND</text>
+<text x="423" y="202" fill="#aeabff" font-family="Arial" font-size="64" font-weight="bold" letter-spacing="-3">OBBY</text>
+<text x="67" y="239" fill="#b5c9e7" font-family="Arial" font-size="18">Five floating worlds. One golden finish. Built entirely in the browser.</text>
+<rect x="1096" y="141" width="127" height="84" rx="15" fill="#1a2e54" stroke="#36537d"/>
+<text x="1159" y="179" fill="#fff" font-family="Arial" font-size="29" font-weight="bold" text-anchor="middle">5</text>
+<text x="1159" y="201" fill="#b9cee7" font-family="Arial" font-size="12" text-anchor="middle">STAGES</text>
+<rect x="1232" y="141" width="129" height="84" rx="15" fill="#1a2e54" stroke="#36537d"/>
+<text x="1296" y="179" fill="#fff" font-family="Arial" font-size="29" font-weight="bold" text-anchor="middle">—</text>
+<text x="1296" y="201" fill="#b9cee7" font-family="Arial" font-size="12" text-anchor="middle">BEST TIME</text>
+<rect x="48" y="267" width="1344" height="440" rx="25" fill="url(#sky)" stroke="#749de2" stroke-width="2"/>
+<circle cx="1092" cy="356" r="115" fill="#fef1ba" opacity=".22" filter="url(#glow)"/>
+<circle cx="1084" cy="346" r="50" fill="#fff5cf" opacity=".55"/>
+<g opacity=".45" fill="#eff8ff"><ellipse cx="300" cy="370" rx="132" ry="24"/><ellipse cx="1055" cy="449" rx="160" ry="31"/><ellipse cx="672" cy="332" rx="98" ry="19"/></g>
+<rect x="73" y="285" width="250" height="49" rx="12" fill="#081b3b" opacity=".86"/>
+<text x="95" y="316" fill="#e4f5ff" font-family="Arial" font-size="17" font-weight="bold">03 · MOVING SKIES</text>
+<rect x="1171" y="285" width="191" height="49" rx="12" fill="#081b3b" opacity=".86"/>
+<text x="1192" y="316" fill="#e4f5ff" font-family="Arial" font-size="17">⏱  0:24.8</text>
+<g filter="url(#shadow)">
+<path d="M194 542L413 482L506 535L290 605Z" fill="url(#blue)" stroke="#c7f3ff" stroke-width="3"/>
+<path d="M290 605L506 535L506 578L290 648Z" fill="#4177ca"/>
+<path d="M194 542L290 605L290 648L194 584Z" fill="#2d559a"/>
+<path d="M512 494L652 449L739 491L594 546Z" fill="url(#violet)" stroke="#e4d8ff" stroke-width="3"/>
+<path d="M594 546L739 491L739 523L594 579Z" fill="#6956c1"/>
+<path d="M512 494L594 546L594 579L512 527Z" fill="#4d458e"/>
+<path d="M760 441L882 404L959 444L835 488Z" fill="url(#violet)" stroke="#e5d9ff" stroke-width="3"/>
+<path d="M835 488L959 444L959 474L835 520Z" fill="#6857bb"/>
+<path d="M760 441L835 488L835 520L760 474Z" fill="#53438e"/>
+<path d="M994 392L1101 360L1179 398L1066 432Z" fill="#4adeb5" stroke="#beffde" stroke-width="3"/>
+<path d="M1066 432L1179 398L1179 426L1066 462Z" fill="#1e9d88"/>
+<path d="M994 392L1066 432L1066 462L994 423Z" fill="#107d69"/>
+<path d="M1213 353L1294 329L1353 361L1269 388Z" fill="url(#gold)" stroke="#fff9d6" stroke-width="3"/>
+<path d="M1269 388L1353 361L1353 389L1269 419Z" fill="#c08a29"/>
+</g>
+<g filter="url(#shadow)">
+<rect x="349" y="432" width="51" height="81" rx="11" fill="#8f73ff" stroke="#cfc4ff" stroke-width="3"/>
+<rect x="354" y="409" width="41" height="44" rx="10" fill="#ffe1aa" stroke="#fff0d8" stroke-width="3"/>
+<rect x="348" y="499" width="16" height="43" rx="5" fill="#5d47c6"/>
+<rect x="384" y="499" width="16" height="43" rx="5" fill="#5d47c6"/>
+<rect x="334" y="456" width="13" height="45" rx="5" fill="#8f73ff"/>
+<rect x="400" y="456" width="13" height="45" rx="5" fill="#8f73ff"/>
+</g>
+<path d="M454 476Q540 391 653 422" stroke="#f5f2ff" stroke-width="5" stroke-dasharray="10 14" opacity=".85" fill="none"/>
+<text x="707" y="393" fill="#f8efff" font-family="Arial" font-size="18" font-weight="bold">TIME YOUR JUMP!</text>
+<rect x="76" y="666" width="1286" height="12" rx="6" fill="#d4edff" opacity=".27"/>
+<rect x="76" y="666" width="735" height="12" rx="6" fill="#7fe4ff"/>
+<circle cx="807" cy="672" r="11" fill="#f6dc9c"/>
+<rect x="48" y="727" width="1344" height="60" rx="18" fill="#132747" stroke="#31537c"/>
+<text x="79" y="766" fill="#b7d6f4" font-family="Arial" font-size="19">WASD  Move</text>
+<text x="307" y="766" fill="#b7d6f4" font-family="Arial" font-size="19">SPACE  Jump</text>
+<text x="524" y="766" fill="#b7d6f4" font-family="Arial" font-size="19">R  Respawn</text>
+<rect x="1012" y="740" width="150" height="36" rx="11" fill="#2b4672"/>
+<text x="1087" y="764" fill="#e7f3ff" font-family="Arial" font-size="15" text-anchor="middle">Restart</text>
+<rect x="1174" y="740" width="195" height="36" rx="11" fill="#4363b1"/>
+<text x="1272" y="764" fill="#e7f3ff" font-family="Arial" font-size="15" text-anchor="middle">Open editor</text>
+</svg>
