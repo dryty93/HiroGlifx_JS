@@ -1,0 +1,6 @@
+// HiroGlifx Arcade — star-defense
+// Replace the game type or customize its engine to make your own edition.
+.Main = ()
+    $ title = "Star Defense";
+    & game = arcade_game("star-defense");
+    break;
