@@ -28,7 +28,8 @@ class FrameProfiler{
   const violations=[];
   if(frames.length>=20)for(const [metric,limit] of Object.entries(this.budgets))
    if(metric in metrics&&metrics[metric]>limit)violations.push({metric,actual:metrics[metric],budget:limit});
-  return {metrics,violations,passing:!violations.length};
+  return {metrics,violations,passing:frames.length>=20&&!violations.length,
+   insufficientSamples:frames.length<20};
  }
  reset(){this.frames=[];}
 }
