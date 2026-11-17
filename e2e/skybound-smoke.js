@@ -66,6 +66,7 @@ async function main(){
    await page.screenshot({path:path.join(captures,"skybound-game-mobile.png"),fullPage:true});
    await page.locator("#skyboundSourcePanel summary").click();
    await page.waitForFunction(()=>document.querySelector("#skyboundSourceCode")?.textContent.includes(": onFinish()"));
+   await page.screenshot({path:path.join(captures,"skybound-rules-source.png"),fullPage:true});
    assert.deepEqual(errors,[],"Browser should have no uncaught page errors");
    console.log("Skybound browser QA passed; saved screenshots in "+captures);
  }finally{
