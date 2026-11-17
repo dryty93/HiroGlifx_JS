@@ -4,7 +4,12 @@ A separately routed native .scroll DOM interpreter for issue #63. No Riftfall sy
 
 ## Run
 
-From repository root:
+For a fresh visual experience starter, run:
+
+    node hiro.js init my-creative-site --ui
+    node hiro.js dev my-creative-site 3000
+
+This copies the five-page example, artwork and verified component library; no additional package setup is needed. For the checked-in example from the repository root:
 
     node hiro.js package add examples/native-ui examples/native-ui-library
     node hiro.js check examples/native-ui
@@ -72,6 +77,9 @@ Issue #63's reference pages emphasize strong editorial composition, animated her
 | TestimonialQuote | editorial customer-quote panel | quote, person |
 | KineticCTA | gradient editorial CTA section | eyebrow, title, action, href |
 | FloatingDock | reusable compact link dock | defaults are overridable |
+| TiltBento | pointer-responsive 3D bento card | title, description, number |
+| SpotlightCard | interactive pointer spotlight on an editorial card | title, description |
+| ScrollProgress | scroll-driven reading progress indicator | no required props |
 
 Build visually sophisticated sections **without duplicating their internal DOM**:
 
@@ -114,6 +122,8 @@ Inside render(self), use:
     motion art glow;
     motion logoStrip marquee;
     motion background spotlight;
+    motion tile tilt;
+    motion progress scroll-progress;
     slide track active;
     show answer open;
     hide monthly annual;
