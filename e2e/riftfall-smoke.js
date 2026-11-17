@@ -29,6 +29,12 @@ async function run(){
    assert.match(snapshot.asset,/glTF avatar \+ animations loaded/,"Original glTF and all six animation groups should load");
    await page.screenshot({path:path.join(out,"riftfall-intro-desktop.png"),fullPage:true});
    await page.getByRole("button",{name:/Enter the arena/}).click();
+   const raidersBefore=await page.evaluate(()=>window.HiroRiftfallSnapshot()?.raiders);
+   await page.waitForFunction(previous=>{
+     const now=window.HiroRiftfallSnapshot?.()?.raiders;
+     return Array.isArray(now)&&now.some((a,i)=>a.repaths>0&&
+       Math.hypot(a.x-previous[i].x,a.z-previous[i].z)>.08);
+   },raidersBefore,{timeout:8500});
    await page.keyboard.down("KeyW");
    await page.waitForTimeout(550);
    await page.keyboard.up("KeyW");
