@@ -61,8 +61,8 @@ function replaceGamePage(page){
  page=page.replace('<meta charset="utf-8">','<meta charset="utf-8">'+meta);
  if(!page.includes('Content-Security-Policy'))throw Error("CSP not applied");
  if(/<script\b[^>]*src=["']https?:\/\//i.test(page))throw Error("Remote executable script in offline bundle");
- if(/<script(?:\s[^>]*)?>[\s\S]*?\S[\s\S]*?<\/script>/i.test(page))
-   throw Error("Inline scripts are forbidden in staged desktop app");
+ const inline=/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi;
+ for(const match of page.matchAll(inline))if(match[1].trim())throw Error("Inline scripts forbidden in staged desktop app");
  return page;
 }
 function generate({root=SOURCE_ROOT,target=DEST,vendorRoot=path.join(__dirname,"node_modules")}={}){
