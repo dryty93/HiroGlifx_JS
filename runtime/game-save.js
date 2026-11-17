@@ -21,6 +21,23 @@ function validate(payload){
    throw Error("Invalid inventory snapshot");
  if(!payload.quests||!Array.isArray(payload.quests.entries)||!isNumber(payload.quests.experience))
    throw Error("Invalid quest snapshot");
+ if(payload.chapters!==undefined){
+   const c=payload.chapters;
+   if(!c||c.version!==1||!Number.isInteger(c.index)||c.index<0||c.index>32||
+      !Number.isInteger(c.progress)||c.progress<0||c.progress>200||
+      !Array.isArray(c.completed)||c.completed.length!==c.index||
+      c.completed.some(v=>typeof v!=="string"||!/^[a-z][a-z0-9-]{0,63}$/.test(v)))
+     throw Error("Invalid chapter snapshot");
+   if(!Array.isArray(payload.eventHistory)||payload.eventHistory.length>256||
+      payload.eventHistory.some(e=>!e||!["defeat","collect","craft","reach","talk","claim","consume"].includes(e.type)||
+        typeof e.id!=="string"||!/^[a-z][a-z0-9-]{0,63}$/.test(e.id)||
+        (e.quantity!==undefined&&(!Number.isInteger(e.quantity)||e.quantity<1||e.quantity>200))||
+        (e.index!==undefined&&(!Number.isInteger(e.index)||e.index<0||e.index>200))))
+     throw Error("Invalid chapter event history");
+   if(!Array.isArray(payload.chapterEvents)||payload.chapterEvents.length>8192||
+      payload.chapterEvents.some(key=>typeof key!=="string"||!/^[a-z][a-z0-9-]{0,63}:[0-9]{1,3}$/.test(key)))
+     throw Error("Invalid chapter event ledger");
+ }
  if(!Array.isArray(payload.raiders)||payload.raiders.length>32)throw Error("Invalid enemy snapshot");
  for(const r of payload.raiders){
    if(typeof r.id!=="string"||!/^[a-z0-9-]{1,40}$/.test(r.id)||
