@@ -1,0 +1,23 @@
+# Phase 2: reusable component plus live state and form input
+.Main = [
+  page "HiroGlifx Reactive App";
+  background "#101827";
+  state count 0;
+  state name "friend";
+  use Heading hero;
+  text tally "";
+  bind text tally "Clicked {count} times";
+  button increase "Add one";
+  on click increase => increment count;
+  input nameField "Your name";
+  bind input nameField name;
+  on input nameField => set name @value;
+  text greeting "";
+  bind text greeting "Hello, {name}!";
+]
+
+.Heading = [
+  text heading "Welcome to HiroGlifx";
+  box accent 64 64 blue;
+  animate accent pulse 1200 infinite;
+]
