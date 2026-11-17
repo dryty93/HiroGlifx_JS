@@ -42,9 +42,7 @@ test("quest progression, prerequisites, rewards and validated replay",()=>{
  assert.equal(c.claim("first-blood"),true);
  assert.equal(c.quests.experience,90);
  assert.equal(c.quests.accept("rift-guardian"),true);
- c.quests.record("defeat","raider",1);
- c.quests.record("defeat","raider",1);
- c.quests.record("defeat","raider",1);
+ for(let i=0;i<7;i++)c.quests.record("defeat","raider",1);
  assert.equal(c.quests.entries.get("rift-guardian").status,"completed");
  assert.equal(c.claim("rift-guardian"),true);
  assert.equal(c.inventory.count("sunstone"),1);
