@@ -50,9 +50,27 @@ class AnimationGraph{
      return false;
    const prev=this.state?this.clips.get(this.state):null;
    const next=this.clips.get(state);
-   if(prev&&prev!==next){prev.stop?.();prev.setWeightForAllAnimatables?.(0);}
-   next.setWeightForAllAnimatables?.(1);next.start?.(loop);
+   // Crossfade both animation groups; do not abruptly stop the previous clip.
+   next.start?.(loop);
+   if(prev&&prev!==next&&this.fade>0){
+     next.setWeightForAllAnimatables?.(0);
+     this.blend={from:prev,to:next,elapsed:0,duration:this.fade};
+   }else{
+     if(prev&&prev!==next){prev.stop?.();prev.setWeightForAllAnimatables?.(0);}
+     next.setWeightForAllAnimatables?.(1);
+     this.blend=null;
+   }
    this.state=state;return true;
+ }
+ tick(dt){
+   if(!this.blend)return;
+   if(typeof dt!=="number"||!Number.isFinite(dt)||dt<0||dt>.2)throw Error("Invalid blend delta");
+   const b=this.blend;b.elapsed+=dt;
+   const ratio=Math.min(1,b.elapsed/b.duration);
+   b.from.setWeightForAllAnimatables?.(1-ratio);
+   b.to.setWeightForAllAnimatables?.(ratio);
+   if(ratio>=1){b.from.stop?.();this.blend=null;}
+
  }
  update({speed=0,grounded=true,attacking=false,dead=false}={}){
    if(dead&&this.clips.has("death"))return this.set("death",{loop:false});
