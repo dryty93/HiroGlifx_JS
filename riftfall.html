@@ -53,10 +53,10 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 <h2 id="overlayTitle">Enter the Riftfall arena</h2>
 <p id="overlayText">Fight through three connected regions and seven raiders, ending with the Rift Guardian. Move with WASD, jump with Space, and attack with J or the Attack button. Their navigation and combat decisions are powered by reusable engine modules and HiroGlifx encounter rules.</p>
 <button id="start" class="primary" disabled>Initializing Havok...</button></div></div></section>
-<div class="toolbar"><button id="attack">⚔ Attack</button><button id="jump">↑ Jump</button><button id="restart">↻ Restart</button>
+<div class="toolbar"><button id="attack">⚔ Attack</button><button id="jump">↑ Jump</button><button id="evade">↝ Evade (K)</button><button id="parry">🛡 Parry (L)</button><button id="restart">↻ Restart</button>
 <div id="status" role="status">Loading physics, the original glTF avatar and gameplay source…</div></div>
-<div class="keyboard"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump</span><span><kbd>J</kbd> Attack</span><span>Drag to rotate camera</span></div>
-<div class="touch" aria-label="Touch controls"><button data-key="KeyA">←</button><button data-key="KeyW">↑</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button><button id="touchJump">Jump</button><button id="touchAttack">Attack</button></div>
+<div class="keyboard"><span><kbd>W A S D</kbd> Move</span><span><kbd>SPACE</kbd> Jump</span><span><kbd>J</kbd> Attack</span><span><kbd>K</kbd> Evade</span><span><kbd>L</kbd> Parry</span><span>Drag to rotate camera</span></div>
+<div class="touch" aria-label="Touch controls"><button data-key="KeyA">←</button><button data-key="KeyW">↑</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button><button id="touchJump">Jump</button><button id="touchAttack">Attack</button><button id="touchEvade">Evade</button><button id="touchParry">Parry</button></div>
 <div class="grid">
 <section class="panel"><h3>What is actually working?</h3><p><strong>23 · Physics:</strong> Havok V2 handles rigid bodies and character collision using a capsule controller, with camera obstruction checks.</p>
 <p><strong>24 · Assets and animation:</strong> a local original glTF file provides idle, walk, run, jump, attack and death clips. If loading fails, the scene explicitly reports a procedural placeholder.</p>
@@ -155,13 +155,17 @@ $("start").onclick=async()=>{
 };
 $("attack").onclick=()=>demo?.attack();
 $("jump").onclick=()=>demo?.character.jump();
+$("evade").onclick=()=>demo?.evade();$("parry").onclick=()=>demo?.parry();
 $("restart").onclick=()=>{started=false;showOverlay("Rebuilding the arena","Reloading the original HiroGlifx combat rules, characters and physics.","Loading...");initialize();};
 $("touchJump").onclick=()=>demo?.character.jump();$("touchAttack").onclick=()=>demo?.attack();
+$("touchEvade").onclick=()=>demo?.evade();$("touchParry").onclick=()=>demo?.parry();
 window.addEventListener("keydown",e=>{
  if(e.target.matches("input,textarea,select"))return;
  if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code))e.preventDefault();
  if(e.code==="Space"&&!e.repeat)demo?.character.jump();
  if(e.code==="KeyJ"&&!e.repeat)demo?.attack();
+ if(e.code==="KeyK"&&!e.repeat)demo?.evade();
+ if(e.code==="KeyL"&&!e.repeat)demo?.parry();
  demo?.press(e.code,true);
 });
 window.addEventListener("keyup",e=>demo?.press(e.code,false));
