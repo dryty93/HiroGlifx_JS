@@ -24,6 +24,8 @@ No JavaScript evaluation, dynamic property access, unbounded loop statements, re
 
 Run `python3 -m http.server 8000 --bind 127.0.0.1` from the repository root, then open `http://127.0.0.1:8000/arcade.html?game=pong`. On the right, the source viewer shows **every executable line** of the HiroGlifx Pong program.
 
+The code panel also has a **JavaScript runtime** tab that fetches and shows the full JavaScript implementation (`runtime/scroll-game-runtime.js` for Pong, `runtime/arcade-chess.js` for Chess, and `runtime/arcade-games.js` for the other four genres). You can inspect and copy both sides independently, without the app pretending its game engine is HiroGlifx source.
+
 Changes to the `examples/arcade/pong.scroll` file will load on a page refresh. Change `# winningScore = 7` to `# winningScore = 3`, or modify `# paddleSpeed = 420`, to alter gameplay without changing JavaScript.
 
 ## Other games
