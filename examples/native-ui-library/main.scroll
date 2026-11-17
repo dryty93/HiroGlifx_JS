@@ -1613,7 +1613,7 @@ ui library
 
 .NotFoundExperience = (ExperienceBlock)
     : render(self) = [
-        element main main root;
+        element main section root;
         class main "hg-404";
         element code div main;
         class code "hg-404-code";
