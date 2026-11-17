@@ -13,6 +13,8 @@ class RPGDemo{
    this.navmesh=null;this.navMode="a-star";this.navQueries=0;this.wave=1;this.level=null;this.navError=null;
    this.rules=new root.HiroWorldRules.WorldRules(source,{name:"rpg-combat"});
    this.combat=new root.HiroCombat.CombatWorld();
+   this.telegraphs=new root.HiroCombat.TelegraphQueue();
+   this.evadeReady=0;this.parryReady=0;
    this.keys=new Set();this.enemies=[];this.last=0;this.disposed=false;this.attackFlash=0;this.combo=0;
    this.campaign=null;this.hitReactions=new Map();this.snapshots=[];this.animationState="idle";this.ready=false;this.assetStatus="Loading glTF...";this.dynamicCrates=[];
  }
@@ -63,6 +65,7 @@ class RPGDemo{
      }
    }
    this.character=this.physics.character([0,1.9,8],{height:1.7,radius:.34,speed:5.7,jump:8.6});
+   this.baseMovementSpeed=this.character.speed;
    const body=B.MeshBuilder.CreateCapsule("hero-fallback",{height:1.7,radius:.34},this.scene);
    body.material=material("hero","#9c88ff");body.isPickable=false;
    this.heroMesh=body;
@@ -151,8 +154,14 @@ class RPGDemo{
      "in-attack-range":context=>this.rules.run("canEnemyStrike",context.distance),
      aggressive:context=>this.rules.run("canEnemyChase",context.distance)
    },actions:{
-     strike:()=>{const result=this.combat.strike(actor.id,"hero",{damage:this.rules.get("enemyDamage")+(actor.index===2?4:0),
-       range:this.rules.get("enemyRange"),cost:0,cooldown:1});return result.hit?AI.SUCCESS:AI.FAILURE;},
+     strike:()=>{
+       if(this.telegraphs.has(actor.id))return AI.SUCCESS;
+       return this.telegraphs.schedule(actor.id,this.rules.get("enemyWindup"),()=>{
+         if(!this.combat.actor(actor.id).alive||!this.combat.actor("hero").alive)return;
+         this.combat.strike(actor.id,"hero",{damage:this.rules.get("enemyDamage")+(actor.index===2?4:0),
+           range:this.rules.get("enemyRange"),cost:0,cooldown:this.rules.get("enemyCooldown")});
+       })?AI.SUCCESS:AI.FAILURE;
+     },
      pursue:context=>{
        actor.agent.navigate(context.target);
        actor.agent.tick(context.dt);
@@ -166,6 +175,24 @@ class RPGDemo{
    this.campaign?.enableAudio().catch(()=>{});
  }
  pause(){this.playing=false;this.last=0;this.keys.clear();}
+ evade(){
+   const hero=this.combat.actor("hero"),now=this.combat.elapsed;
+   if(!this.playing||!hero.alive||now<this.evadeReady||hero.stamina<this.rules.get("evadeCost")||
+      hero.status.get("parry")?.ends>now)return false;
+   hero.stamina-=this.rules.get("evadeCost");
+   this.combat.status("hero","evade",{duration:this.rules.get("evadeDuration")});
+   this.evadeReady=now+this.rules.get("evadeCooldown");
+   this.onEvent("Evade! Briefly invulnerable.");return true;
+ }
+ parry(){
+   const hero=this.combat.actor("hero"),now=this.combat.elapsed;
+   if(!this.playing||!hero.alive||now<this.parryReady||hero.stamina<this.rules.get("parryCost")||
+      hero.status.get("evade")?.ends>now)return false;
+   hero.stamina-=this.rules.get("parryCost");
+   this.combat.status("hero","parry",{duration:this.rules.get("parryDuration")});
+   this.parryReady=now+this.rules.get("parryCooldown");
+   this.onEvent("Parry window opened.");return true;
+ }
  attack(){
    this.campaign?.attackCue();
    if(!this.ready||!this.playing||!this.combat.actor("hero").alive)return false;
@@ -181,6 +208,7 @@ class RPGDemo{
  }
  tick(dt){
    this.rules.tick(dt);this.combat.tick(dt);
+   this.telegraphs.tick(dt);
    this.campaign?.tick(dt);
    for(const [id,remaining] of this.hitReactions){if(remaining<=dt)this.hitReactions.delete(id);else this.hitReactions.set(id,remaining-dt);}
    const forward=(this.keys.has("KeyW")||this.keys.has("ArrowUp")?1:0)-
@@ -188,6 +216,7 @@ class RPGDemo{
    const sideways=(this.keys.has("KeyD")||this.keys.has("ArrowRight")?1:0)-
       (this.keys.has("KeyA")||this.keys.has("ArrowLeft")?1:0);
    this.character.setInput(sideways,-forward);
+   this.character.speed=this.baseMovementSpeed*(this.combat.actor("hero").status.get("evade")?.ends>this.combat.elapsed?1.65:1);
    this.character.tick(dt);
    const pos=this.character.position,hero=this.combat.actor("hero");
    hero.x=pos.x;hero.z=pos.z;
@@ -216,8 +245,8 @@ class RPGDemo{
    for(const e of this.enemies){
      const a=this.combat.actor(e.id);e.mesh.position.set(a.x,e.stage===3?1.1:.8,a.z);
      e.mesh.setEnabled?.(a.alive);
-     const impacted=this.hitReactions.get(e.id)||0;
-     if(e.mesh.scaling){const pulse=impacted>0?1+.11*Math.sin((.22-impacted)*44):1;e.mesh.scaling.setAll?.(pulse);}
+     const impacted=this.hitReactions.get(e.id)||0,warning=this.telegraphs.has(e.id);
+     if(e.mesh.scaling){const pulse=impacted>0?1+.11*Math.sin((.22-impacted)*44):warning?1.05+.09*Math.sin(this.combat.elapsed*28):1;e.mesh.scaling.setAll?.(pulse);}
      if(e.mesh.rotation)e.mesh.rotation.z=impacted>0?.11*Math.sin((.22-impacted)*24):0;
    }
    const desired={x:pos.x+9,y:pos.y+7,z:pos.z+10};
@@ -236,12 +265,14 @@ class RPGDemo{
        repaths:e.agent.repaths,alive:this.combat.actor(e.id).alive})),
      kills:this.rules.get("kills"),done:this.rules.done,x:hero.x,z:hero.z,
      wave:this.wave,chapter:this.level?.waveTitle(this.wave)||"Riftfall",navMode:this.navMode,recastQueries:this.navQueries,
+     telegraphs:this.enemies.filter(e=>this.telegraphs.has(e.id)).map(e=>e.id),
+     defense:{evading:hero.status.get("evade")?.ends>this.combat.elapsed,parrying:hero.status.get("parry")?.ends>this.combat.elapsed},
      campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
-   this.campaign?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
+   this.campaign?.dispose();this.telegraphs.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
 return {RPGDemo};
