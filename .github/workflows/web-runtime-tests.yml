@@ -27,8 +27,10 @@ jobs:
           node --check runtime/game-assets.js
           node --check runtime/game-combat.js
           node --check runtime/game-ai.js
+          node --check runtime/game-navmesh.js
           node --check runtime/steam-rpg-demo.js
           node --check tests/steam-game-foundations.test.js
+          node --check tests/steam-game-advanced.test.js
           node --check e2e/riftfall-smoke.js
           node --check tests/native-3d-game-rules.test.js
           node --check tests/scroll-game-classes.test.js
