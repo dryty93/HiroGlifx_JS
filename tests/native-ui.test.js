@@ -66,3 +66,16 @@ test("text escaping, malicious attributes, handlers and input form events",()=>{
  assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element canvas canvas root;\n ]\n break;'),/Invalid render command/);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test("production build emits standalone route pages without unsafe inline source injection",()=>{
+ const {buildProject}=require("../hiro");const dir=makeProject();
+ try{
+  const files=buildProject(dir);assert.equal(files.length,3);
+  for(const route of ["index.html","dashboard/index.html","form/index.html"]){
+   const content=fs.readFileSync(path.join(dir,"dist",route),"utf8");
+   assert(content.includes("HiroNativeUI.NativeUIRuntime"));
+   assert(content.includes("/assets/native-ui.js"));
+  }
+  assert(fs.readFileSync(path.join(dir,"dist/assets/native-ui.js"),"utf8").includes("NativeUIRuntime"));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
