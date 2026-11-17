@@ -36,6 +36,7 @@ async function main(){
      return status.includes("Skybound is ready")||status.includes("Babylon.js")||status.includes("Could not");
    },null,{timeout:45000});
    const status=await page.locator("#status").innerText();
+   assert.equal(await page.evaluate(()=>window.HiroSkyboundSnapshot?.()?.rulesLoaded),true);
    assert.match(status,/Skybound is ready/,"Game must load in Chromium: "+status);
    assert.equal(await page.locator("#overlay").isVisible(),true);
    await page.getByRole("button",{name:/Start adventure/}).click();
@@ -63,6 +64,8 @@ async function main(){
    assert.equal(await page.locator(".mobile-pad").isVisible(),true);
    await page.locator("#jumpButton").click();
    await page.screenshot({path:path.join(captures,"skybound-game-mobile.png"),fullPage:true});
+   await page.locator("#skyboundSourcePanel summary").click();
+   await page.waitForFunction(()=>document.querySelector("#skyboundSourceCode")?.textContent.includes(": onFinish()"));
    assert.deepEqual(errors,[],"Browser should have no uncaught page errors");
    console.log("Skybound browser QA passed; saved screenshots in "+captures);
  }finally{
