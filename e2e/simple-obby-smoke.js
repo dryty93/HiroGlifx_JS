@@ -36,6 +36,9 @@ async function main(){
    assert.equal(await page.locator(".stage-card").count(),3);
    const overflow=await page.evaluate(()=>({width:innerWidth,scroll:document.body.scrollWidth}));
    assert(overflow.scroll<=overflow.width+2,"Horizontal overflow "+JSON.stringify(overflow));
+   await page.getByRole("button",{name:"Start adventure"}).click();
+   await page.waitForFunction(()=>window.HiroSimpleObbySnapshot?.()?.started===true);
+   await page.waitForTimeout(180);
    await page.locator("#courseWorkshop").scrollIntoViewIfNeeded();
    await page.screenshot({path:path.join(dir,"simple-obby-"+width+".png"),fullPage:true});
    const editor=page.getByRole("textbox",{name:"Game directions"});
