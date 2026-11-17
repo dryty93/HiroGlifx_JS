@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio, feat/phase13-canonical-expressions, feat/phase14-canonical-obby-game, feat/phase15-skybound-showcase, feat/phase16-skybound-physics-feel, feat/phase17-voxel-sandbox, feat/phase18-arcade-and-source-viewer, feat/phase19-native-scroll-pong, feat/phase20-native-scroll-games, feat/phase21-polymorphic-game-library, feat/phase22-native-3d-game-rules, feat/phase23-26-action-rpg-foundations, feat/phase27-riftfall-progression-polish]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio, feat/phase13-canonical-expressions, feat/phase14-canonical-obby-game, feat/phase15-skybound-showcase, feat/phase16-skybound-physics-feel, feat/phase17-voxel-sandbox, feat/phase18-arcade-and-source-viewer, feat/phase19-native-scroll-pong, feat/phase20-native-scroll-games, feat/phase21-polymorphic-game-library, feat/phase22-native-3d-game-rules, feat/phase23-26-action-rpg-foundations, feat/phase27-riftfall-progression-polish, feat/phase28-riftfall-world-navmesh-rig]
   pull_request:
 jobs:
   node:
@@ -23,6 +23,9 @@ jobs:
           node --check runtime/scroll-game-runtime.js
           node --check runtime/scroll-game-classes.js
           node --check runtime/scroll-world-rules.js
+          node --check runtime/riftfall-world.js
+          node --check tests/rigged-avatar.test.js
+          node --check tests/riftfall-world-chapters.test.js
           node --check runtime/game-progression.js
           node --check runtime/game-content.js
           node --check runtime/game-save.js
