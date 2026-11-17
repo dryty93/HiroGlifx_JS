@@ -111,6 +111,15 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 The package is SHA-256 lockfile-verified. The generic `hiro dev` page renderer does not yet host these Canvas game scripts. See [polymorphism documentation](docs/polymorphism.md) for details and limitations.
 
+## Native HiroGlifx gameplay rules for both 3D games (Phase 22)
+
+Skybound and Blockhaven now load **executable, game-specific HiroGlifx `.scroll` rules**, not only the world-building initialization:
+
+- [Skybound's complete native gameplay](examples/skybound-gameplay.scroll): stage scores and bonuses, per-stage movement and jump tuning, moving-platform and spinner motion, disappearing/reappearing platform timing, death and victory rewards. Its existing [level source](examples/skybound-course.scroll) places the full obstacle course.
+- [Blockhaven's native gameplay](examples/blockhaven-gameplay.scroll): terrain height equations, biomes/surface materials, deterministic tree placement, mining and placing policies, and builder score. Its [world setup](examples/blockhaven.scroll) initializes the voxel engine.
+
+The game pages provide **source viewers for both the gameplay rules and the level/world setup**. JavaScript continues to supply the reusable 3D renderer, world storage, and physical collision/input primitives. This is a meaningful game-rules migration, **not a claim that the underlying physics or Babylon/voxel engines themselves are HiroGlifx source**. See [implementation details and tests](docs/native-3d-game-rules.md).
+
 ## Blockhaven — original 3D voxel sandbox (browser)
 
 **[Play Blockhaven](blockhaven.html)** to explore a finite, procedurally generated world, mine and place blocks, switch materials and save the world in your browser. It uses Babylon.js for first-person WebGL rendering and canonical HiroGlifx variables to create the world.
