@@ -98,7 +98,8 @@ class NavigationAgent{
    this.grid=grid;this.speed=finite(speed,"speed");this.position={...position};this.path=[];this.lastGoal=null;this.repaths=0;
  }
  navigate(target){
-   const id=key(target.x,target.z);
+   const targetCell=this.grid.cell(target.x,target.z);
+   const id=key(targetCell.x,targetCell.z);
    if(id!==this.lastGoal||!this.path.length){
      this.path=this.grid.path(this.position,target);
      this.lastGoal=id;this.repaths++;
