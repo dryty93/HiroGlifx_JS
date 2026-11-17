@@ -197,17 +197,24 @@ class RPGDemo{
    this.onEvent("Parry window opened.");return true;
  }
  attack(){
-   this.campaign?.attackCue();
-   if(!this.ready||!this.playing||!this.combat.actor("hero").alive)return false;
+   if(!this.ready||!this.playing||!this.combat.actor("hero").alive||
+      this.attackWindows.has("hero"))return false;
    const hero=this.combat.actor("hero");
    const candidates=this.enemies.filter(e=>this.combat.actor(e.id).alive)
      .sort((a,b)=>Math.hypot(a.agent.position.x-hero.x,a.agent.position.z-hero.z)-
                    Math.hypot(b.agent.position.x-hero.x,b.agent.position.z-hero.z));
-   if(!candidates.length)return false;
-   const result=this.combat.strike("hero",candidates[0].id,{damage:this.rules.run("heroDamage",this.combo),
-     range:this.rules.get("range"),cost:this.rules.get("staminaCost"),cooldown:this.rules.get("cooldown")});
-   if(result.hit){this.combo=Math.min(5,this.combo+1);this.attackFlash=.25;return true;}
-   return false;
+   if(!candidates.length||hero.stamina<this.rules.get("staminaCost"))return false;
+   const windup=this.rules.get("heroWindup"),recovery=this.rules.get("heroRecovery");
+   const accepted=this.attackWindows.begin("hero",{windup,recovery,onImpact:()=>{
+     const target=candidates[0];
+     if(!this.combat.actor(target.id).alive)return;
+     const result=this.combat.strike("hero",target.id,{
+       damage:this.rules.run("heroDamage",this.combo),range:this.rules.get("range"),
+       cost:this.rules.get("staminaCost"),cooldown:this.rules.get("cooldown")});
+     this.combo=result.hit?Math.min(5,this.combo+1):0;
+   }});
+   if(accepted){this.campaign?.attackCue();this.attackFlash=windup+recovery;}
+   return accepted;
  }
  tick(dt){
    this.rules.tick(dt);this.combat.tick(dt);
