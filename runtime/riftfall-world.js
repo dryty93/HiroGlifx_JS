@@ -4,9 +4,10 @@
 (function(root,factory){
  const world=typeof module==="object"&&module.exports?require("./scroll-world-rules"):root.HiroWorldRules;
  const ai=typeof module==="object"&&module.exports?require("./game-ai"):root.HiroAI;
- const api=factory(world,ai);
+ const stream=typeof module==="object"&&module.exports?require("./game-region-stream"):root.HiroRegionStream;
+ const api=factory(world,ai,stream);
  if(typeof module==="object"&&module.exports)module.exports=api;else root.HiroRiftfallWorld=api;
-})(typeof globalThis!=="undefined"?globalThis:this,function(world,ai){
+})(typeof globalThis!=="undefined"?globalThis:this,function(world,ai,stream){
 "use strict";
 const numeric=(n,min,max,label)=>{
  if(typeof n!=="number"||!Number.isFinite(n)||n<min||n>max)throw Error("Invalid "+label);
@@ -23,11 +24,13 @@ class RiftfallWorld{
    if(!Array.isArray(this.regions)||this.regions.length<2||this.regions.length>12||
      !Array.isArray(this.obstacles)||this.obstacles.length>70||
      !Array.isArray(this.encounters)||this.encounters.length>50)throw Error("Invalid Riftfall level source");
-   this.worldMeshes=[];this.nav=null;this.currentWave=1;
+   this.worldMeshes=[];this.nav=null;this.currentWave=1;this.details=null;
  }
  waveTitle(stage){return this.rules.run("chapterTitle",stage);}
  threshold(stage){return this.rules.run("waveThreshold",stage);}
  waveStart(stage){this.currentWave=stage;return this.rules.run("waveStart",stage);}
+ updateDetails(position){return this.details?.update(position)||{regions:[],count:0};}
+ dispose(){this.details?.dispose();this.details=null;}
  spawns(stage){
    return this.encounters.map((row,i)=>{
      if(!Array.isArray(row)||row.length!==7)throw Error("Invalid encounter definition");
@@ -70,25 +73,30 @@ class RiftfallWorld{
        }
      meshCount++;
    }
-   if(B.MeshBuilder.CreateSphere){
-     for(let i=0;i<54;i++){
-       const zone=i%3,z=[0,-23,-48][zone],angle=i*2.39996322973;
-       const x=Math.cos(angle)*(.8+i%5+9),dz=Math.sin(angle)*(.8+i%4+9);
-       const shrub=B.MeshBuilder.CreateSphere("world-foliage-"+i,{diameter:1+(i%3)*.34,segments:6},scene);
-       shrub.position.set(x,.4,z+dz);shrub.scaling.y=.52;
-       shrub.material=material("foliage-"+i,zone===2?"#5a769a":zone===1?"#5c9a83":"#378472");
-       shrub.isPickable=false;
+   // All terrain and obstacles stay in Havok/Recast. Only non-colliding decorative
+   // meshes stream by player proximity, bounding the visual mesh footprint.
+   this.details=new stream.RegionStream({regions:this.regions,radius:7,maxRegions:2,
+     create:row=>{
+       const [id,,cx,cz,w,d,tint]=row;
+       const meshes=[],mat=material("detail-"+id,tint);
+       try{
+         if(B.MeshBuilder.CreateSphere)for(let i=0;i<12;i++){
+           const a=i*2.39996322973,r=.28+.56*((i*7%13)/13);
+           const m=B.MeshBuilder.CreateSphere("detail-shrub-"+id+"-"+i,{diameter:1+(i%3)*.3,segments:6},scene);
+           m.position.set(cx+Math.cos(a)*r*w/2,.4,cz+Math.sin(a)*r*d/2);
+           if(m.scaling)m.scaling.y=.55;m.material=mat;m.isPickable=false;meshes.push(m);
+         }
+         if(B.MeshBuilder.CreateCylinder)for(let i=0;i<3;i++){
+           const a=(i+.5)*2.2;
+           const m=B.MeshBuilder.CreateCylinder("detail-pillar-"+id+"-"+i,{diameter:.9,height:1.7+i*.4,tessellation:6},scene);
+           m.position.set(cx+Math.cos(a)*w*.38,1,cz+Math.sin(a)*d*.38);
+           m.material=mat;m.isPickable=false;meshes.push(m);
+         }
+         return {dispose(){for(const m of meshes)m.dispose?.();mat?.dispose?.();}};
+       }catch(error){for(const m of meshes)m.dispose?.();mat?.dispose?.();throw error;}
      }
-   }
-   if(B.MeshBuilder.CreateCylinder){
-     for(let i=0;i<17;i++){
-       const z=i%2?-50:-22,angle=i*2.4;
-       const mesh=B.MeshBuilder.CreateCylinder("world-obelisk-"+i,{diameter:.9,height:1.6+i%4,tessellation:6},scene);
-       mesh.position.set(Math.cos(angle)*11,1,z+Math.sin(angle)*10);
-       mesh.material=material("obelisk-"+i,i%2?"#566382":"#947966");
-       mesh.isPickable=false;
-     }
-   }
+   });
+   this.details.update({x:0,z:8});
    return {navigation:this.nav,meshes:this.worldMeshes,count:meshCount,regions:this.regions.length};
  }
 }
