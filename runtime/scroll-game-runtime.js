@@ -396,7 +396,6 @@
              if(result?.tag==="break")break;
            }
          }else if(node.tag==="local"){
-           if(Object.prototype.hasOwnProperty.call(scope,node.name))throw new Error("Duplicate local "+node.name);
            scope[node.name]=this.evaluate(node.value,scope,budget,mode);
          }else if(node.tag==="assign"){
            const val=this.evaluate(node.value,scope,budget,mode);
