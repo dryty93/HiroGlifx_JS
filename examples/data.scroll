@@ -1,0 +1,4 @@
+# Phase 3: local persistent data and predefined JSON API.
+data.collection notes
+data.seed notes '{"title":"Ship HiroGlifx","done":false}'
+route GET /health json '{"ok":true}'
