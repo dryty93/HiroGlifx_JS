@@ -32,6 +32,21 @@ node hiro.js build my-studio
 
 Open **http://127.0.0.1:3000/showcase** to explore 66 class previews, grouped across seven categories, each with its own copyable `.scroll` snippet. The `hiro showcase` command installs an isolated temporary preview automatically, avoiding local lockfile setup errors. The --ui starter includes 11 live examples, including /showcase and /catalog and the hero, portfolio, storytelling and conversion collections. It provides 28 additional high-level experience classes. See [the complete native experience catalog](docs/native-experience-catalog.md) and [the native UI guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
 
+## Build a playable 3D game with simple HiroGlifx directions
+
+Describe your game with commands like `platform start at 0 0 0 size 5`, `moving glide at 5 0 0 size 3 axis z range 1 period 3`, `checkpoint safe at 10 0 0 size 4` and `finish goal at 15 0 0 size 5`. The new **Simple Obby Kit** compiles the readable `.scroll` file into native HiroGlifx game objects and runs the existing Skybound collision, physics and Babylon.js 3D engine.
+
+```bash
+node hiro.js game 8000
+# Open http://127.0.0.1:8000/simple-obby.html
+node hiro.js game check examples/simple-obby/soda-splash.scroll
+node hiro.js game new my-first-game.scroll
+```
+
+The interactive browser workshop loads the original Soda Splash example and lets you edit the game directly, rebuild and play. Change stages, obstacles, jump and movement, or choose one of five themes: sky, soda, candy, neon and ice. See [the simple 3D games guide](docs/simple-3d-games.md).
+
+This is an original, browser-based 3D obstacle course prototype: the shared physics and rendering runtime remain JavaScript/Babylon.js, while the **game itself is authored with readable HiroGlifx**. The demo is not a Roblox compatibility layer or a reproduction of someone else's game.
+
 ## Canonical variable syntax — Phase 13
 
 The **new canonical-expression subset** brings typed variable declarations back to HiroGlifx's symbolic `.Main = ()` style. A shorthand may execute immediately or return a reusable object:
