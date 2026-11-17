@@ -56,6 +56,10 @@ class RPGDemo{
        if(!recast)throw Error("Recast returned no runtime");
        this.navmesh=new root.HiroNavmesh.RecastNavigation({BABYLON:B,scene:this.scene,recast});
        this.navmesh.build(geometry.meshes);
+       this.navRouter=new root.HiroNavmesh.RouteBudget({
+         path:(from,to)=>this.navmesh.path({x:from.x,y:.1,z:from.z},{x:to.x,y:.1,z:to.z}),
+         fallback:(from,to)=>this.nav.path(from,to),maxQueriesPerSecond:20,ttl:.25,errorLimit:3
+       });
        this.navMode="recast";
      }catch(error){
        this.navmesh?.dispose();this.navmesh=null;
@@ -120,14 +124,7 @@ class RPGDemo{
         height:stage===3?2.2:1.5,depth:stage===3?1.15:.7},this.scene);
      mesh.material=mat(id,color);mesh.position.set(x,stage===3?1.1:.75,z);
      this.combat.create(id,{team:"raiders",health,x,z,armor});
-     const route=this.navmesh?((from,to)=>{
-       try{
-         this.navQueries++;
-         const path=this.navmesh.path({x:from.x,y:.1,z:from.z},{x:to.x,y:.1,z:to.z});
-         if(path.length>1)return path.map(p=>({x:p.x,z:p.z}));
-       }catch(error){this.navError=error.message;}
-       return this.nav.path(from,to);
-     }):null;
+     const route=this.navRouter?((from,to)=>this.navRouter.route(from,to,this.combat.elapsed)):null;
      const agent=new root.HiroAI.NavigationAgent({grid:this.nav,position:{x,z},speed,route});
      const actor={id,mesh,agent,index,stage,decision:null,attackTime:0};
      actor.decision=this.makeBehavior(actor);this.enemies.push(actor);
@@ -236,14 +233,18 @@ class RPGDemo{
      raiders:this.enemies.map(e=>({id:e.id,x:this.combat.actor(e.id).x,z:this.combat.actor(e.id).z,
        repaths:e.agent.repaths,alive:this.combat.actor(e.id).alive})),
      kills:this.rules.get("kills"),done:this.rules.done,x:hero.x,z:hero.z,
-     wave:this.wave,chapter:this.level?.waveTitle(this.wave)||"Riftfall",navMode:this.navMode,recastQueries:this.navQueries,
+     wave:this.wave,chapter:this.level?.waveTitle(this.wave)||"Riftfall",
+     navMode:this.navRouter?.stats().mode||this.navMode,
+     recastQueries:this.navRouter?.stats().queries||0,
+     navFallbacks:this.navRouter?.stats().fallbacks||0,
+     navErrors:this.navRouter?.stats().errors||0,
      visualRegions:this.level?.details?.snapshot()||null,
      campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
-   this.campaign?.dispose();this.level?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
+   this.campaign?.dispose();this.level?.dispose();this.navRouter?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
 return {RPGDemo};
