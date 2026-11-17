@@ -18,11 +18,15 @@ async function main(){
    const errors=[];page.on("pageerror",e=>errors.push(e.message));
    const response=await page.goto(base+"/simple-obby.html",{waitUntil:"domcontentloaded"});
    assert.equal(response.status(),200);
-   await page.waitForFunction(()=>{
+   try{await page.waitForFunction(()=>{
     const snapshot=window.HiroSimpleObbySnapshot?.();
     const text=document.getElementById("status")?.textContent||"";
-    return snapshot?.sceneReady||text.includes("could not")||text.includes("couldn't")||text.includes("Failed");
-   },null,{timeout:100000});
+    return snapshot?.sceneReady||/could not|couldn't|failed|error/i.test(text);
+   },null,{timeout:45000});}catch(error){
+    const diagnostic=await page.evaluate(()=>({status:document.getElementById("status")?.textContent,
+     snapshot:window.HiroSimpleObbySnapshot?.(),scripts:[...document.scripts].map(x=>x.src).filter(Boolean)}));
+    throw Error("Soda Splash startup: "+JSON.stringify({diagnostic,errors})+" "+error.message);
+   }
    const snapshot=await page.evaluate(()=>window.HiroSimpleObbySnapshot?.());
    assert(snapshot?.sceneReady,"Babylon 3D scene did not initialize: "+await page.locator("#status").innerText());
    assert.equal(snapshot.title,"Soda Splash");
