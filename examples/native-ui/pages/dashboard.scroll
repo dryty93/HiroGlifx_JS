@@ -57,5 +57,10 @@ import native-ui
         component CounterButton counter section;
         component SuccessButton more section;
         prop more label "Another inherited button";
+        component ThemeButton theme section;
+        component Modal modal section;
+        prop modal title "Polymorphic UI details";
+        prop modal message "This dialog is rendered by an imported HiroGlifx class. State is managed in HiroGlifx.";
+
     ]
     break;
