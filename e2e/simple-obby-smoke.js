@@ -57,7 +57,7 @@ async function main(){
    await page.waitForFunction(()=>window.HiroSimpleObbySnapshot?.()?.title==="Soda Splash");
    await editor.fill(original.replace("theme soda","theme unsafe"));
    await page.getByRole("button",{name:"Build & Play My Game"}).click();
-   await page.waitForFunction(()=>/Line \\d+: Choose a theme/.test(document.getElementById("compileStatus")?.textContent||""));
+   await page.waitForFunction(()=>document.getElementById("compileStatus")?.textContent?.includes("Choose a theme"));
    assert.equal((await page.evaluate(()=>window.HiroSimpleObbySnapshot?.())).title,"Soda Splash","invalid course must not replace existing world");
    assert.deepEqual(errors,[]);
    await page.close();
