@@ -1,0 +1,4 @@
+# PostgreSQL schema created by runtime/postgres-store.js
+# Collections still declared with the familiar command:
+data.collection tasks
+route GET /health json '{"ok":true}'
