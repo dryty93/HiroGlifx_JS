@@ -108,11 +108,12 @@ class RPGDemo{
    this.engine.runRenderLoop(()=>{
      if(this.disposed)return;
      const now=typeof performance!=="undefined"?performance.now():Date.now();
-     const dt=this.last?Math.min(.05,Math.max(0,(now-this.last)/1000)):0;this.last=now;
+     const rawFrameMs=this.last?Math.max(0,now-this.last):0;
+     const dt=this.last?Math.min(.05,rawFrameMs/1000):0;this.last=now;
      if(this.playing&&dt)this.tick(dt);
      this.sync();
      this.scene.render();
-     if(this.playing&&dt)this.profiler.sample({frameMs:dt*1000,
+     if(this.playing&&dt)this.profiler.sample({frameMs:rawFrameMs,
        activeMeshes:this.scene.meshes?.length||0,
        activeColliders:this.physics.aggregates?.length||0,
        navQueries:this.navRouter?.stats().queries||0});
