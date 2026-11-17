@@ -179,3 +179,22 @@ test("unsafe CSS variable expressions are prohibited by the native compiler",()=
  assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n stylevar panel --unsafe width;\n ]\n break;'),/Invalid render command/);
  assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n motion panel javascript;\n ]\n break;'),/Invalid render command/);
 });
+
+
+test("UI CLI discovers every installed experience and scaffolds native .scroll routes safely",()=>{
+ const {uiClasses,createUIPage,validateProject}=require("../hiro");
+ const dir=makeProject();
+ try{
+  const names=uiClasses(dir);
+  for(const name of ["SplitHero","StickyScrollytelling","BeforeAfterSlider","MagneticCTA","NotFoundExperience"])
+   assert(names.has(name),"missing "+name);
+  const file=createUIPage(dir,"SplitHero","my-hero");
+  const src=fs.readFileSync(file,"utf8");
+  assert(src.includes("import native-ui"));
+  assert(src.includes("component SplitHero experience page;"));
+  assert.equal(validateProject(dir),11);
+  assert.throws(()=>createUIPage(dir,"SplitHero","my-hero"),/already exists/);
+  assert.throws(()=>createUIPage(dir,"NoSuchComponent","missing"),/Unknown UI component/);
+  assert.throws(()=>createUIPage(dir,"SplitHero","../outside"),/Invalid UI route/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
