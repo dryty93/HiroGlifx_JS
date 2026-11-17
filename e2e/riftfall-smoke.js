@@ -30,6 +30,14 @@ async function run(){
    const content=await page.evaluate(()=>window.HiroRiftfallContentSnapshot?.());
    assert.equal(content.builderItems,9);
    assert.equal(content.questDetails.length,4);
+   assert.equal(content.chapterDetails.length,4);
+   assert.equal(content.chapters.current,"approach");
+   await page.locator("#chaptersButton").click();
+   assert.match(await page.locator("#rpgEntries").innerText(),/Broken Approach/);
+   await page.getByRole("button",{name:"Close"}).click();
+   await page.locator("#chapterSourceTab").click();
+   assert.match(await page.locator("#source").innerText(),/Riftsteel Oath/);
+   await page.locator("#combatSourceTab").click();
    assert.equal(content.inventory.equipment[0].id,"training-sword");
    await page.locator("#inventoryButton").click();
    assert.equal(await page.locator("#rpgModal").isVisible(),true);
