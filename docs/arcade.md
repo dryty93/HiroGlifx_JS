@@ -1,49 +1,38 @@
-# HiroGlifx Arcade and source transparency
+# HiroGlifx Arcade — Complete native .scroll gameplay
 
-## Play six games
+HiroGlifx `.scroll` source now implements the complete rules and drawing for all six Arcade examples: Pong, Snake, Breakout, Star Defense, Chess, and Tic-Tac-Toe. JavaScript still implements the **generic language interpreter** and browser Canvas/input integration; game-specific rules are no longer executed from the older `runtime/arcade-games.js` or `runtime/arcade-chess.js` modules.
 
-Open `arcade.html` using a local HTTP server, such as `python3 -m http.server 8000 --bind 127.0.0.1`, then visit `http://127.0.0.1:8000/arcade.html`.
+## Source is always available
 
-Arcade includes: **Pong** (player vs computer), **Snake**, **Breakout**, **Star Defense** (an original Galaga-style fixed-screen shooter), **Chess** (local two-player, not an AI opponent), and **Tic-Tac-Toe** (local two-player). These are compact prototype games, not licensed ports with external copyrighted assets.
+The [Arcade](../arcade.html) loads the real `examples/arcade/<game>.scroll` file and renders the complete source alongside gameplay. The *JavaScript runtime* tab fetches `runtime/scroll-game-runtime.js` to distinguish the implementation of the language from the game authored in the language.
 
-Each game has an inspectable `examples/arcade/<id>.scroll` source file. Selecting another game loads and executes that exact canonical HiroGlifx program:
+Full authored game sources:
 
-```scroll
-.Main = ()
-    $ title = "Pong";
-    & game = arcade_game("pong");
-    break;
-```
+- [Pong](../examples/arcade/pong.scroll) — physics, paddles, opponent AI and scoring
+- [Snake](../examples/arcade/snake.scroll) — arrays, food, collision, grid logic
+- [Breakout](../examples/arcade/breakout.scroll) — bricks, ball, bounce and lives
+- [Star Defense](../examples/arcade/star-defense.scroll) — bullets, enemy formations and shooting
+- [Chess](../examples/arcade/chess.scroll) — a 64-square board, legal moves, check, checkmate, castling, en passant, promotions, stalemate, insufficient material, automatic draw conditions, undo
+- [Tic-Tac-Toe](../examples/arcade/tic-tac-toe.scroll) — click handling, turns, and win/draw detection
 
-The `arcade_game` factory is registered by the trusted browser host in `runtime/arcade-canonical.js`, returning a reusable model from `runtime/arcade-games.js` or `runtime/arcade-chess.js`. This is a proof of HiroGlifx's **extensibility** and symbolic variables; the underlying game mechanics remain JavaScript host implementations, not yet pure `.scroll` gameplay loops. The viewer points to the source file and shared engines to make that distinction clear.
+## Interpreter capabilities
 
-## Controls
+Start with `.Main = ()` and end with `break;`. Declare typed globals using `#` number, `$` string, `?` boolean, and `&` array. Define `: tick(dt) = [ ... ]` and `: draw() = [ ... ]`. Optional methods: `: init()`, `: click(x, y)`, `: keyEvent(code, pressed)`, and custom `: method(arg1, ...)` methods. Every method has a bounded instruction budget; recursive calls are depth-limited.
 
-| Game | Controls |
-| --- | --- |
-| Pong | W/S, Up/Down or pointer movement |
-| Snake | Arrow keys or WASD |
-| Breakout | A/D, Left/Right or pointer movement |
-| Star Defense | A/D or Left/Right to move, Space to fire |
-| Chess | Click a piece and then a destination, press Q/R/B/N to select promotion; local two-player |
-| Tic-Tac-Toe | Click or tap an empty square; local two-player |
+Control flow: `if condition [ ... ]`, `for i from start to end [ ... ]` (exclusive end), `while condition [ ... ]` (bounded), `let local = expr;`, global or local assignment, `return value;`, `break;` in a loop, and expression statements that call functions.
 
-All games feature restart controls; real browser game sessions can be paused. Chess supports castling, en passant, legal promotions, checks, checkmate, stalemate and common automatic draw conditions. It does not implement an AI or a complete online chess service.
+Expressions: finite numbers, strings, booleans, arithmetic, comparisons, logic, calls and parentheses. There are **no dynamic JavaScript properties, eval, Function, imports, direct DOM access, or arbitrary browser navigation**.
 
-## Blockhaven source viewer
+Built-in functions: numeric `abs`, `min`, `max`, `clamp`, `floor`, `ceil`, `round`, `sign`, `sqrt`, `sin`, `cos`; arrays `array`, `filled`, `chars`, `get`, `set`, `len`, `clone`, `push`, `unshift`, `pop`, `shift`, `removeAt`, `char`, `indexOf`; strings `lower`, `upper`; seeded `random`; input `key(name)` and `pointer("x"|"y")`. Canvas draw-only calls: `clear`, `rect`, `circle`, and `text`.
 
-`blockhaven.html` now displays the actual `examples/blockhaven.scroll` file in an expandable code panel, with copy functionality and links to the voxel world and Babylon renderer modules. The source is fetched, not reconstructed or fabricated.
+## Chess scope
 
-## Engineering structure
+The rules are *implemented in Chess's `.scroll` file*, including king safety during move validation, castling through non-attacked squares, en passant, all four promotion types and endgames. The example is local two-player, with an Undo control. It has no chess AI, clocks, PGN export, online multiplayer, or full claim-based draw interface. This is a chess demo and game-language stress test, not a replacement for an established chess engine.
 
-- `runtime/arcade-games.js`: independent deterministic game state and Canvas rendering for five small genres
-- `runtime/arcade-chess.js`: rules-aware local two-player chess model
-- `runtime/arcade-canonical.js`: factory and typed HiroGlifx object methods
-- `examples/arcade/*.scroll`: six executable canonical HiroGlifx programs
-- `arcade.html`: game selector, controls, source viewer and visual game host
-- `tests/arcade-games.test.js`: model and legal chess tests
-- `e2e/arcade-smoke.js`: real Chromium user interactions and visual snapshots
+## Validation
 
-## Next steps
+Run `node --test tests/native-arcade-all.test.js tests/scroll-game-runtime.test.js` to check real native gameplay, including chess special moves and safety budgets. `e2e/arcade-smoke.js` plays through browser input, verifies code provenance and captures screenshots. The standard project checker can validate game scripts; hosting a new game requires a Canvas game host similar to `arcade.html`.
 
-Build reusable `.scroll` game components, event handling, stateful methods and a genuine scriptable scene model; then introduce computer chess, enhanced mobile controls, sound and gamepad support. For larger games, separate rendering and simulation and measure performance across devices. Small-game showcases are a useful language regression suite but are not a replacement for an integrated compiler.
+## Important distinction for the wider platform
+
+Skybound and Blockhaven still have JavaScript game-specific rules and a HiroGlifx `.scroll` object configuration layer. The *Arcade's six games* are genuinely authored in `.scroll`; that architecture is the template for moving more gameplay systems into the language. Reuse the generic native interpreter rather than making one JavaScript factory per game.
