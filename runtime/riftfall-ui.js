@@ -95,7 +95,7 @@ class RiftfallUI{
  hide(){
    if(!this.open)return;
    this.open=false;this.modal.hidden=true;
-   if(this.wasPlaying&&this.demo?.combat.actor("hero").alive&&!this.demo.rules.done)this.demo.start();
+   if(this.wasPlaying&&this.demo?.combat.actor("hero").alive&&(!this.demo.rules.done||!this.campaign?.chapters||!this.campaign.chapters.finished))this.demo.start();
  }
  line(name,description,button,click,disabled=false){
    const div=this.el("div",{className:"rpg-entry"}),info=this.el("div");
