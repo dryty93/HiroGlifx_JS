@@ -5,7 +5,7 @@ const ID=/^[A-Za-z_][A-Za-z0-9_]*$/;
 const CLASS=/^\.([A-Za-z_]\w*)\s*=\s*\(([A-Za-z_]\w*)?\)$/;
 const FIELD=/^([#$?])\s*([A-Za-z_]\w*)\s*=\s*(.+);$/;
 const METHOD=/^:\s*([A-Za-z_]\w*)\s*\(self\)\s*=\s*\[$/;
-const TAGS=new Set("main header footer nav section article aside div h1 h2 h3 h4 p span small strong em ul li a button form label input textarea select option figure img picture video blockquote details summary".split(" "));
+const TAGS=new Set("main header footer nav section article aside div h1 h2 h3 h4 p span small strong em ul li a button form label input textarea select option figure figcaption img picture video blockquote details summary".split(" "));
 const ATTRS=new Set("href type name placeholder required disabled value autocomplete role aria-label aria-modal aria-expanded aria-current aria-live aria-describedby aria-hidden for title tabindex min max src alt loading decoding width height poster controls autoplay muted loop playsinline".split(" "));
 const EVENT=new Set(["click","input","change","submit"]);
 const EFFECTS=new Set(["reveal","rise","scale","float","glow","marquee","hover-rise","spotlight","parallax"]);
@@ -32,7 +32,7 @@ function compile(source){
  for(const c of classes.values())for(const [method,steps] of c.methods)for(const s of steps){
   const [a,b,d]=s.args;const n=s.args.length;
   if(method==="render"){
-   if(!((s.op==="element"&&n===3&&ID.test(a)&&TAGS.has(b))||(s.op==="component"&&n===3&&ID.test(a)&&ID.test(b))||(s.op==="prop"&&n===3)||(s.op==="text"&&n===2)||(s.op==="class"&&n===2)||(s.op==="attr"&&n===3&&(ATTRS.has(b)||/^data-[a-z0-9-]+$/.test(b)))||(s.op==="on"&&n===3&&EVENT.has(b))||(s.op==="bind"&&n===2)||(s.op==="show"&&n===2)||(s.op==="slide"&&n===2)||(s.op==="motion"&&n===2&&EFFECTS.has(b))))throw Error("Invalid render command at line "+s.line);
+   if(!((s.op==="element"&&n===3&&ID.test(a)&&TAGS.has(b))||(s.op==="component"&&n===3&&ID.test(a)&&ID.test(b))||(s.op==="prop"&&n===3)||(s.op==="text"&&n===2)||(s.op==="class"&&n===2)||(s.op==="attr"&&n===3&&(ATTRS.has(b)||/^data-[a-z0-9-]+$/.test(b)))||(s.op==="on"&&n===3&&EVENT.has(b))||(s.op==="bind"&&n===2)||(s.op==="show"&&n===2)||(s.op==="hide"&&n===2)||(s.op==="slide"&&n===2)||(s.op==="motion"&&n===2&&EFFECTS.has(b))))throw Error("Invalid render command at line "+s.line);
   }else if(!((s.op==="set"&&n===2)||(s.op==="increment"&&n>=1&&n<=2)||(s.op==="toggle"&&n===1)||(s.op==="navigate"&&n===1)||(s.op==="theme"&&n===1&&["light","dark","toggle"].includes(a))||(s.op==="cycle"&&n===3)))throw Error("Invalid action at line "+s.line);
  }
  return {classes,header};
@@ -60,6 +60,7 @@ class NativeUIRuntime{
     if(win?.IntersectionObserver&&!win.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){const watcher=new win.IntersectionObserver(entries=>{for(const item of entries)if(item.isIntersecting){item.target.classList.add("hg-in-view");watcher.unobserve(item.target);}},{threshold:0.12,rootMargin:"0px 0px -25px 0px"});watcher.observe(el);this.observers.push(watcher);}else el.classList.add("hg-in-view");
    }}
    else if(op==="slide"){if(typeof obj.fields[b]!=="number"||!Number.isInteger(obj.fields[b]))throw Error("slide needs integer field");node(a).style.setProperty("--hg-slide",String(obj.fields[b]));}
+   else if(op==="hide"){if(typeof obj.fields[b]!=="boolean")throw Error("hide needs boolean field");node(a).style.display=obj.fields[b]?"none":"";}
    else if(op==="show"){if(typeof obj.fields[b]!=="boolean")throw Error("show needs boolean field");node(a).style.display=obj.fields[b]?"":"none";}
    else if(op==="bind"){const el=node(a);if(!Object.hasOwn(obj.fields,b))throw Error("Unknown bound field");el.value=String(obj.fields[b]);const fn=()=>{const decl=this.program.classes.get(obj.type).fields.get(b);this.assign(obj,b,decl.kind==="#"?Number(el.value):decl.kind==="?"?el.checked:el.value);};el.addEventListener("input",fn);this.listeners.push([el,"input",fn]);}
    else if(op==="on"){if(!this.program.classes.get(obj.type).methods.has(c))throw Error("Missing handler "+c);const el=node(a),fn=e=>{if(b==="submit")e.preventDefault();this.call(obj,c);};el.addEventListener(b,fn);this.listeners.push([el,b,fn]);}
