@@ -17,6 +17,18 @@ node hiro.js dev my-app
 
 Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
 
+## Native HiroGlifx experience components (experimental)
+
+Build polished, responsive landing pages and interactive sites using **native .scroll**, not JavaScript-authored application components. The native-ui package includes cinematic heroes, responsive bento sections, pointer-reactive spotlight and tilt cards, scroll-reveal stories, animated marquees, carousels, pricing switches, FAQs, forms and themes. Components use typed inheritance, polymorphic overrides, verified package imports and declarative events.
+
+~~~bash
+node hiro.js init my-studio --ui
+node hiro.js dev my-studio 3000
+node hiro.js build my-studio
+~~~
+
+The --ui starter includes five live examples: /, /dashboard, /form, /experiences and /studio. See [the native experience component guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
+
 ## Canonical variable syntax — Phase 13
 
 The **new canonical-expression subset** brings typed variable declarations back to HiroGlifx's symbolic `.Main = ()` style. A shorthand may execute immediately or return a reusable object:
