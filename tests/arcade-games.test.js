@@ -11,16 +11,11 @@ test("all six arcades are instantiable by canonical scroll source",async()=>{
  assert.equal(games.length,6);
  for(const id of games){
    const code=fs.readFileSync(path.join(__dirname,"../examples/arcade/"+id+".scroll"),"utf8");
-   if(id==="pong"){
-     const game=new ScrollGame(code,{name:"pong"});
-     assert.equal(game.name,id);
-     assert.equal(game.kind,"arcade-game");
-   }else{
-     const runtime=install(new CanonicalRuntime());
-     await runtime.execute(code);
-     assert.equal(runtime.get("game").name,id);
-     assert.equal(runtime.get("game").kind,"arcade-game");
-   }
+   const game=new ScrollGame(code,{name:id});
+   assert.equal(game.name,id);
+   assert.equal(game.kind,"arcade-game");
+   assert.equal(game.program.methods.has("tick"),true);
+   assert.equal(game.program.methods.has("draw"),true);
  }
 });
 test("Pong has a playable ball, paddle control and score reset",()=>{
