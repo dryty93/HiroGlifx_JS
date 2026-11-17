@@ -36,6 +36,9 @@
      if(typeof this.camera.lowerRadiusLimit!=="undefined")this.camera.lowerRadiusLimit=11;
      if(typeof this.camera.upperRadiusLimit!=="undefined")this.camera.upperRadiusLimit=27;
      if(typeof this.camera.attachControl==="function")this.camera.attachControl(this.canvas,true);
+     // Babylon arrow-key camera input must not compete with HiroGlifx player controls.
+     if(typeof this.camera.inputs?.removeByType==="function")
+       this.camera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
      const sun=new B.HemisphericLight("sun",new B.Vector3(-.6,1,.35),this.scene);
      sun.intensity=1.15;
      if(typeof B.DirectionalLight==="function"){
