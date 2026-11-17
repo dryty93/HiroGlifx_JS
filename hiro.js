@@ -79,6 +79,15 @@ function buildProject(project,destination=path.join(project,"dist")){
  }
  fs.mkdirSync(path.join(destination,"assets"),{recursive:true});
  fs.copyFileSync(path.join(__dirname,"runtime/native-ui.js"),path.join(destination,"assets/native-ui.js"));
+ const assets=path.join(project,"assets");
+ if(fs.existsSync(assets)){
+  for(const name of fs.readdirSync(assets)){
+   if(!/^[A-Za-z0-9_-]+\.(?:svg|png|jpg|jpeg|webp|avif)$/.test(name))continue;
+   const file=path.join(assets,name);
+   if(fs.lstatSync(file).isFile()&&!fs.lstatSync(file).isSymbolicLink())
+    fs.copyFileSync(file,path.join(destination,"assets",name));
+  }
+ }
  return output;
 }
 
