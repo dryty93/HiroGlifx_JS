@@ -22,6 +22,7 @@ async function main(){
     await page.goto(base+route,{waitUntil:"domcontentloaded"});
     await page.getByText(title,{exact:false}).waitFor();
     assert.equal(await page.locator("h1").count(),1);
+    assert.equal(await page.getByRole("main").count(),1,"one semantic main landmark");
     assert.equal(await page.locator("body").evaluate(el=>el.scrollWidth<=innerWidth+2),true,"horizontal overflow");
     if(route==="/experiences"||route==="/studio"){
      for(let y=0;y<await page.evaluate(()=>document.body.scrollHeight);y+=650){
