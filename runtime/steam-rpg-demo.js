@@ -43,7 +43,7 @@ class RPGDemo{
 
    if(!this.levelSource)throw Error("Missing authored HiroGlifx level source");
    this.level=new root.HiroRiftfallWorld.RiftfallWorld(this.levelSource);
-   const geometry=this.level.build({BABYLON:B,scene:this.scene,physics:this.physics,material});
+   const geometry=this.level.build({BABYLON:B,scene:this.scene,physics:this.physics,material,physicsStreaming:true});
    this.nav=geometry.navigation;
    // Dynamic physics props are real Havok rigid bodies.
    for(const [i,x,z] of [[0,-8,3],[1,8,5],[2,-2,-26],[3,6,-47]]){
@@ -217,6 +217,7 @@ class RPGDemo{
    this.character.tick(dt);
    const pos=this.character.position,hero=this.combat.actor("hero");
    this.level?.updateDetails(pos);
+   this.level?.updatePhysics(pos);
    hero.x=pos.x;hero.z=pos.z;
    const moving=Math.hypot(sideways,forward);
    this.attackFlash=Math.max(0,this.attackFlash-dt);
@@ -270,6 +271,7 @@ class RPGDemo{
      telegraphs:this.enemies.filter(e=>this.telegraphs.has(e.id)).map(e=>e.id),
      defense:{evading:hero.status.get("evade")?.ends>this.combat.elapsed,parrying:hero.status.get("parry")?.ends>this.combat.elapsed},
      visualRegions:this.level?.details?.snapshot()||null,
+     physicalRegions:this.level?.colliderStream?.snapshot()||null,
      campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
