@@ -23,6 +23,7 @@
        if(mode==="draw")throw new Error("World services may not be invoked during draw");
        return this.services.get(name)(...args);
      }
+     if(name.startsWith("world_"))throw new Error("Unregistered world service "+name);
      return super.functionBuiltin(name,args,budget,mode);
    }
    run(name,...args){
