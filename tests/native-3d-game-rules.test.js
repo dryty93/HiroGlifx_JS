@@ -65,3 +65,32 @@ test("scripted terrain callbacks reject invalid geometry and unwanted host servi
  const policy=new WorldRules(sky);
  assert.throws(()=>policy.tick(.02),/Unregistered world service world_configure/);
 });
+
+test("Skybound moving platforms, spinner and vanish decisions are supplied by HiroGlifx",()=>{
+ const {SkyboundWorld}=require("../runtime/skybound-world");
+ const policy=new WorldRules(sky,{services:{world_configure:()=>true}});
+ const w=new SkyboundWorld();
+ w.tile("start",0,0,0,4,"solid",1);
+ w.moving("move",5,0,0,3,"z",1,3,3);
+ w.spinner("spin",10,0,0,2,1,3,5);
+ w.vanishing("vanish",15,0,0,3,.3,4);
+ w.spawn("hero",0,2,0);
+ let movingCalls=0;
+ w.motionRules={
+   movingOffset:(...args)=>{movingCalls++;return policy.run("movingOffset",...args);},
+   spinnerX:(...args)=>policy.run("spinnerX",...args),
+   spinnerZ:(...args)=>policy.run("spinnerZ",...args),
+   shouldVanish:(...args)=>policy.run("shouldVanish",...args),
+   respawnDelay:()=>policy.run("respawnDelay")
+ };
+ for(let i=0;i<40;i++)w.step(.02);
+ assert.ok(movingCalls>0);
+ const x=w.tiles.get("move").z;
+ assert.ok(Math.abs(x)>0.1);
+ assert.ok(Math.abs(w.tiles.get("spin").x-10)>0.1);
+ const vanish=w.modifiers.get("vanish");
+ vanish.started=w.motionTime-.4;
+ w.step(.02);
+ assert.equal(w.tiles.get("vanish").active,false);
+ assert.ok(vanish.inactiveUntil>w.motionTime);
+});
