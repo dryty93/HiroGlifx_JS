@@ -69,7 +69,7 @@
      this.jumpBuffer=Math.max(0,this.jumpBuffer-clamped);
      if(this.jumpBuffer>0&&(this.grounded||this.coyote>0)){
        this.vertical=this.jumpStrength;this.jumpBuffer=0;this.coyote=0;this.grounded=false;
-     }else if(this.grounded&&this.vertical<0)this.vertical=0;
+     }else if(this.grounded)this.vertical=0;
      else this.vertical+=this.gravity*clamped;
      const mag=Math.max(1,Math.hypot(this.input.x,this.input.z));
      const desired=new this.B.Vector3(this.input.x/mag*this.speed,this.vertical,this.input.z/mag*this.speed);
