@@ -35,11 +35,11 @@ async function run(){
   await page.keyboard.up("KeyW");
   await page.waitForFunction(()=>{
     const s=window.HiroRiftfallSnapshot?.();
-    return s?.performance?.metrics?.sampleCount>=8 || (s&&!s.health);
+    return s?.performance?.metrics?.sampleCount>=24 || (s&&!s.health);
   },null,{timeout:12000}).catch(()=>{});
   const after=await page.evaluate(()=>window.HiroRiftfallSnapshot?.());
   console.log("OFFLINE_FRAME_DIAGNOSTICS",JSON.stringify(after?.performance));
-  assert.ok(after.performance.metrics.sampleCount>=5,"Too few rendered frames to test offline gameplay");
+  assert.ok(after.performance.metrics.sampleCount>=20,"Insufficient real frame samples for percentile diagnostics");
   assert.ok(after.performance.metrics.frameP95>0);
   // Headless SwiftShader results are recorded, not treated as a hardware GPU certification.
   assert.ok(Number.isFinite(after.performance.metrics.frameP99));
