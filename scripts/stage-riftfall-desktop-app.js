@@ -14,7 +14,7 @@ function buildApp({root=path.resolve(__dirname,".."),out=path.join(root,"dist","
   fs.copyFileSync(path.join(root,"desktop",file),path.join(out,"desktop",file));
  const pkg={name:"hiroglifx-riftfall-desktop",version:"0.1.0",private:true,
    description:"Unsigned desktop test build of original HiroGlifx Riftfall",
-   main:"desktop/main.cjs",license:"UNLICENSED"};
+   main:"desktop/main.cjs",license:"UNLICENSED",devDependencies:{electron:"43.8.10"}};
  fs.writeFileSync(path.join(out,"package.json"),JSON.stringify(pkg,null,2)+"\n");
  return {out,assets:path.join(out,"dist","riftfall")};
 }
