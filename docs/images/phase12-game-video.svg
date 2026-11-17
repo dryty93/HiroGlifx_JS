@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680"><rect width="1200" height="680" fill="#0b1220"/>
+<text x="46" y="57" fill="#f3f7ff" font-family="Arial" font-size="31" font-weight="bold">HiroGlifx · Browser Game &amp; Video Studio</text>
+<text x="46" y="90" fill="#9bb2d1" font-family="Arial" font-size="16">Visual preview derived from committed UI and commands — not a captured browser screenshot</text>
+<rect x="42" y="122" width="480" height="484" rx="16" fill="#15233d" stroke="#476083"/>
+<text x="66" y="166" fill="#92c4ff" font-family="monospace" font-size="20">scene.scroll</text>
+<text x="66" y="212" fill="#d9e8fd" font-family="monospace" font-size="17">scene 640 360 #101827</text>
+<text x="66" y="250" fill="#b0eccd" font-family="monospace" font-size="16">sprite player 30 165 42 42 blue</text>
+<text x="66" y="288" fill="#b0eccd" font-family="monospace" font-size="16">sprite coin 550 165 35 35 gold</text>
+<text x="66" y="326" fill="#d9e8fd" font-family="monospace" font-size="16">control ArrowRight player 20 0</text>
+<text x="66" y="364" fill="#d9e8fd" font-family="monospace" font-size="16">goal player coin</text>
+<text x="66" y="402" fill="#b0eccd" font-family="monospace" font-size="16">tween coin y 70 2000 0</text>
+<rect x="66" y="472" width="430" height="88" rx="12" fill="#233d59"/>
+<text x="85" y="504" fill="#a4d1ff" font-family="Arial" font-size="18" font-weight="bold">Engine selection</text>
+<text x="85" y="537" fill="#d5e4f7" font-family="Arial" font-size="17">Canvas 2D  ·  Phaser 4  ·  Babylon.js</text>
+<rect x="543" y="122" width="610" height="484" rx="16" fill="#15233d" stroke="#476083"/>
+<text x="569" y="160" fill="#92c4ff" font-family="Arial" font-size="20">Live browser preview</text>
+<rect x="573" y="184" width="549" height="297" rx="12" fill="#101827"/>
+<rect x="612" y="339" width="46" height="46" rx="5" fill="#60a5fa"/>
+<circle cx="1040" cy="352" r="20" fill="#facc15"/>
+<path d="M698 388 Q840 275 958 379" fill="none" stroke="#a78bfa" stroke-width="5" stroke-dasharray="10 11"/>
+<rect x="792" y="289" width="58" height="58" rx="11" fill="#a78bfa"/>
+<text x="593" y="216" fill="#b4c5e1" font-family="Arial" font-size="15">2D: playable sprites and animation</text>
+<rect x="576" y="499" width="125" height="45" rx="9" fill="#60a5fa"/><text x="639" y="528" fill="#0a1d33" font-family="Arial" font-size="17" text-anchor="middle" font-weight="bold">Play</text>
+<rect x="717" y="499" width="133" height="45" rx="9" fill="#60a5fa"/><text x="785" y="528" fill="#0a1d33" font-family="Arial" font-size="17" text-anchor="middle" font-weight="bold">Pause</text>
+<rect x="865" y="499" width="245" height="45" rx="9" fill="#304d6b"/><text x="989" y="528" fill="#e8f4ff" font-family="Arial" font-size="17" text-anchor="middle" font-weight="bold">Record WebM</text>
+<rect x="576" y="565" width="538" height="7" rx="3" fill="#32465d"/><rect x="576" y="565" width="219" height="7" rx="3" fill="#60a5fa"/>
+<circle cx="795" cy="568" r="11" fill="#e5f4ff"/>
+<rect x="42" y="628" width="1111" height="31" rx="10" fill="#203750"/>
+<text x="596" y="649" fill="#b4cee9" font-family="Arial" font-size="16" text-anchor="middle">Canvas game model → Phaser 4 2D / Babylon.js 3D → Timeline → Browser WebM recorder</text></svg>
