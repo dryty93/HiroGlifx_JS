@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio, feat/phase13-canonical-expressions, feat/phase14-canonical-obby-game, feat/phase15-skybound-showcase, feat/phase16-skybound-physics-feel, feat/phase17-voxel-sandbox, feat/phase18-arcade-and-source-viewer, feat/phase19-native-scroll-pong, feat/phase20-native-scroll-games, feat/phase21-polymorphic-game-library, feat/phase22-native-3d-game-rules]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio, feat/phase13-canonical-expressions, feat/phase14-canonical-obby-game, feat/phase15-skybound-showcase, feat/phase16-skybound-physics-feel, feat/phase17-voxel-sandbox, feat/phase18-arcade-and-source-viewer, feat/phase19-native-scroll-pong, feat/phase20-native-scroll-games, feat/phase21-polymorphic-game-library, feat/phase22-native-3d-game-rules, feat/phase23-26-action-rpg-foundations]
   pull_request:
 jobs:
   node:
@@ -23,6 +23,15 @@ jobs:
           node --check runtime/scroll-game-runtime.js
           node --check runtime/scroll-game-classes.js
           node --check runtime/scroll-world-rules.js
+          node --check runtime/game-physics.js
+          node --check runtime/game-assets.js
+          node --check runtime/game-combat.js
+          node --check runtime/game-ai.js
+          node --check runtime/game-navmesh.js
+          node --check runtime/steam-rpg-demo.js
+          node --check tests/steam-game-foundations.test.js
+          node --check tests/steam-game-advanced.test.js
+          node --check e2e/riftfall-smoke.js
           node --check tests/native-3d-game-rules.test.js
           node --check tests/scroll-game-classes.test.js
           node --check tests/scroll-game-package-import.test.js
@@ -196,4 +205,26 @@ jobs:
         with:
           name: polymorphism-browser-screenshots
           path: artifacts/polymorphism-*.png
+          if-no-files-found: warn
+
+  riftfall-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Exercise Havok RPG, animation and enemy navigation
+        run: node e2e/riftfall-smoke.js
+      - name: Upload real browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: riftfall-browser-screenshots
+          path: artifacts/riftfall-*.png
           if-no-files-found: warn

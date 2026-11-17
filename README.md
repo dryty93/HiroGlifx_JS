@@ -94,6 +94,24 @@ Arrays, indexed operations, nested bounded `for`/`while` loops, custom methods, 
 **Blockhaven's source viewer** continues to show its actual `.scroll` initialization, but the voxel game logic is still in host JavaScript; it has *not* been ported to native `.scroll` game scripts.
 
 
+## Phases 23–26 — Riftfall: advanced 3D game foundations
+
+**[Play Riftfall](riftfall.html)**, a playable browser action-RPG vertical slice built to validate four reusable systems working together:
+
+1. **Phase 23:** real Havok Physics V2 initialization and Babylon capsule character controller, static/dynamic rigid bodies, jump controls and camera occlusion
+2. **Phase 24:** same-origin glTF/glb asset registry, original local animated avatar, state transitions and weighted animation crossfades
+3. **Phase 25:** health, stamina, armor, equipment, attacks, cooldowns, status effects and event-driven defeat logic
+4. **Phase 26:** A* pathfinding agents, collision-aware navigation grid, behavior trees with attack/chase/idle decisions, and an optional Recast-Detour navmesh bridge
+
+The combat, combo, aggro and victory rules are authored in [HiroGlifx `.scroll`](examples/steam-rpg-combat.scroll), while the reusable browser/physics services live in [physics](runtime/game-physics.js), [assets](runtime/game-assets.js), [combat](runtime/game-combat.js), [AI](runtime/game-ai.js), and [optional Recast](runtime/game-navmesh.js).
+
+```bash
+python3 -m http.server 8000 --bind 127.0.0.1
+# open http://127.0.0.1:8000/riftfall.html
+```
+
+Riftfall requires an internet connection to the *development* Babylon/Havok CDN and WebAssembly SIMD support. **This is an initial Steam-oriented engine foundation, not a commercially polished Steam game**. The glTF character is simple original block-out art; the live AI uses A*, not yet Recast crowd navigation. Skybound/Blockhaven continue using their existing physics until a dedicated, tested migration. See [Phase 23–26 documentation](docs/phase23-26-rpg-framework.md).
+
 ## Polymorphism: import a complex HiroGlifx game library
 
 The new [Polymorphism Lab](polymorphism.html) runs two complete `.scroll` games that import a reusable [enemykit](examples/packages/enemykit/main.scroll) package. The library defines `.Enemy = (Unit)`, `.Scout = (Enemy)`, `.Brute = (Enemy)`, and `.Medic = (Enemy)`, with typed fields and different behavior overrides.
