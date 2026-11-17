@@ -181,10 +181,11 @@ async function build(){
 function tick(){
  if(model&&started&&!paused&&!model.completed){
   let x=0,z=0;
-  if(keys.has("ArrowRight")||keys.has("KeyD"))x++;
-  if(keys.has("ArrowLeft")||keys.has("KeyA"))x--;
-  if(keys.has("ArrowUp")||keys.has("KeyW"))z++;
-  if(keys.has("ArrowDown")||keys.has("KeyS"))z--;
+  // Forward follows the actual course direction (+X); A/D strafe across platforms.
+  if(keys.has("ArrowUp")||keys.has("KeyW"))x++;
+  if(keys.has("ArrowDown")||keys.has("KeyS"))x--;
+  if(keys.has("ArrowLeft")||keys.has("KeyA"))z++;
+  if(keys.has("ArrowRight")||keys.has("KeyD"))z--;
   const length=Math.hypot(x,z)||1;
   model.setInput(x/length,z/length);
  }else if(model){model.setInput(0,0);}
