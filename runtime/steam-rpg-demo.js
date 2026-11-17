@@ -14,6 +14,7 @@ class RPGDemo{
    this.rules=new root.HiroWorldRules.WorldRules(source,{name:"rpg-combat"});
    this.combat=new root.HiroCombat.CombatWorld();
    this.telegraphs=new root.HiroCombat.TelegraphQueue();
+   this.attackWindows=new root.HiroAttackWindows.AttackWindows();
    this.profiler=new root.HiroGamePerformance.FrameProfiler();
    this.evadeReady=0;this.parryReady=0;
    this.keys=new Set();this.enemies=[];this.last=0;this.disposed=false;this.attackFlash=0;this.combo=0;
@@ -211,6 +212,7 @@ class RPGDemo{
  tick(dt){
    this.rules.tick(dt);this.combat.tick(dt);
    this.telegraphs.tick(dt);
+   this.attackWindows.tick(dt);
    this.campaign?.tick(dt);
    for(const [id,remaining] of this.hitReactions){if(remaining<=dt)this.hitReactions.delete(id);else this.hitReactions.set(id,remaining-dt);}
    const forward=(this.keys.has("KeyW")||this.keys.has("ArrowUp")?1:0)-
@@ -283,7 +285,7 @@ class RPGDemo{
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
-   this.campaign?.dispose();this.telegraphs.dispose();this.level?.dispose();this.navRouter?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
+   this.campaign?.dispose();this.attackWindows.dispose();this.telegraphs.dispose();this.level?.dispose();this.navRouter?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
 return {RPGDemo};
