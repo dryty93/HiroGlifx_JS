@@ -162,7 +162,7 @@
      this.mount.appendChild(el);this.elements.set(name,el);return el;
    }
    registerMethod(kind,method,handler){
-     if(!NAME.test(kind)||!NAME.test(method)||typeof handler!=="function")throw new Error("Invalid method registration");
+     if(!/^[A-Za-z_][A-Za-z0-9_-]*$/.test(kind)||!NAME.test(method)||typeof handler!=="function")throw new Error("Invalid method registration");
      const key=kind+"."+method;
      if(this.methods.has(key))throw new Error("Duplicate method "+key);
      this.methods.set(key,handler);return this;
