@@ -6,9 +6,10 @@
  const ai=typeof module==="object"&&module.exports?require("./game-ai"):root.HiroAI;
  const stream=typeof module==="object"&&module.exports?require("./game-region-stream"):root.HiroRegionStream;
  const physicsStream=typeof module==="object"&&module.exports?require("./game-physics-stream"):root.HiroPhysicsStream;
- const api=factory(world,ai,stream,physicsStream);
+ const art=typeof module==="object"&&module.exports?require("./game-art-direction"):root.HiroRiftfallArt;
+ const api=factory(world,ai,stream,physicsStream,art);
  if(typeof module==="object"&&module.exports)module.exports=api;else root.HiroRiftfallWorld=api;
-})(typeof globalThis!=="undefined"?globalThis:this,function(world,ai,stream,physicsStream){
+})(typeof globalThis!=="undefined"?globalThis:this,function(world,ai,stream,physicsStream,art){
 "use strict";
 const numeric=(n,min,max,label)=>{
  if(typeof n!=="number"||!Number.isFinite(n)||n<min||n>max)throw Error("Invalid "+label);
@@ -30,7 +31,11 @@ class RiftfallWorld{
  waveTitle(stage){return this.rules.run("chapterTitle",stage);}
  threshold(stage){return this.rules.run("waveThreshold",stage);}
  waveStart(stage){this.currentWave=stage;return this.rules.run("waveStart",stage);}
- updateDetails(position){return this.details?.update(position)||{regions:[],count:0};}
+ updateDetails(position,dt=0){
+   const current=this.details?.update(position)||{regions:[],count:0};
+   if(dt>0)for(const record of this.details?.loaded?.values()||[])record.tick?.(dt);
+   return current;
+ }
  updatePhysics(position){return this.colliderStream?.update(position)||null;}
  dispose(){this.colliderStream?.dispose();this.colliderStream=null;this.details?.dispose();this.details=null;}
  spawns(stage){
@@ -86,6 +91,7 @@ class RiftfallWorld{
      create:row=>{
        const [id,,cx,cz,w,d,tint]=row;
        const meshes=[],mat=material("detail-"+id,tint);
+       let illustration=null;
        try{
          if(B.MeshBuilder.CreateSphere)for(let i=0;i<12;i++){
            const a=i*2.39996322973,r=.28+.56*((i*7%13)/13);
@@ -99,8 +105,11 @@ class RiftfallWorld{
            m.position.set(cx+Math.cos(a)*w*.38,1,cz+Math.sin(a)*d*.38);
            m.material=mat;m.isPickable=false;meshes.push(m);
          }
-         return {dispose(){for(const m of meshes)m.dispose?.();mat?.dispose?.();}};
-       }catch(error){for(const m of meshes)m.dispose?.();mat?.dispose?.();throw error;}
+         if(B.StandardMaterial&&B.Color3&&B.MeshBuilder.CreateCylinder)
+           illustration=new art.RegionArt({BABYLON:B,scene,row,quality:"medium"});
+         return {tick(dt){illustration?.tick(dt);},
+           dispose(){illustration?.dispose();for(const m of meshes)m.dispose?.();mat?.dispose?.();}};
+       }catch(error){illustration?.dispose();for(const m of meshes)m.dispose?.();mat?.dispose?.();throw error;}
      }
    });
    this.details.update({x:0,z:8});
