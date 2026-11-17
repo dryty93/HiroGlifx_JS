@@ -1,0 +1,17 @@
+// Phase 28 chapter sequence. Gameplay objectives are authored in HiroGlifx.
+.Main = ()
+    & chapters = array();
+    : init() = [
+        // Chapter(id,title,description,eventType,eventId,amount,nextChapterId)
+        push(chapters,array("approach","Broken Approach","Clear two raiders guarding the southern approach.","defeat","raider",2,"watchtower"));
+        push(chapters,array("watchtower","The Northern Signal","Reach the abandoned watchtower and relight the warning signal.","reach","watchtower",1,"forge"));
+        push(chapters,array("forge","Riftsteel Oath","Craft a Riftsteel Blade before confronting the guardian.","craft","steel-blade",1,"guardian"));
+        push(chapters,array("guardian","The Last Rift","Defeat the Rift Guardian to secure the valley.","defeat","rift-guardian",1,""));
+    ]
+    : tick(dt) = [
+        // Chapter progression is event-driven; host services supply game ticks.
+    ]
+    : draw() = [
+        // Babylon supplies rendering; chapter definitions have no Canvas output.
+    ]
+    break;
