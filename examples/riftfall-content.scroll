@@ -33,10 +33,7 @@
         push(quests,array("explorer","The old watchtower","Reach the northern watchtower.","reach","watchtower",1,"",65,"healing-herb",2));
 
         // Dialogue(id,speaker,text,choices); Choice(label,nextId,questToAccept)
-        push(dialogue,array("elder","Keeper Nara","The rift is growing. Can you keep the raiders from our gate?",
-            array("I will stop them.","supply","first-blood"),
-            array("Where is the forge?","forge","rift-smith"),
-            array("I'll explore first.","explore","explorer")));
+        push(dialogue,array("elder","Keeper Nara","The rift is growing. Can you keep the raiders from our gate?",array("I will stop them.","supply","first-blood"),array("Where is the forge?","forge","rift-smith"),array("I'll explore first.","explore","explorer")));
         push(dialogue,array("supply","Keeper Nara","You can find Rift Shards on defeated enemies. Bring them to the forge."));
         push(dialogue,array("forge","Keeper Nara","Craft a Riftsteel Blade using two shards and one timber."));
         push(dialogue,array("explore","Keeper Nara","The watchtower lies north of this clearing."));
