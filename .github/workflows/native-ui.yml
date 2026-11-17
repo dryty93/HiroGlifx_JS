@@ -27,12 +27,14 @@ jobs:
           node --check runtime/dev-server.js
           node --check tests/native-ui.test.js
           node --check e2e/native-ui-smoke.js
+          node --check hiro.js
       - name: Native UI and full regression suite
         run: node --test tests/*.test.js
       - name: Validate imported native UI project
         run: |
           node hiro.js package add examples/native-ui examples/native-ui-library
           node hiro.js check examples/native-ui
+          node hiro.js build examples/native-ui
   browser:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
