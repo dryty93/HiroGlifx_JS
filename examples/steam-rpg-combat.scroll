@@ -7,7 +7,7 @@
     # range = 2.8;
     # enemyDamage = 9;
     # enemyRange = 2.1;
-    # enemyAggro = 12;
+    # enemyAggro = 24;
     # enemyCooldown = 1.3;
     # kills = 0;
     # attacks = 0;
