@@ -1,0 +1,67 @@
+// Boss Gauntlet: same imported enemykit, new complex game in fewer lines.
+import enemykit
+
+.Phantom = (Scout)
+    # health = 95;
+    # maxHealth = 95;
+    # speed = 155;
+    $ color = "#d3a4ff";
+    $ label = "Phantom";
+
+    : update(self, dt) = [
+        put(self, "x", field(self, "x") + field(self, "speed") * dt);
+        put(self, "y", 230 + cos(field(self, "x") / 16) * 92);
+        if field(self, "x") > 790 [
+            put(self, "x", 10);
+        ]
+    ]
+    break;
+
+.Main = ()
+    & roster = array();
+    # score = 0;
+    ? done = false;
+    $ message = "Phantom Gauntlet: intercept the moving targets";
+
+    : init() = [
+        for i from 0 to 6 [
+            let enemy = spawn("Phantom");
+            put(enemy, "x", 25 + i * 112);
+            push(roster, enemy);
+        ]
+    ]
+
+    : tick(dt) = [
+        for i from 0 to len(roster) [
+            let actor = get(roster, i);
+            if field(actor, "alive") [
+                send(actor, "update", dt);
+            ]
+        ]
+        if score >= 600 [
+            done = true;
+            message = "You cleared the gauntlet!";
+        ]
+    ]
+
+    : click(x, y) = [
+        for i from 0 to len(roster) [
+            let actor = get(roster, i);
+            if field(actor, "alive") && abs(field(actor, "x") - x) < 30 && abs(field(actor, "y") - y) < 35 [
+                send(actor, "takeDamage", 100);
+                score = score + 100;
+                return true;
+            ]
+        ]
+        return false;
+    ]
+
+    : draw() = [
+        clear("#121b3b");
+        text("PHANTOM GAUNTLET", 400, 45, 28, "#e4cbff");
+        for i from 0 to len(roster) [
+            send(get(roster, i), "draw");
+        ]
+        text(message + " · " + score, 400, 480, 18, "#ebf4ff");
+    ]
+    break;
