@@ -57,11 +57,11 @@ class NativeUIRuntime{
    else if(op==="class"){const cls=this.tmpl(b,obj);if(!/^[\w\s-]*$/.test(cls))throw Error("Bad CSS class");node(a).className=cls;}
    else if(op==="attr"){const val=this.tmpl(c,obj);if(b==="href"&&!/^\/(?!\/)[A-Za-z0-9_/?#=&%-]*$|^#[A-Za-z0-9_-]+$/.test(val))throw Error("Unsafe href");if((b==="src"||b==="poster")&&!SAFE_MEDIA.test(val))throw Error("Unsafe media URL");if(["autoplay","loop","muted","playsinline","controls"].includes(b)){if(val==="true")node(a).setAttribute(b,"");}else node(a).setAttribute(b,val);}
    else if(op==="motion"){const el=node(a);el.dataset.hgMotion=b;
-    if(b==="spotlight"||b==="tilt"){
+    if(b==="spotlight"||b==="tilt"||b==="magnetic"){
       const win=this.document.defaultView;
       if(!win?.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches){
-       const move=e=>{const rect=el.getBoundingClientRect();const x=(e.clientX-rect.left)/Math.max(1,rect.width),y=(e.clientY-rect.top)/Math.max(1,rect.height);if(b==="spotlight"){el.style.setProperty("--hg-pointer-x",(x*100).toFixed(2)+"%");el.style.setProperty("--hg-pointer-y",(y*100).toFixed(2)+"%");}else{el.style.setProperty("--hg-tilt-x",((.5-y)*9).toFixed(2)+"deg");el.style.setProperty("--hg-tilt-y",((x-.5)*9).toFixed(2)+"deg");}};
-       const leave=()=>{if(b==="tilt"){el.style.setProperty("--hg-tilt-x","0deg");el.style.setProperty("--hg-tilt-y","0deg");}};
+       const move=e=>{const rect=el.getBoundingClientRect();const x=(e.clientX-rect.left)/Math.max(1,rect.width),y=(e.clientY-rect.top)/Math.max(1,rect.height);if(b==="magnetic"){el.style.transform="translate("+((x-.5)*16).toFixed(2)+"px,"+((y-.5)*16).toFixed(2)+"px)";}else if(b==="spotlight"){el.style.setProperty("--hg-pointer-x",(x*100).toFixed(2)+"%");el.style.setProperty("--hg-pointer-y",(y*100).toFixed(2)+"%");}else{el.style.setProperty("--hg-tilt-x",((.5-y)*9).toFixed(2)+"deg");el.style.setProperty("--hg-tilt-y",((x-.5)*9).toFixed(2)+"deg");}};
+       const leave=()=>{if(b==="magnetic")el.style.transform="";if(b==="tilt"){el.style.setProperty("--hg-tilt-x","0deg");el.style.setProperty("--hg-tilt-y","0deg");}};
        el.addEventListener("pointermove",move);el.addEventListener("pointerleave",leave);this.listeners.push([el,"pointermove",move],[el,"pointerleave",leave]);
       }
     }
