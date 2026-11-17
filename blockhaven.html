@@ -60,7 +60,7 @@ kbd{display:inline-block;border:1px solid #577d87;background:#274451;border-bott
 <canvas id="viewport" width="1200" height="680" tabindex="0" aria-label="Interactive voxel world"></canvas>
 <div class="crosshair" aria-hidden="true"></div>
 <div class="hud"><div><div class="chip">🌿 CREATIVE MODE</div><div id="look" class="chip">CLICK TO LOOK</div></div>
-<div><div class="chip" id="coords">X 0 · Y 0 · Z 0</div><div class="chip" id="blockCount">0 BLOCKS</div></div></div>
+<div><div class="chip" id="coords">X 0 · Y 0 · Z 0</div><div class="chip" id="blockCount">0 BLOCKS</div><div class="chip" id="builderScore">0 XP</div></div></div>
 <div class="hotbar" id="hotbar" aria-label="Build block selection"></div>
 <div class="overlay" id="overlay"><div class="overcard"><div class="kicker">WELCOME TO YOUR WORLD</div>
 <h2>Every block is yours to shape.</h2>
@@ -72,12 +72,14 @@ kbd{display:inline-block;border:1px solid #577d87;background:#274451;border-bott
 <div class="mobile" aria-label="Mobile exploration controls"><button data-key="KeyA">←</button><button data-key="KeyW">↑</button><button data-key="KeyS">↓</button><button data-key="KeyD">→</button><button id="mobileJump">Jump</button><button id="mobileMine">Mine</button><button id="mobilePlace">Place</button></div>
 <div class="bottom"><section class="panel"><div class="kicker">CREATE &amp; EXPLORE</div><h3>A world built from HiroGlifx objects</h3><p>Blockhaven generates a reproducible world and lets you mine and place colored voxel blocks. Your edits can be saved to your browser and restored later.</p>
 <p><kbd>W A S D</kbd> Walk · <kbd>SPACE</kbd> Jump · <kbd>1–7</kbd> Select material · Mouse to look · <kbd>ESC</kbd> Release mouse</p></section>
-<section class="panel"><div class="kicker">OPEN SOURCE CREATIVE ENGINE</div><h3>Explore the code</h3><p>The world begins with a canonical <code>.Main = ()</code> program using <code>voxel_world()</code>, <code>voxel_generate()</code> and <code>voxel_player()</code>.</p><p>This original prototype is not affiliated with Minecraft or Mojang and is intended to grow into a richer HiroGlifx game engine.</p></section></div>
-<details class="code-panel" id="sourcePanel"><summary>View Blockhaven's real HiroGlifx source <span>⌄</span></summary><p>The source below is the actual <code>.scroll</code> program loaded by this game, not pseudocode. Open the game engine implementation for the behavior behind its commands.</p><div><a href="./examples/blockhaven.scroll" target="_blank" rel="noopener">Open .scroll file</a><button id="copySource" type="button">Copy source</button><a href="https://github.com/dryty93/HiroGlifx_JS/blob/main/runtime/voxel-world.js" target="_blank" rel="noopener">World engine</a> · <a href="https://github.com/dryty93/HiroGlifx_JS/blob/main/runtime/voxel-babylon.js" target="_blank" rel="noopener">3D renderer</a></div><pre><code id="sourceCode">Loading actual source…</code></pre></details>
+<section class="panel"><div class="kicker">OPEN SOURCE CREATIVE ENGINE</div><h3>Explore the code</h3><p>The world is assembled by <code>blockhaven.scroll</code>, while <code>blockhaven-gameplay.scroll</code> now defines terrain heights, biomes, vegetation, mining rewards, and placement policies. The shared JavaScript voxel engine handles block storage, collisions, and Babylon rendering.</p><p>This original prototype is not affiliated with Minecraft or Mojang and is intended to grow into a richer HiroGlifx game engine.</p></section></div>
+<details class="code-panel" id="sourcePanel"><summary>View Blockhaven's real HiroGlifx source <span>⌄</span></summary><p>Both source views show actual executed <code>.scroll</code> programs. The gameplay file contains editable terrain and mining/placement rules, not pseudocode. Open the game engine implementation for the behavior behind its commands.</p><div><button id="showWorldSource" type="button">World setup</button><button id="showRulesSource" type="button">Full gameplay rules</button><a id="sourceFile" href="./examples/blockhaven.scroll" target="_blank" rel="noopener">Open .scroll file</a><button id="copySource" type="button">Copy source</button><a href="https://github.com/dryty93/HiroGlifx_JS/blob/main/runtime/voxel-world.js" target="_blank" rel="noopener">World engine</a> · <a href="https://github.com/dryty93/HiroGlifx_JS/blob/main/runtime/voxel-babylon.js" target="_blank" rel="noopener">3D renderer</a></div><pre><code id="sourceCode">Loading actual source…</code></pre></details>
 <footer>Blockhaven · Powered by HiroGlifx + Babylon.js · Your world data stays in your browser</footer>
 </div>
 <script src="./runtime/scroll-runtime.js"></script>
 <script src="./runtime/canonical-runtime.js"></script>
+<script src="./runtime/scroll-game-runtime.js"></script>
+<script src="./runtime/scroll-world-rules.js"></script>
 <script src="./runtime/voxel-world.js"></script>
 <script src="./runtime/voxel-canonical.js"></script>
 <script src="./runtime/voxel-babylon.js"></script>
@@ -88,7 +90,13 @@ kbd{display:inline-block;border:1px solid #577d87;background:#274451;border-bott
 const $=id=>document.getElementById(id),types=HiroVoxel.BLOCKS,palette=HiroVoxelBabylon.COLORS;
 const saveKey="hiroglifx-blockhaven-v1";
 let runtime=null,model=null,view=null,playing=false,selected="grass",unsub=null,autosaveTimer=null;
-window.HiroBlockhavenSnapshot=()=>model?Object.freeze({x:model.player.x,y:model.player.y,z:model.player.z,blocks:model.blocks.size,edits:model.edits,playing,target:view?.aim()?.block||null}):null;
+let rules=null,initSource="",rulesSource="",codeView="rules";
+function showCode(kind){
+ codeView=kind;
+ $("sourceCode").textContent=kind==="rules"?rulesSource:initSource;
+ $("sourceFile").href=kind==="rules"?"./examples/blockhaven-gameplay.scroll":"./examples/blockhaven.scroll";
+}
+window.HiroBlockhavenSnapshot=()=>model?Object.freeze({x:model.player.x,y:model.player.y,z:model.player.z,blocks:model.blocks.size,edits:model.edits,playing,builderScore:rules?.get("builderScore")??0,terrainRulesLoaded:!!rules,target:view?.aim()?.block||null}):null;
 function notify(text){$("status").textContent=text;}
 function select(type){
  selected=type;document.querySelectorAll(".slot").forEach(s=>s.classList.toggle("selected",s.dataset.type===type));
@@ -110,7 +118,9 @@ function save(){
 function setup(world,rt=null){
  if(unsub)unsub();if(view)view.stop();if(runtime)runtime.dispose();
  runtime=rt;model=world;
- view=new HiroVoxelBabylon.VoxelBabylonAdapter({BABYLON:window.BABYLON,canvas:$("viewport"),world,onFrame:w=>{
+ view=new HiroVoxelBabylon.VoxelBabylonAdapter({BABYLON:window.BABYLON,canvas:$("viewport"),world,onFrame:(w,dt)=>{
+   if(rules)rules.tick(dt);
+   $("builderScore").textContent=(rules?.get("builderScore")??0)+" XP";
    $("coords").textContent="X "+w.player.x.toFixed(1)+" · Y "+w.player.y.toFixed(1)+" · Z "+w.player.z.toFixed(1);
    $("blockCount").textContent=w.blocks.size+" BLOCKS";
  }});
@@ -124,12 +134,23 @@ function setup(world,rt=null){
 }
 async function newWorld(seed=42){
  if(!window.BABYLON)throw new Error("Babylon.js failed to load. Internet access is required.");
- const response=await fetch("./examples/blockhaven.scroll",{cache:"no-store"});
- if(!response.ok)throw new Error("Could not load voxel scroll");
- const code=(await response.text()).replace("voxel_world(42)","voxel_world("+seed+")");
- const rt=HiroVoxelCanonical.install(new HiroCanonical.CanonicalRuntime());
+ const [response,policyResponse]=await Promise.all([
+   fetch("./examples/blockhaven.scroll",{cache:"no-store"}),
+   fetch("./examples/blockhaven-gameplay.scroll",{cache:"no-store"})
+ ]);
+ if(!response.ok||!policyResponse.ok)throw new Error("Could not load HiroGlifx world and gameplay rules");
+ initSource=await response.text();
+ rulesSource=await policyResponse.text();
+ const engine=new HiroWorldRules.WorldRules(rulesSource,{name:"blockhaven-gameplay"});
+ const terrainProfile={
+   heightAt:(x,z,seed)=>engine.run("terrainHeight",x,z,seed),
+   materialAt:(x,z,radius)=>engine.run("surfaceMaterial",x,z,radius),
+   treeAt:(x,z,seed)=>engine.run("shouldPlantTree",x,z,seed)
+ };
+ const code=initSource.replace("voxel_world(42)","voxel_world("+seed+")");
+ const rt=HiroVoxelCanonical.install(new HiroCanonical.CanonicalRuntime(),{terrainProfile});
  await rt.execute(code);
- setup(rt.get("world"),rt);
+ rules=engine;showCode("rules");setup(rt.get("world"),rt);
 }
 function load(){
  try{
@@ -158,6 +179,21 @@ $("fullscreen").onclick=()=>{
  if(!document.fullscreenElement)game.requestFullscreen?.().catch(e=>notify(e.message));
  else document.exitFullscreen?.();
 };
+function mine(){
+ if(!view||!rules)return false;
+ const hit=view.aim();if(!hit||!rules.run("canMine",hit.block.type))return false;
+ const removed=view.mine();
+ if(removed){rules.run("afterMine",hit.block.type);$("builderScore").textContent=rules.get("builderScore")+" XP";}
+ return removed;
+}
+function place(){
+ if(!view||!rules||!rules.run("canPlace",selected))return false;
+ const placed=view.place(selected);
+ if(placed){rules.run("afterPlace",selected);$("builderScore").textContent=rules.get("builderScore")+" XP";}
+ return placed;
+}
+$("showRulesSource").onclick=()=>showCode("rules");
+$("showWorldSource").onclick=()=>showCode("setup");
 const canvas=$("viewport");
 canvas.addEventListener("click",()=>{
  if(!playing){start();return;}
@@ -165,13 +201,13 @@ canvas.addEventListener("click",()=>{
    canvas.requestPointerLock().catch(()=>{});
    return;
  }
- const result=view.mine();notify(result?"Block mined.":"Aim at a block within reach to mine.");
+ const result=mine();notify(result?"Block mined.":"Aim at a block within reach to mine.");
 });
 canvas.addEventListener("contextmenu",e=>e.preventDefault());
 canvas.addEventListener("mousedown",e=>{
  if(e.button!==2||!playing)return;
  e.preventDefault();
- const placed=view.place(selected);notify(placed?"Placed "+selected+".":"Choose a valid adjacent block face.");
+ const placed=place();notify(placed?"Placed "+selected+".":"Choose a valid adjacent block face.");
 });
 document.addEventListener("pointerlockchange",()=>{
  $("look").textContent=document.pointerLockElement===canvas?"LOOK ACTIVE":"CLICK TO LOOK";
@@ -193,9 +229,9 @@ document.querySelectorAll("[data-key]").forEach(button=>{
  for(const event of ["pointerup","pointercancel","lostpointercapture"])button.addEventListener(event,()=>view?.keyup(code));
 });
 $("mobileJump").onclick=()=>view?.jump();
-$("mobileMine").onclick=()=>notify(view?.mine()?"Block mined.":"Aim at a nearby block.");
-$("mobilePlace").onclick=()=>notify(view?.place(selected)?"Block placed.":"Aim at a nearby block.");
-fetch("./examples/blockhaven.scroll",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("Source unavailable");return r.text();}).then(source=>{$("sourceCode").textContent=source;}).catch(e=>{$("sourceCode").textContent=e.message;});
+$("mobileMine").onclick=()=>notify(mine()?"Block mined.":"Aim at a nearby block.");
+$("mobilePlace").onclick=()=>notify(place()?"Block placed.":"Aim at a nearby block.");
+
 $("copySource").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("sourceCode").textContent);notify("HiroGlifx source copied.");}catch{notify("Clipboard unavailable; select and copy the code manually.");}});
 newWorld().catch(e=>notify(e.message));
 })();
