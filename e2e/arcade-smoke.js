@@ -94,8 +94,11 @@ async function run(){
   // Blockhaven must expose the actual loaded .scroll, not a fabricated sample.
   await page.goto(base+"/blockhaven.html",{waitUntil:"domcontentloaded"});
   await page.locator("#sourcePanel summary").click();
+  await page.locator("#showWorldSource").click();
   await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes("voxel_world(42)"),null,{timeout:60000});
   assert.equal(await page.locator("#sourcePanel").getAttribute("open")!==null,true);
+  await page.locator("#showRulesSource").click();
+  await page.waitForFunction(()=>document.querySelector("#sourceCode")?.textContent.includes(": terrainHeight(x, z, seed)"));
   await page.screenshot({path:path.join(out,"blockhaven-source-panel.png"),fullPage:true});
   assert.deepEqual(errors,[],"No uncaught browser script errors");
   console.log("Arcade games and Blockhaven source viewer passed Chromium smoke tests");
