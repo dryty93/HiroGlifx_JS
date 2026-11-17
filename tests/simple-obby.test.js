@@ -82,7 +82,7 @@ test("game authoring rejects unsafe code, collisions and invalid course limits",
  assert.throws(()=>compile(base),/finish platform/);
  assert.throws(()=>compile(base+end+"\n"+end),/Duplicate object/);
  assert.throws(()=>compile("game \"Missing\"\nstage 1 \"Start\"\nplatform a at 0 0 0 size 5\n"+end),/player/);
- assert.throws(()=>compile(base+"platform b at 5 0 0 size 4\n".repeat(101)+end),/Maximum 100/);
+ assert.throws(()=>compile(base+Array.from({length:101},(_,i)=>"platform b"+i+" at 5 0 0 size 4").join("\n")+"\n"+end),/Maximum 100/);
  assert.throws(()=>compile("x".repeat(24001)),/oversized/);
 });
 test("HTML workshop loads native compiler, editor and original game renderer",()=>{
