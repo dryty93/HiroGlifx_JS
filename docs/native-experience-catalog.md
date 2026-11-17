@@ -2,6 +2,22 @@
 
 Reusable experience primitives and full website sections, all authored in `.scroll`. This catalog extends the foundation delivered in PR #67. The website examples are **visual inspiration**; the classes are original implementations, not copied source or a claim of one-to-one replication of all external sites.
 
+## Complete living showroom — all 66 classes
+
+Run the standalone showcase directly from the repository root:
+
+```bash
+node hiro.js showcase 3000
+```
+
+Open **http://127.0.0.1:3000/showcase**. Unlike running the repository example directly, `hiro showcase` creates an isolated temporary project, installs the verified `native-ui` library and serves all 11 pages automatically. Stop with Ctrl+C.
+
+The `/showcase` page is a single, comprehensive living catalog. **Every class currently declared in `examples/native-ui-library/main.scroll` is instantiated** (66 total), including abstract foundation classes explicitly labeled as nonvisual, grouped into seven categories. Each preview has a HiroGlifx source snippet; the anchor navigation jumps between categories. All interactive controls run through the native DOM host. A regression test enumerates the real package declarations and fails if a class is missing from the showcase, preventing the catalog from silently falling out of sync.
+
+For an editable long-lived project instead, run `node hiro.js init my-studio --ui` then `node hiro.js dev my-studio 3000`; it includes `/showcase` and the focused catalog pages. The shared `.scroll` source itself is at `examples/native-ui/pages/showcase.scroll`.
+
+Screenshots: `e2e/all-experiences-smoke.js` captures each category at 1440px and 390px, while asserting complete class coverage, category anchors, interactive carousel, FAQ, comparison slider, pricing toggle and modal. `node e2e/all-experiences-smoke.js` requires Chromium/Playwright.
+
 ## Get started
 
 ```bash
