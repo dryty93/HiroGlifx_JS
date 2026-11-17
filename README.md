@@ -17,6 +17,34 @@ node hiro.js dev my-app
 
 Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads the browser. Add pages/about.scroll for the /about route. The CLI also supports **node hiro.js check my-app** to validate scroll parsing. The new UI CLI has no external dependencies.
 
+## Reusable `.scroll` packages (Phase 11)
+
+Developers can now distribute **pure HiroGlifx classes and abilities** as local libraries—no core compiler edits or JavaScript plugin code needed.
+
+```bash
+node hiro.js init my-app
+node hiro.js package add my-app examples/packages/sparkfx
+node hiro.js package list my-app
+node hiro.js check my-app
+node hiro.js dev my-app
+```
+
+Use the library from any `.scroll` page:
+
+```scroll
+import sparkfx
+
+.Main = [
+  use PartyCard hero;
+  button play "Celebrate";
+  on click play => animate hero-badge spin 750;
+]
+```
+
+A package contains `hiro-package.json` and `main.scroll`, containing reusable `extends`, `ability`, and component definitions. HiroGlifx copies it to your project's `packages/` directory, pins version and SHA-256 in `hiro.lock.json`, and resolves transitive imports with collision and cycle checks. The local dev server compiles those imports before rendering.
+
+Run `node hiro.js package remove my-app sparkfx` to uninstall (unless another package depends on it). **This phase is local-only; it is not an npm/public registry or a signed/publisher-verified ecosystem.** Packages may contain UI actions and are treated as trusted source code. See [package documentation](docs/package-system.md).
+
 ## Build animated interfaces in a few commands
 
 ~~~scroll
