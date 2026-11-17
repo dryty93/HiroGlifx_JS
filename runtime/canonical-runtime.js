@@ -32,7 +32,7 @@
        if(!closed)throw new SyntaxError("Unclosed string literal");
        tokens.push({kind:"literal",value:text});continue;
      }
-     const number=source.slice(i).match(/^(?:\d+(?:\.\d+)?|\.\d+)/);
+     const number=source.slice(i).match(/^-?(?:\d+(?:\.\d+)?|\.\d+)/);
      if(number){tokens.push({kind:"literal",value:Number(number[0])});i+=number[0].length;continue;}
      const ident=source.slice(i).match(/^[A-Za-z_][A-Za-z0-9_]*/);
      if(ident){tokens.push({kind:"identifier",value:ident[0]});i+=ident[0].length;continue;}
