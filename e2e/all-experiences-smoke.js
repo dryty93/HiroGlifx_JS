@@ -45,7 +45,7 @@ async function main(){
    const accordion=page.locator('[data-hiro-component="FAQItem"]');
    await accordion.getByRole("button").click();assert.equal(await accordion.getByRole("button").getAttribute("aria-expanded"),"true");
    const slider=page.getByRole("slider",{name:"Before and after comparison"});
-   await slider.fill("72");
+   await slider.evaluate(el=>{el.value="72";el.dispatchEvent(new Event("input",{bubbles:true}));});
    await page.waitForFunction(()=>[...document.querySelectorAll(".hg-compare")].some(el=>el.style.getPropertyValue("--hg-wipe")==="72"));
    await slider.focus();await page.keyboard.press("ArrowRight");
    await page.waitForFunction(()=>[...document.querySelectorAll(".hg-compare")].some(el=>el.style.getPropertyValue("--hg-wipe")==="73"));
