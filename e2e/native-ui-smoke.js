@@ -36,6 +36,12 @@ async function main(){
     await page.screenshot({path:path.join(artifacts,"native-ui-"+(route==="/"?"landing":route.slice(1))+"-"+width+".png"),fullPage:true});
     if(route==="/experiences"){
      assert(await page.locator("[data-hg-motion=reveal].hg-in-view").count()>0,"viewport reveal");
+     const tilt=page.locator('[data-hg-motion="tilt"]');
+     await tilt.hover({position:{x:24,y:30}});
+     assert.notEqual(await tilt.evaluate(el=>el.style.getPropertyValue("--hg-tilt-x")),"","native 3D tilt updates on pointer move");
+     const spotlight=page.locator('[data-hg-motion="spotlight"]').first();
+     await spotlight.hover({position:{x:35,y:40}});
+     assert.notEqual(await spotlight.evaluate(el=>el.style.getPropertyValue("--hg-pointer-x")),"","native pointer spotlight updates");
      const carousel=page.locator(".hg-track");
      assert.equal(await carousel.evaluate(el=>el.style.getPropertyValue("--hg-slide")),"0");
      await page.getByRole("button",{name:"Next experience"}).click();
