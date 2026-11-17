@@ -64,6 +64,7 @@
    jump(){
      const p=this.player;if(!p||this.completed)return false;
      if(p.grounded||this.coyote>0){
+       if(!p.grounded&&this.coyote>0)p.grounded=true;
        const success=super.jump.call(this);
        if(success){this.coyote=0;this.telemetry.jumpCount++;this.emit("jump",{jumps:this.telemetry.jumpCount});}
        return success;
@@ -107,7 +108,7 @@
        const before=oldPositions.get(p.standing),current=this.tiles.get(p.standing);
        p.x+=current.x-before.x;p.z+=current.z-before.z;
      }
-     this.coyote=priorGround?.10:Math.max(0,this.coyote-delta);
+     this.coyote=priorGround ? 0.10 : Math.max(0,this.coyote-delta);
      this.jumpBuffer=Math.max(0,this.jumpBuffer-delta);
      super.step(delta);
      if(this.player.grounded&&this.jumpBuffer>0){
