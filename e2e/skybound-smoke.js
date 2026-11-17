@@ -34,7 +34,7 @@ async function main(){
    await page.waitForFunction(()=>{
      const status=document.querySelector("#status")?.textContent||"";
      return status.includes("Skybound is ready")||status.includes("Babylon.js")||status.includes("Could not");
-   },{timeout:45000});
+   },null,{timeout:45000});
    const status=await page.locator("#status").innerText();
    assert.match(status,/Skybound is ready/,"Game must load in Chromium: "+status);
    assert.equal(await page.locator("#overlay").isVisible(),true);
