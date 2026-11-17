@@ -1,0 +1,23 @@
+appId: io.hiroglifx.riftfall.dev
+productName: Riftfall Developer Preview
+asar: true
+files:
+  - package.json
+  - desktop/**/*.cjs
+  - dist/riftfall/**/*
+directories:
+  output: ../../releases/unsigned
+mac:
+  target:
+    - zip
+  identity: null
+win:
+  target:
+    - nsis
+  artifactName: "Riftfall-unsigned-${version}-${arch}.${ext}"
+linux:
+  target:
+    - AppImage
+  category: Game
+  artifactName: "Riftfall-unsigned-${version}-${arch}.${ext}"
+publish: null
