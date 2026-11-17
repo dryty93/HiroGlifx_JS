@@ -65,9 +65,13 @@ footer{padding-top:28px;text-align:center;color:#7796b8;font-size:12px}
 <aside class="panel"><div class="source-info"><h2>Real HiroGlifx source</h2><span class="tag">.scroll</span></div>
 <p class="sub" id="sourceExplanation">Pong's full game logic runs from this .scroll file. Other arcade titles currently use JavaScript game engines behind their HiroGlifx entrypoints.</p>
 <div class="tag" id="implementationStatus">Full HiroGlifx gameplay</div>
-<pre><code id="sourceCode" aria-label="Game source code">Loading source…</code></pre>
-<div class="controls"><button class="source-action" id="copy" type="button">Copy code</button>
-<a id="sourceFile" class="engine-link" href="./examples/arcade/pong.scroll">Open .scroll file</a></div>
+<div class="controls" role="group" aria-label="Code implementation files">
+<button class="source-action" id="showScroll" type="button" aria-pressed="true">HiroGlifx (.scroll)</button>
+<button class="source-action" id="showEngine" type="button" aria-pressed="false">JavaScript runtime</button>
+</div>
+<pre><code id="sourceCode" aria-label="Full game implementation source code">Loading source…</code></pre>
+<div class="controls"><button class="source-action" id="copy" type="button">Copy visible code</button>
+<a id="sourceFile" class="engine-link" href="./examples/arcade/pong.scroll" target="_blank" rel="noopener">Open full source file</a></div>
 <div class="instructions" id="instructions">Move your paddle with W/S or Up/Down. On a touch device, use the arrows.</div>
 <p class="notice">The <code>.scroll</code> file creates a reusable game instance. The shared game rules live in <a class="engine-link" href="./runtime/arcade-games.js">arcade-games.js</a> and <a class="engine-link" href="./runtime/arcade-chess.js">arcade-chess.js</a>; the HiroGlifx bridge lives in <a class="engine-link" href="./runtime/arcade-canonical.js">arcade-canonical.js</a>.</p>
 </aside></div>
@@ -88,7 +92,22 @@ const config={
  "chess":["Chess","Play a full legal game with a friend, locally.","Two players share this screen. Select a piece and destination; Q/R/B/N chooses promotion. Castling and en passant are supported."],
  "tic-tac-toe":["Tic-Tac-Toe","A quick local two-player strategy game.","Tap an empty square. Players alternate X and O. Three in a line wins."]
 };
-let runtime=null,game=null,paused=true,previous=0,raf=0,loadId=0,source="";
+let runtime=null,game=null,paused=true,previous=0,raf=0,loadId=0,source="",sourceView="scroll";
+let gameId="pong",engineSource="";
+const enginePath=id=>id==="pong"?"./runtime/scroll-game-runtime.js":
+  id==="chess"?"./runtime/arcade-chess.js":"./runtime/arcade-games.js";
+function showSource(mode){
+ sourceView=mode;
+ $("showScroll").setAttribute("aria-pressed",String(mode==="scroll"));
+ $("showEngine").setAttribute("aria-pressed",String(mode==="engine"));
+ if(mode==="scroll"){
+   $("sourceCode").textContent=source;
+   $("sourceFile").href="./examples/arcade/"+gameId+".scroll";
+ }else{
+   $("sourceCode").textContent=engineSource;
+   $("sourceFile").href=enginePath(gameId);
+ }
+}
 window.HiroArcadeSnapshot=()=>game?Object.freeze({name:game.name,turn:game.name==="chess"?game.s.t:null,moves:game.name==="chess"?game.moves.length:null,score:game.score,done:game.done,sourceMode:game instanceof HiroScrollGame.ScrollGame?"native-scroll":"javascript-adapter"}):null;
 const gameName=()=>new URL(location.href).searchParams.get("game")||"pong";
 function setStatus(message){$("status").textContent=message;}
@@ -108,7 +127,7 @@ function playLoop(ts){
 }
 async function openGame(name){
  if(!config[name])name="pong";
- const serial=++loadId;
+ const serial=++loadId;gameId=name;engineSource="";source="";
  paused=true;previous=0;$("pause").textContent="▶ Play";
  if(runtime){runtime.dispose();runtime=null;}game=null;setStatus("Loading "+config[name][0]+"…");
  $("gameTitle").textContent=config[name][0];$("gameDescription").textContent=config[name][1];$("instructions").textContent=config[name][2];
@@ -127,6 +146,7 @@ async function openGame(name){
    if(next)await next.execute(program);
    if(serial!==loadId){next?.dispose();return;}
    runtime=next;game=isNative?actualGame:runtime.get("game");source=program;
+   showSource("scroll");
    $("implementationStatus").textContent=isNative?"Full game rules in .scroll":"JavaScript engine / .scroll entrypoint";
    $("sourceExplanation").textContent=isNative?
      "This complete HiroGlifx program defines Pong's state, movement, collision physics, computer paddle, score rules and Canvas drawing.":
@@ -146,8 +166,19 @@ $("restart").onclick=()=>{
  if(!game)return;
  game.reset();paused=true;previous=0;draw();$("pause").textContent="▶ Play";setStatus("Restarted. Press Play.");
 };
+$("showScroll").onclick=()=>showSource("scroll");
+$("showEngine").onclick=async()=>{
+ const id=gameId,serial=loadId;
+ try{
+   const result=await fetch(enginePath(id),{cache:"no-store"});
+   if(!result.ok)throw Error("Could not load runtime source");
+   const actual=await result.text();
+   if(serial!==loadId)return;
+   engineSource=actual;showSource("engine");
+ }catch(error){setStatus(error.message);}
+};
 $("copy").onclick=async()=>{
- try{await navigator.clipboard.writeText(source);setStatus("Actual .scroll source copied.");}
+ try{await navigator.clipboard.writeText($("sourceCode").textContent);setStatus("Visible source copied.");}
  catch{setStatus("Clipboard blocked. Select the source text manually.");}
 };
 document.querySelectorAll("[data-game]").forEach(b=>b.onclick=()=>openGame(b.dataset.game));
