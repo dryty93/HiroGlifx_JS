@@ -19,6 +19,8 @@ jobs:
           node --check tests/preview-policy.test.js
           node --check runtime/data-server.js
           node --check runtime/postgres-store.js
+          node --check runtime/owned-api-server.js
+          node --check runtime/run-postgres-api.js
           node --check runtime/auth-server.js
           node --check runtime/browser-policy.js
           node --check runtime/run-browser.js
