@@ -1,0 +1,54 @@
+name: Simple HiroGlifx 3D Games
+on:
+  pull_request:
+    paths:
+      - 'runtime/simple-obby.js'
+      - 'runtime/obby-babylon.js'
+      - 'simple-obby.html'
+      - 'examples/simple-obby/**'
+      - 'tests/simple-obby.test.js'
+      - 'e2e/simple-obby-smoke.js'
+      - 'hiro.js'
+      - '.github/workflows/simple-obby.yml'
+  push:
+    branches: [feat/simple-3d-obby-kit]
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check runtime/simple-obby.js
+          node --check runtime/obby-babylon.js
+          node --check e2e/simple-obby-smoke.js
+          node --check tests/simple-obby.test.js
+          node --check hiro.js
+      - name: Native course compiler and entire repository regression suite
+        run: node --test tests/*.test.js
+      - name: CLI game source verification
+        run: node hiro.js game check examples/simple-obby/soda-splash.scroll
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Run real Babylon 3D course, edit and capture screenshots
+        run: node e2e/simple-obby-smoke.js
+      - name: Upload desktop and mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simple-hiriglifx-3d-game-screenshots
+          path: artifacts/simple-obby-*.png
+          if-no-files-found: error
