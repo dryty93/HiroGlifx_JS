@@ -2,7 +2,7 @@
  * Hero/enemy behavior rules are authored in examples/steam-rpg-combat.scroll.
  * Babylon/Havok supply rendering, capsule movement and actual rigid-body collision.
  */
-(function(root,factory){const api=factory();if(typeof module==="object"&&module.exports)module.exports=api;else root.HiroRPGDemo=api;})(typeof globalThis!=="undefined"?globalThis:this,function(){
+(function(root,factory){const api=factory(root);if(typeof module==="object"&&module.exports)module.exports=api;else root.HiroRPGDemo=api;})(typeof globalThis!=="undefined"?globalThis:this,function(root){
 "use strict";
 const finite=(v,min,max,label)=>{if(typeof v!=="number"||!Number.isFinite(v)||v<min||v>max)throw Error("Invalid "+label);return v;};
 class RPGDemo{
