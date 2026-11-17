@@ -61,7 +61,7 @@ async function main(){
      assert.equal(await pricing.getByText("$19").isVisible(),true);
      assert.equal(await pricing.getByText("$24").isVisible(),false);
      assert.equal(await page.locator("img.hg-image").count(),1);
-     assert.equal(await page.locator("img.hg-image").evaluate(el=>el.complete&&el.naturalWidth>0),true);
+     await page.waitForFunction(()=>[...document.querySelectorAll("img.hg-image")].every(el=>el.complete&&el.naturalWidth>0));
     }
     if(route==="/dashboard"){
      const button=page.getByRole("button",{name:"Clicked 0 times"});await button.click();
