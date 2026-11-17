@@ -6,9 +6,11 @@
 "use strict";
 const finite=(v,min,max,label)=>{if(typeof v!=="number"||!Number.isFinite(v)||v<min||v>max)throw Error("Invalid "+label);return v;};
 class RPGDemo{
- constructor({canvas,BABYLON,HavokPhysics,source,onUpdate=()=>{},onEvent=()=>{}}){
+ constructor({canvas,BABYLON,HavokPhysics,source,levelSource=null,recastFactory=null,onUpdate=()=>{},onEvent=()=>{}}){
    if(!canvas||!BABYLON?.Scene||!HavokPhysics||typeof source!=="string")throw Error("Babylon, Havok and HiroGlifx source required");
    this.canvas=canvas;this.B=BABYLON;this.havok=HavokPhysics;this.onUpdate=onUpdate;this.onEvent=onEvent;
+   this.levelSource=levelSource;this.recastFactory=recastFactory;
+   this.navmesh=null;this.navMode="a-star";this.navQueries=0;this.wave=1;this.level=null;this.navError=null;
    this.rules=new root.HiroWorldRules.WorldRules(source,{name:"rpg-combat"});
    this.combat=new root.HiroCombat.CombatWorld();
    this.keys=new Set();this.enemies=[];this.last=0;this.disposed=false;this.attackFlash=0;this.combo=0;
@@ -36,42 +38,29 @@ class RPGDemo{
      mesh.metadata={cameraOccluder:occluder};
      this.physics.staticBox(mesh);return mesh;
    };
-   platform("terrain",0,-.45,0,28,.9,28,"#3b766d");
-   // Procedural scenery is original and requires no third-party game art.
-   if(B.MeshBuilder.CreateSphere){
-     for(let i=0;i<20;i++){
-       const angle=i*Math.PI*2/20,radius=i%2===0?12.8:13.7;
-       const x=Math.cos(angle)*radius,z=Math.sin(angle)*radius;
-       const crown=B.MeshBuilder.CreateSphere("rift-shrub-"+i,{diameter:1.5+(i%3)*.3,segments:8},this.scene);
-       crown.position.set(x,.64,z);crown.scaling.y=.62;
-       crown.material=material("shrub-"+i,i%3===0?"#276e79":"#3e9984");
-       crown.isPickable=false;
-     }
-   }
-   if(B.MeshBuilder.CreateCylinder){
-     for(let i=0;i<8;i++){
-       const angle=i*Math.PI/4,x=Math.cos(angle)*11,z=Math.sin(angle)*11;
-       const pillar=B.MeshBuilder.CreateCylinder("rift-pillar-"+i,{diameter:1.0,height:2.0+(i%3)*.6,tessellation:6},this.scene);
-       pillar.position.set(x,1,z);
-       pillar.material=material("pillar-"+i,i%2===0?"#536782":"#607b97");
-       pillar.isPickable=false;
-     }
-   }
-   for(const [i,x,z] of [[0,-8,3],[1,8,5]]){
+
+   if(!this.levelSource)throw Error("Missing authored HiroGlifx level source");
+   this.level=new root.HiroRiftfallWorld.RiftfallWorld(this.levelSource);
+   const geometry=this.level.build({BABYLON:B,scene:this.scene,physics:this.physics,material});
+   this.nav=geometry.navigation;
+   // Dynamic physics props are real Havok rigid bodies.
+   for(const [i,x,z] of [[0,-8,3],[1,8,5],[2,-2,-26],[3,6,-47]]){
      const crate=B.MeshBuilder.CreateBox("physics-crate-"+i,{size:1.15},this.scene);
      crate.position.set(x,3,z);crate.material=material("crate-"+i,"#cb9a69");
      this.dynamicCrates.push(this.physics.dynamicBox(crate,{mass:3,restitution:.16}));
    }
-   platform("stone-west",-4,.65,.1,2,1.3,2,"#70859b");
-   platform("stone-east",4,.65,-1,2,1.3,2,"#75869d");
-   platform("stone-center",0,.65,-3,2.3,1.3,1.5,"#70809b");
-   this.nav=new root.HiroAI.NavigationGrid({width:28,height:28,originX:-14,originZ:-14});
-   for(const [cx,cz,w,d] of [[-4,.1,2,2],[4,-1,2,2],[0,-3,2.3,1.5]]){
-     for(let x=Math.floor(cx-w/2);x<=Math.ceil(cx+w/2);x++)
-       for(let z=Math.floor(cz-d/2);z<=Math.ceil(cz+d/2);z++){
-         const cell=this.nav.cell(x,z);
-         if(this.nav.inside(cell.x,cell.z))this.nav.setBlocked(cell.x,cell.z,true);
-       }
+   // Prefer actual Recast-Detour path queries whenever WASM is available.
+   if(this.recastFactory&&root.HiroNavmesh?.RecastNavigation){
+     try{
+       const recast=typeof this.recastFactory==="function"?await this.recastFactory():this.recastFactory;
+       if(!recast)throw Error("Recast returned no runtime");
+       this.navmesh=new root.HiroNavmesh.RecastNavigation({BABYLON:B,scene:this.scene,recast});
+       this.navmesh.build(geometry.meshes);
+       this.navMode="recast";
+     }catch(error){
+       this.navmesh?.dispose();this.navmesh=null;
+       this.navMode="a-star";this.navError=error.message;
+     }
    }
    this.character=this.physics.character([0,1.9,8],{height:1.7,radius:.34,speed:5.7,jump:8.6});
    const body=B.MeshBuilder.CreateCapsule("hero-fallback",{height:1.7,radius:.34},this.scene);
@@ -91,16 +80,16 @@ class RPGDemo{
    }catch(error){this.assetStatus="Procedural character: "+error.message;}
    this.combat.create("hero",{team:"heroes",health:145,stamina:110,x:0,z:8,armor:8});
    this.combat.equip("hero","weapon",{id:"training-sword",damage:7});
-   for(const [i,pos] of [[0,[-6,-5]],[1,[5,-7]],[2,[0,-10]]]){
-     const id="raider-"+i, mesh=B.MeshBuilder.CreateBox(id,{width:.7,height:1.5,depth:.7},this.scene);
-     mesh.material=material(id,i===2?"#ecb35c":"#df7187");mesh.position.set(pos[0],.75,pos[1]);
-     this.combat.create(id,{team:"raiders",health:i===2?130:75,x:pos[0],z:pos[1],armor:i===2?35:7});
-     const agent=new root.HiroAI.NavigationAgent({grid:this.nav,position:{x:pos[0],z:pos[1]},speed:i===2?1.8:2.6});
-     const actor={id,mesh,agent,index:i,decision:null,attackTime:0};
-     actor.decision=this.makeBehavior(actor);this.enemies.push(actor);
-   }
+   this.spawnWave(1,material);
    this.combat.onEvent(e=>{
-     if(e.type==="defeat"&&e.actor!=="hero"){this.rules.run("afterEnemyDefeated");this.onEvent("Defeated "+e.actor);}
+     if(e.type==="defeat"&&e.actor!=="hero"){
+       const kills=this.rules.run("afterEnemyDefeated");
+       this.onEvent("Defeated "+e.actor);
+       if(this.wave<3&&kills>=this.level.threshold(this.wave)){
+         this.ensureWave(this.wave+1);
+         this.onEvent("New region unlocked: "+this.level.waveTitle(this.wave));
+       }
+     }
      if(e.type==="hit"){
        this.hitReactions.set(e.target,.22);
        this.onEvent(e.attacker+" hit "+e.target+" ("+e.damage+")");
@@ -118,6 +107,38 @@ class RPGDemo{
    this._resize=()=>this.engine?.resize();
    if(typeof window!=="undefined")window.addEventListener("resize",this._resize);
    return this;
+ }
+ spawnWave(stage,material=null){
+   if(!this.level)throw Error("Level source not loaded");
+   const B=this.B,mat=material||((id,color)=>{
+     const m=new B.StandardMaterial(id+"-mat",this.scene);m.diffuseColor=B.Color3.FromHexString(color);return m;
+   });
+   const info=this.level.spawns(stage);
+   for(const entry of info){
+     const {id,index,x,z,health,armor,speed,color}=entry;
+     const mesh=B.MeshBuilder.CreateBox(id,{width:stage===3?1.15:.7,
+        height:stage===3?2.2:1.5,depth:stage===3?1.15:.7},this.scene);
+     mesh.material=mat(id,color);mesh.position.set(x,stage===3?1.1:.75,z);
+     this.combat.create(id,{team:"raiders",health,x,z,armor});
+     const route=this.navmesh?((from,to)=>{
+       try{
+         this.navQueries++;
+         const path=this.navmesh.path({x:from.x,y:.1,z:from.z},{x:to.x,y:.1,z:to.z});
+         if(path.length>1)return path.map(p=>({x:p.x,z:p.z}));
+       }catch(error){this.navError=error.message;}
+       return this.nav.path(from,to);
+     }):null;
+     const agent=new root.HiroAI.NavigationAgent({grid:this.nav,position:{x,z},speed,route});
+     const actor={id,mesh,agent,index,stage,decision:null,attackTime:0};
+     actor.decision=this.makeBehavior(actor);this.enemies.push(actor);
+   }
+   this.wave=stage;this.level.waveStart(stage);
+   return info.length;
+ }
+ ensureWave(target){
+   if(!Number.isInteger(target)||target<1||target>3)throw Error("Invalid RPG wave");
+   for(let stage=this.wave+1;stage<=target;stage++)this.spawnWave(stage);
+   return this.wave;
  }
  makeBehavior(actor){
    const AI=root.HiroAI;
@@ -193,7 +214,7 @@ class RPGDemo{
    this.sword.position.set(pos.x+.4,pos.y-.1,pos.z-.15);
    if(this.sword.rotation)this.sword.rotation.z=this.attackFlash>0?-.75:0;
    for(const e of this.enemies){
-     const a=this.combat.actor(e.id);e.mesh.position.set(a.x,.8,a.z);
+     const a=this.combat.actor(e.id);e.mesh.position.set(a.x,e.stage===3?1.1:.8,a.z);
      e.mesh.setEnabled?.(a.alive);
      const impacted=this.hitReactions.get(e.id)||0;
      if(e.mesh.scaling){const pulse=impacted>0?1+.11*Math.sin((.22-impacted)*44):1;e.mesh.scaling.setAll?.(pulse);}
@@ -214,12 +235,13 @@ class RPGDemo{
      raiders:this.enemies.map(e=>({id:e.id,x:this.combat.actor(e.id).x,z:this.combat.actor(e.id).z,
        repaths:e.agent.repaths,alive:this.combat.actor(e.id).alive})),
      kills:this.rules.get("kills"),done:this.rules.done,x:hero.x,z:hero.z,
+     wave:this.wave,chapter:this.level?.waveTitle(this.wave)||"Riftfall",navMode:this.navMode,recastQueries:this.navQueries,
      campaign:this.campaign?.snapshot()||null});
  }
  dispose(){
    this.disposed=true;this.pause();
    if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
-   this.campaign?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
+   this.campaign?.dispose();this.navmesh?.dispose();this.assets?.dispose();this.physics?.dispose();this.scene?.dispose();this.engine?.dispose();
  }
 }
 return {RPGDemo};
