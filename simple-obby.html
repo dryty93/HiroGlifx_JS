@@ -194,15 +194,22 @@ function setBest(value){try{localStorage.setItem(bestKey,String(value));}catch{}
 function time(value){const minutes=Math.floor(value/60),seconds=(value%60).toFixed(1).padStart(4,"0");return minutes+":"+seconds;}
 function updateBest(){const v=best();$("bestMetric").textContent=v?v.toFixed(1)+"s":"—";}
 function sound(frequency=440,duration=.13){
- if(muted||typeof window.AudioContext!=="function"&&typeof window.webkitAudioContext!=="function")return;
+ const preset=design?.sound||"bubbles";
+ if(muted||preset==="off"||typeof window.AudioContext!=="function"&&typeof window.webkitAudioContext!=="function")return;
  try{
   audio=audio||new (window.AudioContext||window.webkitAudioContext)();
   if(audio.state==="suspended")audio.resume();
-  const osc=audio.createOscillator(),gain=audio.createGain(),now=audio.currentTime;
-  osc.type="sine";osc.frequency.setValueAtTime(frequency,now);
-  osc.frequency.exponentialRampToValueAtTime(Math.max(80,frequency*.72),now+duration);
-  gain.gain.setValueAtTime(.06,now);gain.gain.exponentialRampToValueAtTime(.001,now+duration);
-  osc.connect(gain).connect(audio.destination);osc.start(now);osc.stop(now+duration);
+  const now=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();
+  const filter=audio.createBiquadFilter();filter.type="lowpass";filter.frequency.value=preset==="soft"?1100:4200;
+  osc.type=preset==="arcade"?"square":preset==="soft"?"triangle":"sine";
+  const start=preset==="bubbles"?frequency*.8:preset==="glass"?frequency*1.6:frequency;
+  const finish=preset==="bubbles"?frequency*1.25:Math.max(80,frequency*.68);
+  osc.frequency.setValueAtTime(start,now);
+  osc.frequency.exponentialRampToValueAtTime(finish,now+duration);
+  gain.gain.setValueAtTime(.0001,now);
+  gain.gain.exponentialRampToValueAtTime(preset==="arcade"?.025:.052,now+.012);
+  gain.gain.exponentialRampToValueAtTime(.0001,now+duration);
+  osc.connect(filter).connect(gain).connect(audio.destination);osc.start(now);osc.stop(now+duration+.01);
  }catch{}
 }
 function announce(text){$("status").textContent=text;}
@@ -269,6 +276,7 @@ async function build(){
  view.start();view.paused=true;
  runtime=rt;model=world;renderer=view;rules=policy;ready=true;lastStage=1;showSkyboundCode(sourceMode);
  events.push(world.on("jump",()=>{policy.run("onJump");sound(680,.085);}));
+ events.push(world.on("land",({tile})=>{if(tile!=="start")sound(480+(world.tiles.get(tile)?.stage||1)*95,.085);}));
  events.push(world.on("checkpoint",({tile})=>{policy.run("onCheckpoint");sound(840,.2);announce("✓ Checkpoint saved: "+tile);}));
  events.push(world.on("stage",({stage,title})=>{policy.run("onStage",stage);lastStage=stage;sound(700+stage*80,.22);announce("STAGE "+stage+" — "+title);}));
  events.push(world.on("respawn",()=>{policy.run("onRespawn");sound(190,.24);announce("Try again! Your checkpoint is saved.");}));
