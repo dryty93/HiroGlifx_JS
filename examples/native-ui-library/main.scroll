@@ -680,3 +680,44 @@ ui library
         text second "Experiences";
     ]
     break;
+
+
+.TiltBento = (BentoTile)
+    : render(self) = [
+        element tile article root;
+        class tile "hg-bento-tile hg-bento-accent";
+        motion tile tilt;
+        element title h3 tile;
+        class title "hg-bento-title";
+        text title "{title}";
+        element description p tile;
+        class description "hg-bento-desc";
+        text description "{description}";
+        element number span tile;
+        class number "hg-bento-number";
+        attr number aria-hidden "true";
+        text number "{number}";
+    ]
+    break;
+
+.SpotlightCard = (Card)
+    : render(self) = [
+        element panel article root;
+        class panel "hg-card";
+        motion panel spotlight;
+        element title h3 panel;
+        class title "hg-bento-title";
+        text title "{title}";
+        element description p panel;
+        class description "hg-bento-desc";
+        text description "{description}";
+    ]
+    break;
+
+.ScrollProgress = (Component)
+    : render(self) = [
+        element progress div root;
+        motion progress scroll-progress;
+        attr progress aria-hidden "true";
+    ]
+    break;
