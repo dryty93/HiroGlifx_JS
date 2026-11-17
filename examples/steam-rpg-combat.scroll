@@ -9,6 +9,13 @@
     # enemyRange = 2.1;
     # enemyAggro = 24;
     # enemyCooldown = 1.3;
+    # enemyWindup = 0.42;
+    # evadeDuration = 0.35;
+    # evadeCost = 22;
+    # evadeCooldown = 0.9;
+    # parryDuration = 0.25;
+    # parryCost = 15;
+    # parryCooldown = 1.15;
     # kills = 0;
     # attacks = 0;
     # elapsed = 0;
