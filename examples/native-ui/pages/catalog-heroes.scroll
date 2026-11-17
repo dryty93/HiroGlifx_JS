@@ -1,0 +1,46 @@
+ui application
+import native-ui
+
+.Main = ()
+    : render(self) = [
+        element app main root;
+        component ScrollProgress progress app;
+        component StickyNavigation nav app;
+        prop nav brand "HIRO / CATALOG";
+        element intro section app;
+        class intro "hg-wrap hg-section";
+        element link a intro;
+        attr link href "/catalog";
+        class link "hg-button";
+        text link "Back to the catalog";
+        component SplitHero experience0 app;
+        prop experience0 eyebrow "SPLIT HERO";
+        prop experience0 title "Clarity meets momentum.";
+        prop experience0 description "A responsive split hero with an interactive art panel.";
+        prop experience0 action "See portfolios";
+        prop experience0 href "/catalog-portfolios";
+        component GlassHero experience1 app;
+        prop experience1 eyebrow "GLASS HERO";
+        prop experience1 title "Make a vivid first impression.";
+        prop experience1 description "Glass layers, subtle spotlight and polished typographic hierarchy.";
+        component OrbitHero experience2 app;
+        prop experience2 eyebrow "ORBIT PORTFOLIO";
+        prop experience2 title "A different perspective.";
+        prop experience2 label "HIROGLIFX";
+        component ProductHero experience3 app;
+        prop experience3 title "Your product, beautifully presented.";
+        prop experience3 description "Native product-device frame and a conversion-focused layout.";
+        prop experience3 label "APP INTERFACE";
+        component PosterHero experience4 app;
+        prop experience4 eyebrow "EDITORIAL POSTER";
+        prop experience4 title "Every idea begins with feeling.";
+        prop experience4 description "A kinetic serif hero with large expressive typography.";
+        component VideoHero experience5 app;
+        prop experience5 title "Video-focused product showcase.";
+        prop experience5 description "Provide an application-owned media file to enable playback.";
+        prop experience5 src "/assets/studio-placeholder.svg";
+        component MegaFooter footer app;
+        prop footer title "HIROGLIFX";
+        prop footer description "Native experiences. No borrowed JavaScript components.";
+    ]
+    break;

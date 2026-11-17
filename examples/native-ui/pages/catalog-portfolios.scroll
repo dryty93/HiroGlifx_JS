@@ -1,0 +1,38 @@
+ui application
+import native-ui
+
+.Main = ()
+    : render(self) = [
+        element app main root;
+        component ScrollProgress progress app;
+        component StickyNavigation nav app;
+        prop nav brand "HIRO / CATALOG";
+        element intro section app;
+        class intro "hg-wrap hg-section";
+        element link a intro;
+        attr link href "/catalog";
+        class link "hg-button";
+        text link "Back to the catalog";
+        component CollagePortfolio experience0 app;
+        prop experience0 title "A world of work.";
+        prop experience0 eyebrow "VISUAL COLLAGE";
+        component HorizontalPortfolio experience1 app;
+        prop experience1 title "Explore the archive.";
+        prop experience1 eyebrow "SWIPEABLE PORTFOLIO";
+        component EditorialPortfolio experience2 app;
+        prop experience2 title "A visual language of its own.";
+        component CaseStudyFeature experience3 app;
+        prop experience3 eyebrow "FEATURED CASE STUDY";
+        prop experience3 title "One carefully crafted experience.";
+        prop experience3 description "An editorial media-and-story composition with gentle scroll motion.";
+        component ProductMockup experience4 app;
+        prop experience4 eyebrow "PRODUCT INTERFACE";
+        prop experience4 title "Make your product the hero.";
+        prop experience4 label "APP PREVIEW";
+        component IntegrationCloud experience5 app;
+        prop experience5 title "Composable by default.";
+        component MegaFooter footer app;
+        prop footer title "HIROGLIFX";
+        prop footer description "Native experiences. No borrowed JavaScript components.";
+    ]
+    break;

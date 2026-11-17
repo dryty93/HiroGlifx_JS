@@ -8,7 +8,7 @@ function page(name){return fs.readFileSync(path.join(ROOT,"examples/native-ui",n
 function makeProject(){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-"));
  fs.mkdirSync(path.join(dir,"pages"));fs.copyFileSync(path.join(ROOT,"examples/native-ui/app.scroll"),path.join(dir,"app.scroll"));
- for(const name of ["dashboard","form","experiences","studio"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
+ for(const name of ["dashboard","form","experiences","studio","catalog","catalog-heroes","catalog-portfolios","catalog-stories","catalog-conversion","showcase"])fs.copyFileSync(path.join(ROOT,"examples/native-ui/pages",name+".scroll"),path.join(dir,"pages",name+".scroll"));
  installLocal(dir,path.join(ROOT,"examples/native-ui-library"));return dir;
 }
 function fakeDOM(){
@@ -17,7 +17,7 @@ function fakeDOM(){
   appendChild(node){this.children.push(node);return node;},
   remove(){this.removed=true;},
   replaceChildren(...items){this.children=[...items];},
-  setAttribute(k,v){this.attributes[k]=v;},
+  setAttribute(k,v){this.attributes[k]=v;if(k==="type")this.type=v;},
   addEventListener(k,v){this.listeners[k]=v;},removeEventListener(k){delete this.listeners[k];},
   focus(){doc.activeElement=this;}
  });
@@ -70,8 +70,8 @@ test("text escaping, malicious attributes, handlers and input form events",()=>{
 test("production build emits standalone route pages without unsafe inline source injection",()=>{
  const {buildProject}=require("../hiro");const dir=makeProject();
  try{
-  const files=buildProject(dir);assert.equal(files.length,5);
-  for(const route of ["index.html","dashboard/index.html","form/index.html","experiences/index.html","studio/index.html"]){
+  const files=buildProject(dir);assert.equal(files.length,11);
+  for(const route of ["index.html","dashboard/index.html","form/index.html","experiences/index.html","studio/index.html","catalog/index.html","catalog-heroes/index.html","catalog-portfolios/index.html","catalog-stories/index.html","catalog-conversion/index.html","showcase/index.html"]){
    const content=fs.readFileSync(path.join(dir,"dist",route),"utf8");
    assert(content.includes("HiroNativeUI.NativeUIRuntime"));
    assert(content.includes("/assets/native-ui.js"));
@@ -131,10 +131,122 @@ test("one-command UI starter installs the experience package and all preview rou
  const parent=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-ui-starter-")),dir=path.join(parent,"new-studio");
  try{
   makeNativeProject(dir);
-  assert.equal(validateProject(dir),5);
+  assert.equal(validateProject(dir),11);
   assert(fs.existsSync(path.join(dir,"hiro.lock.json")));
   assert(fs.existsSync(path.join(dir,"packages/native-ui/main.scroll")));
   assert(fs.existsSync(path.join(dir,"assets/studio-placeholder.svg")));
-  assert.equal(buildProject(dir).length,5);
+  assert.equal(buildProject(dir).length,11);
  }finally{fs.rmSync(parent,{recursive:true,force:true});}
+});
+
+
+test("all 28 new native experience classes compile with typed inherited API",()=>{
+ const ui=compile(LIB);
+ const names=["ExperienceBlock","SplitHero","GlassHero","ProductHero","PosterHero","OrbitHero","VideoHero","CollagePortfolio","HorizontalPortfolio","EditorialPortfolio","CaseStudyFeature","StickyScrollytelling","TimelineStory","ProcessSteps","StatsStrip","BeforeAfterSlider","ProductMockup","IntegrationCloud","FeatureSpotlight","QuoteWall","MagazineGrid","PeopleGrid","TabbedShowcase","ComparisonTable","NewsletterCTA","MagneticCTA","MegaFooter","NotFoundExperience"];
+ for(const name of names){
+  const cls=ui.classes.get(name);
+  assert(cls&&cls.methods.has("render"),"missing native render for "+name);
+  assert(cls.fields.has("title"),"missing inherited typed title for "+name);
+ }
+ assert.equal(names.length,28);
+ assert.notEqual(ui.classes.get("ProductHero").methods.get("render"),ui.classes.get("SplitHero").methods.get("render"));
+ assert.notEqual(ui.classes.get("EditorialPortfolio").methods.get("render"),ui.classes.get("CollagePortfolio").methods.get("render"));
+});
+test("all native catalog category routes compile through verified package imports",()=>{
+ const dir=makeProject();
+ try{
+  for(const file of ["catalog","catalog-heroes","catalog-portfolios","catalog-stories","catalog-conversion"]){
+   const src=resolveSource(dir,page("pages/"+file+".scroll"));
+   assert(compile(src).classes.has("Main"),file);
+  }
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+test("comparison slider and tabbed showcase are bound to native typed state",()=>{
+ const src="ui application\n"+LIB.replace(/^ui library\s*/,"")+"\n.Main = ()\n : render(self) = [\n element page main root;\n component BeforeAfterSlider compare page;\n component TabbedShowcase tabs page;\n ]\n break;";
+ const dom=fakeDOM(),runtime=new NativeUIRuntime(dom).execute(src);
+ const slider=dom.nodes.find(x=>x.tagName==="INPUT"&&x.attributes.type==="range");
+ assert(slider,"native comparison slider missing");
+ assert.equal(dom.nodes.find(x=>x.style["--hg-wipe"]==="50")!==undefined,true);
+ slider.value="75";slider.listeners.input();
+ assert(dom.nodes.some(x=>x.style["--hg-wipe"]==="75"),"native slider did not update comparison");
+ assert.equal(dom.nodes.filter(x=>x.tagName==="INPUT"&&x.attributes.type==="range").length,1,"dragging must not remount range input");
+ const tab=dom.nodes.filter(x=>x.tagName==="BUTTON"&&x.textContent==="Switch showcase view").at(-1);
+ assert(tab,"tab control");
+ tab.listeners.click();
+ assert(dom.nodes.filter(x=>x.tagName==="ARTICLE").some(x=>x.style.display==="none"),"tab visibility should change");
+ runtime.dispose();
+});
+test("unsafe CSS variable expressions are prohibited by the native compiler",()=>{
+ assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n stylevar panel --unsafe width;\n ]\n break;'),/Invalid render command/);
+ assert.throws(()=>compile('ui application\n.Main = ()\n : render(self) = [\n element panel div root;\n motion panel javascript;\n ]\n break;'),/Invalid render command/);
+});
+
+
+test("UI CLI discovers every installed experience and scaffolds native .scroll routes safely",()=>{
+ const {uiClasses,createUIPage,validateProject}=require("../hiro");
+ const dir=makeProject();
+ try{
+  const names=uiClasses(dir);
+  for(const name of ["SplitHero","StickyScrollytelling","BeforeAfterSlider","MagneticCTA","NotFoundExperience"])
+   assert(names.has(name),"missing "+name);
+  const file=createUIPage(dir,"SplitHero","my-hero");
+  const src=fs.readFileSync(file,"utf8");
+  assert(src.includes("import native-ui"));
+  assert(src.includes("component SplitHero experience page;"));
+  assert.equal(validateProject(dir),12);
+  assert.throws(()=>createUIPage(dir,"SplitHero","my-hero"),/already exists/);
+  assert.throws(()=>createUIPage(dir,"NoSuchComponent","missing"),/Unknown UI component/);
+  assert.throws(()=>createUIPage(dir,"SplitHero","../outside"),/Invalid UI route/);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test("all-experiences showroom covers every exported native UI class, including abstract foundations",()=>{
+ const {compile}=require("../runtime/native-ui");
+ const showroom=page("pages/showcase.scroll");
+ const program=compile("ui application\n"+LIB.replace(/^ui library\s*/,"")+"\n"+showroom.replace(/^ui application\s*/,"").replace(/^import native-ui\s*$/m,""));
+ const steps=program.classes.get("Main").methods.get("render");
+ const instantiated=steps.filter(step=>step.op==="component").map(step=>step.args[0]);
+ const names=[...compile(LIB).classes.keys()];
+ const missing=names.filter(name=>!instantiated.includes(name));
+ assert.deepEqual(missing,[],"all exported classes must have a live preview");
+ assert.equal(names.length,66);
+ assert.equal(new Set(instantiated).size,66,"all components present at least once");
+ const anchorSteps=steps.filter(step=>step.op==="attr"&&step.args[1]==="id"&&step.args[2].startsWith("hg-showcase-"));
+ assert.equal(anchorSteps.length,7,"seven jump-to-category anchors");
+ const codeExamples=steps.filter(step=>step.op==="class"&&step.args[1]==="hg-showcase-code");
+ assert.equal(codeExamples.length,66,"one native source snippet for each class");
+});
+test("native class showroom is importable and valid for a fully built starter",()=>{
+ const dir=makeProject();
+ try{
+  const resolved=resolveSource(dir,page("pages/showcase.scroll"));
+  assert(resolved.includes("component NotFoundExperience"));
+  assert(compile(resolved).classes.has("ShowcaseCarousel"));
+  const {buildProject}=require("../hiro");
+  const outputs=buildProject(dir);
+  assert(outputs.some(p=>p.endsWith("showcase/index.html")));
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
+test("unsafe showcase anchor ids are rejected",()=>{
+ const {compile,NativeUIRuntime}=require("../runtime/native-ui");
+ const dom=fakeDOM(),runtime=new NativeUIRuntime(dom);
+ assert.throws(()=>runtime.execute('ui application\n.Main = ()\n : render(self) = [\n element section section root;\n attr section id "../bad";\n ]\n break;'),/Unsafe element id/);
+ runtime.dispose();
+});
+
+
+test("full 66-class showroom mounts and unmounts every native component in the DOM host",()=>{
+ const dir=makeProject();
+ try{
+  const dom=fakeDOM();
+  const source=resolveSource(dir,page("pages/showcase.scroll"));
+  const ui=new NativeUIRuntime(dom).execute(source);
+  const rendered=new Set(dom.nodes.map(node=>node.dataset.hiroComponent).filter(Boolean));
+  const expected=[...compile(LIB).classes.keys()];
+  assert.deepEqual(expected.filter(name=>!rendered.has(name)),[],"missing DOM component instance");
+  assert.equal(dom.nodes.filter(node=>node.tagName==="PRE").length,66);
+  ui.dispose();
+  assert.equal(dom.mount.children.length,0);
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

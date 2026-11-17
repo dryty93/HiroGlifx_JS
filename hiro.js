@@ -92,7 +92,7 @@ function buildProject(project,destination=path.join(project,"dist")){
  const assets=path.join(project,"assets");
  if(fs.existsSync(assets)){
   for(const name of fs.readdirSync(assets)){
-   if(!/^[A-Za-z0-9_-]+\.(?:svg|png|jpg|jpeg|webp|avif)$/.test(name))continue;
+   if(!/^[A-Za-z0-9_-]+\.(?:svg|png|jpg|jpeg|webp|avif|mp4|webm)$/.test(name))continue;
    const file=path.join(assets,name);
    if(fs.lstatSync(file).isFile()&&!fs.lstatSync(file).isSymbolicLink())
     fs.copyFileSync(file,path.join(destination,"assets",name));
@@ -101,8 +101,62 @@ function buildProject(project,destination=path.join(project,"dist")){
  return output;
 }
 
+function uiClasses(project){
+ const {compile}=require("./runtime/native-ui");
+ const source=resolveSource(path.resolve(project),"ui application\nimport native-ui\n.Main = ()\n : render(self) = [\n ]\n break;\n");
+ return compile(source).classes;
+}
+function createUIPage(project,component,slug){
+ project=path.resolve(project);
+ if(!/^[A-Z][A-Za-z0-9_]*$/.test(component)||component==="Main")throw Error("Invalid UI component name");
+ if(!/^[a-z][a-z0-9-]{0,39}$/.test(slug))throw Error("Invalid UI route slug");
+ const classes=uiClasses(project);
+ if(!classes.has(component))throw Error("Unknown UI component "+component);
+ const file=path.join(project,"pages",slug+".scroll");
+ if(fs.existsSync(file))throw Error("UI route already exists: "+slug);
+ fs.mkdirSync(path.dirname(file),{recursive:true});
+ const root=component==="NotFoundExperience"?"div":"main";
+ const source=[
+ "ui application","import native-ui","",
+ ".Main = ()",
+ "    : render(self) = [",
+ "        element page "+root+" root;",
+ "        component "+component+" experience page;",
+ "    ]","    break;",""
+ ].join("\n");
+ resolveSource(project,source);
+ fs.writeFileSync(file,source,{flag:"wx"});
+ return file;
+}
 async function main(argv=process.argv.slice(2)){
   const [command,location,...rest]=argv;
+  if(command==="ui"){
+    const action=location,project=rest[0];
+    if(!project)throw Error("Usage: hiro ui <list|add> <project> [Component route]");
+    if(action==="list"){
+      const classes=uiClasses(project);
+      console.log([...classes.keys()].filter(name=>name!=="Main").sort().join("\n"));return;
+    }
+    if(action==="add"){
+      const component=rest[1],slug=rest[2];
+      if(!component||!slug)throw Error("Usage: hiro ui add <project> <Component> <route>");
+      const filename=createUIPage(project,component,slug);console.log("Created",filename);return;
+    }
+    throw Error("Unknown UI command "+action);
+  }
+  if(command==="showcase"){
+    const os=require("node:os");
+    const temp=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-showcase-"));
+    try{
+      makeNativeProject(temp);
+      const port=location===undefined?3000:Number(location);
+      const live=await serveProject(temp,port,{watch:false});
+      process.once("exit",()=>fs.rmSync(temp,{recursive:true,force:true}));
+      console.log("HiroGlifx showcase: http://127.0.0.1:"+live.server.address().port+"/showcase");
+      console.log("All components are loaded from the verified native-ui package. Ctrl+C to stop.");
+      return live;
+    }catch(error){fs.rmSync(temp,{recursive:true,force:true});throw error;}
+  }
   if(command==="package"){
     const [action,projectDir,arg]=[location,rest[0],rest[1]];
     if(!projectDir)throw new Error("Usage: hiro package <add|remove|list> <project> [path|name]");
@@ -147,7 +201,7 @@ async function main(argv=process.argv.slice(2)){
     console.log("HiroGlifx app: http://127.0.0.1:"+live.server.address().port);
     return live;
   }
-  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
+  console.log("HiroGlifx CLI\n  hiro init <directory> [--ui]\n  hiro showcase [port]\n  hiro dev <directory> [port]\n  hiro check <directory>\n  hiro build <directory>\n  hiro ui list <project>\n  hiro ui add <project> <Component> <route>\n  hiro package add <project> <local-folder>\n  hiro package remove <project> <name>\n  hiro package list <project>");
 }
 if(require.main===module)main().catch(error=>{console.error(error.message);process.exitCode=1;});
-module.exports={main,makeProject,makeNativeProject,validateProject,buildProject};
+module.exports={main,makeProject,makeNativeProject,validateProject,buildProject,uiClasses,createUIPage};

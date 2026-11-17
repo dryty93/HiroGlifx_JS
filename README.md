@@ -22,12 +22,15 @@ Open **http://127.0.0.1:3000**. Editing my-app/app.scroll automatically reloads 
 Build polished, responsive landing pages and interactive sites using **native .scroll**, not JavaScript-authored application components. The native-ui package includes cinematic heroes, responsive bento sections, pointer-reactive spotlight and tilt cards, scroll-reveal stories, animated marquees, carousels, pricing switches, FAQs, forms and themes. Components use typed inheritance, polymorphic overrides, verified package imports and declarative events.
 
 ~~~bash
+node hiro.js showcase 3000  # Preview every built-in experience; no package installation needed
 node hiro.js init my-studio --ui
+node hiro.js ui list my-studio
+node hiro.js ui add my-studio SplitHero campaign
 node hiro.js dev my-studio 3000
 node hiro.js build my-studio
 ~~~
 
-The --ui starter includes five live examples: /, /dashboard, /form, /experiences and /studio. See [the native experience component guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
+Open **http://127.0.0.1:3000/showcase** to explore 66 class previews, grouped across seven categories, each with its own copyable `.scroll` snippet. The `hiro showcase` command installs an isolated temporary preview automatically, avoiding local lockfile setup errors. The --ui starter includes 11 live examples, including /showcase and /catalog and the hero, portfolio, storytelling and conversion collections. It provides 28 additional high-level experience classes. See [the complete native experience catalog](docs/native-experience-catalog.md) and [the native UI guide](docs/native-ui.md) and [the importable scroll component library](examples/native-ui-library/main.scroll). This is an opt-in DOM dialect; game-script/DOM compiler unification and advanced shader-grade interactions remain future work.
 
 ## Canonical variable syntax — Phase 13
 
