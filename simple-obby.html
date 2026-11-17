@@ -137,8 +137,9 @@ finish goal at 24 0 0 size 5</code><p>You can also change <strong>theme soda</st
 <script>
 (function(){
 "use strict";
-const $=id=>document.getElementById(id),keys=new Set(),segments=[...document.querySelectorAll(".stage-segment")];
-const cards=[...document.querySelectorAll(".stage-card")];
+const $=id=>document.getElementById(id),keys=new Set();
+let segments=[...document.querySelectorAll(".stage-segment")];
+let cards=[...document.querySelectorAll(".stage-card")];
 let runtime=null,model=null,renderer=null,started=false,paused=true,ready=false,source=null,events=[],raf=0,lastStage=1,muted=false,audio=null;
 let rules=null,rulesSource=null,sourceMode="course",design=null;
 function showSoda SplashCode(mode){
@@ -168,7 +169,26 @@ $("copyDirections").addEventListener("click",async()=>{
  catch{$("compileStatus").textContent="Select and copy your directions manually.";}
 });
 // Read-only state snapshot for browser QA and performance diagnostics.
-window.HiroSoda SplashSnapshot=()=>model?Object.freeze({x:model.player.x,z:model.player.z,stage:model.currentStage,time:model.elapsed,completed:model.completed,score:rules?.get("score")??0,rulesLoaded:!!rules}):null;
+window.HiroSodaSplashSnapshot=()=>model?Object.freeze({x:model.player.x,z:model.player.z,stage:model.currentStage,time:model.elapsed,completed:model.completed,score:rules?.get("score")??0,rulesLoaded:!!rules}):null;
+window.HiroSimpleObbySnapshot=()=>design?Object.freeze({
+ title:design.title,theme:design.theme,stages:design.stages.length,
+ objects:model?.tiles.size||0,started,paused,sceneReady:!!renderer?.scene,
+ speed:model?.moveSpeed||0,jump:model?.jumpSpeed||0,
+ player:model?.player?{x:model.player.x,y:model.player.y,z:model.player.z,grounded:model.player.grounded}:null
+}):null;
+function configureStageHUD(){
+ const bar=document.querySelector(".stage-bar"),tiles=$("stageCards");
+ bar.replaceChildren();tiles.replaceChildren();
+ for(const stage of design.stages){
+  const seg=document.createElement("div");seg.className="stage-segment";bar.appendChild(seg);
+  const card=document.createElement("div");card.className="stage-card";
+  const number=document.createElement("b");number.textContent=String(stage.id).padStart(2,"0");
+  const title=document.createElement("small");title.textContent=stage.name;
+  card.append(number,title);tiles.appendChild(card);
+ }
+ segments=[...bar.querySelectorAll(".stage-segment")];
+ cards=[...tiles.querySelectorAll(".stage-card")];
+}
 function best(){try{return Number(localStorage.getItem(bestKey))||0;}catch{return 0;}}
 function setBest(value){try{localStorage.setItem(bestKey,String(value));}catch{}}
 function time(value){const minutes=Math.floor(value/60),seconds=(value%60).toFixed(1).padStart(4,"0");return minutes+":"+seconds;}
@@ -227,6 +247,7 @@ async function build(){
  const world=rt.get("world");
  if(!world?.player||world.tiles.size<3)throw new Error("Your course needs more platforms");
  world.stages=design.stages.map((stage,i)=>({...stage,description:"Your custom stage",color:["#49dfff","#ff82bf","#ffe398","#7ff1c3","#ba9bff"][i]}));
+ configureStageHUD();
  if($("courseEditor"))$("courseEditor").value=source;
  const policy=new HiroWorldRules.WorldRules(rulesSource,{name:"skybound-gameplay",services:{
    world_configure:(speed,jumpForce)=>{
