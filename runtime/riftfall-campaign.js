@@ -45,6 +45,7 @@ class RiftfallCampaign{
      this.recordChapterEvents();
      this.audio.play("collect");
      this.emit("loot","Raider defeated · collected "+drop);
+     this.autoSave();
    }
  }
  async enableAudio(){
@@ -177,7 +178,7 @@ class RiftfallCampaign{
  saveData(){
    const demo=this.demo,p=demo.character.position,hero=demo.combat.actor("hero");
    return {position:{x:p.x,y:p.y,z:p.z},health:hero.health,stamina:hero.stamina,
-     ...(this.chapters?{chapters:this.chapters.snapshot()}:{}),
+     ...(this.chapters?{chapters:this.chapters.snapshot(),chapterEvents:[...this.chapterEvents],eventHistory:this.content.events.map(e=>({...e}))}:{}),
      kills:demo.rules.get("kills"),wave:1,elapsed:demo.rules.get("elapsed"),
      inventory:this.content.inventory.snapshot(),quests:this.content.quests.snapshot(),
      raiders:demo.enemies.map(e=>{
@@ -199,6 +200,7 @@ class RiftfallCampaign{
    // Validate the entire saved progression before touching the live world.
    const previous=this.content.serialize();
    const oldChapters=this.chapters?.snapshot();
+   const oldHistory=[...this.content.events],oldSeen=new Set(this.chapterEvents);
    if(this.chapters&&saved.chapters){
      // Validate chapter state in isolation before mutating the live game.
      new chapters.ChapterDirector(this.chapters.chapters).restore(saved.chapters);
@@ -229,12 +231,17 @@ class RiftfallCampaign{
      if(time)demo.rules.state.set("elapsed",{...time,value:saved.elapsed});
      this.applyEquipment();this.reachedWatchtower=this.content.quests.entries.get("explorer")?.progress[0]>=1;
      if(this.chapters){
-       if(saved.chapters)this.chapters.restore(saved.chapters);
-       else this.restoreLegacyChapterState(saved);
+       if(saved.chapters){
+         this.chapters.restore(saved.chapters);
+         this.content.events=(saved.eventHistory||[]).map(e=>({...e}));
+         this.chapterEvents=new Set(saved.chapterEvents||[]);
+         this.recordChapterEvents();
+       }else this.restoreLegacyChapterState(saved);
      }
    }catch(error){
      this.content.restore(previous);
      if(oldChapters)this.chapters.restore(oldChapters);
+     this.content.events=oldHistory;this.chapterEvents=oldSeen;
      throw error;
    }
    this.emit("load","Loaded "+slot);return true;
