@@ -260,6 +260,7 @@ ui library
     $ brand = "NOVA / STUDIO";
     $ first = "Experiences";
     $ second = "Showcase";
+    $ third = "Catalog";
     : render(self) = [
         element shell header root;
         class shell "hg-sticky-nav";
@@ -277,6 +278,9 @@ ui library
         element second a links;
         attr second href "/studio";
         text second "{second}";
+        element third a links;
+        attr third href "/catalog";
+        text third "{third}";
     ]
     break;
 
