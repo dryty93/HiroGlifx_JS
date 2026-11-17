@@ -9,12 +9,20 @@
  "use strict";
  const COLORS={solid:"#67b9ff",checkpoint:"#22d3a6",lava:"#ff466e",finish:"#facc15"};
  const STAGES={1:"#60a5fa",2:"#fb7185",3:"#a78bfa",4:"#38bdf8",5:"#fbbf24"};
+ const PALETTES=Object.freeze({
+   sky:{sky:"#3b65aaff",fog:"#5175b5",stages:["#60a5fa","#fb7185","#a78bfa","#38bdf8","#fbbf24"],ground:"#67b9ff"},
+   soda:{sky:"#24bcd9ff",fog:"#40bdd0",stages:["#8df1f0","#62dad2","#3bcac5","#8df0d8","#ffe79b"],ground:"#83e9f0"},
+   candy:{sky:"#d68cdcff",fog:"#bb83de",stages:["#ff9fca","#a58eff","#ffe18c","#8be9df","#fbc0fc"],ground:"#ffa2c7"},
+   neon:{sky:"#161a48ff",fog:"#28305f",stages:["#18ebff","#c960ff","#ff5c9c","#37f9ac","#ffe167"],ground:"#25e6ff"},
+   ice:{sky:"#67bfedff",fog:"#7fcae8",stages:["#a5f6ff","#92cfff","#a6eafa","#b7f5fa","#fff7cf"],ground:"#b1f6ff"}
+ });
  class ObbyBabylonAdapter{
-   constructor({BABYLON,canvas,world,onBeforeStep=null}){
+   constructor({BABYLON,canvas,world,onBeforeStep=null,theme="sky"}){
      if(!BABYLON?.Engine||!BABYLON?.MeshBuilder||!canvas||!world)
        throw new Error("Babylon engine, canvas and ObbyWorld required");
      if(!world.player)throw new Error("Create player before rendering");
      this.B=BABYLON;this.canvas=canvas;this.world=world;
+    this.theme=Object.hasOwn(PALETTES,theme)?theme:"sky";this.palette=PALETTES[this.theme];
      this.onBeforeStep=onBeforeStep;
      this.engine=null;this.scene=null;this.meshes=new Map();
      this.last=0;this.active=false;this.paused=false;
@@ -28,11 +36,11 @@
      this.engine=engine;
      if(typeof engine.setHardwareScalingLevel==="function")engine.setHardwareScalingLevel(Math.min(2,Math.max(1,(typeof devicePixelRatio!=="undefined"?devicePixelRatio:1))));
      this.scene=new B.Scene(engine);
-     this.scene.clearColor=B.Color4.FromHexString("#3b65aaff");
+     this.scene.clearColor=B.Color4.FromHexString(this.palette.sky);
      if(typeof B.Scene.FOGMODE_EXP2==="number"){
        this.scene.fogMode=B.Scene.FOGMODE_EXP2;
        this.scene.fogDensity=.007;
-       this.scene.fogColor=B.Color3.FromHexString("#5175b5");
+       this.scene.fogColor=B.Color3.FromHexString(this.palette.fog);
      }
      this.camera=new B.ArcRotateCamera("follow",Math.PI*1.08,Math.PI/3.05,18,new B.Vector3(0,0,0),this.scene);
      if(typeof this.camera.lowerRadiusLimit!=="undefined")this.camera.lowerRadiusLimit=11;
@@ -60,7 +68,7 @@
        this.meshes.set(name,mesh);return mesh;
      };
      for(const tile of this.world.tiles.values()){
-       const color=tile.kind==="solid" ? (STAGES[tile.stage]||COLORS.solid) : COLORS[tile.kind];
+       const color=tile.kind==="solid" ? (this.palette.stages[(tile.stage||1)-1]||this.palette.ground) : COLORS[tile.kind];
        const mesh=create(tile.id,tile.x,tile.y,tile.z,tile.size,tile.height,tile.size,color,{glow:tile.kind!=="solid"});
        if(typeof mesh.enableEdgesRendering==="function"){
          mesh.enableEdgesRendering();
