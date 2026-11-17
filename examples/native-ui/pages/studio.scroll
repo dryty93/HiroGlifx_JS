@@ -1,0 +1,64 @@
+ui application
+import native-ui
+
+// An inherited experience can replace the underlying implementation.
+.GalleryHero = (EditorialHero)
+    $ eyebrow = "THE HIROGLIFX SHOWCASE";
+    $ title = "Designed to be experienced.";
+    $ description = "A collection of premium, reusable native UI experiences.";
+    $ action = "Discover experiences";
+    $ href = "/experiences";
+    break;
+
+.StudioBento = (BentoWide)
+    $ title = "Visual expression, without compromises.";
+    $ description = "A custom tile that inherits the complete wide bento experience.";
+    $ number = "08";
+    break;
+
+.Main = ()
+    : render(self) = [
+        element page main root;
+        component StickyNavigation nav page;
+        prop nav brand "HIRO / STUDIO";
+        component GalleryHero hero page;
+        component MarqueeBand marquee page;
+        prop marquee text "CREATE. EXPRESS. REPEAT.";
+        element gallery section page;
+        class gallery "hg-wrap hg-section";
+        element eyebrow p gallery;
+        class eyebrow "hg-kicker";
+        text eyebrow "CURATED COMPOSITIONS";
+        element title h2 gallery;
+        class title "hg-title";
+        text title "Different projects. One design vocabulary.";
+        motion title reveal;
+        element tiles div gallery;
+        class tiles "hg-bento";
+        component StudioBento first tiles;
+        component BentoMint second tiles;
+        prop second title "Intelligent composition";
+        prop second description "Build complicated designs from reliable pieces.";
+        component PhotoTile photo tiles;
+        prop photo title "A visual component with real media";
+        prop photo src "/assets/studio-placeholder.svg";
+        prop photo alt "Abstract concentric rings in violet and mint";
+        component BentoWide third tiles;
+        prop third title "Reusable at every scale.";
+        prop third description "Subclasses override what matters and inherit the rest.";
+        component TestimonialQuote testimonial page;
+        prop testimonial quote "The experience is the product. HiroGlifx makes it a first-class part of the language.";
+        prop testimonial person "Native UI design philosophy";
+        component PricingPanel pricing page;
+        prop pricing title "SIMPLE PRICING INTERACTION";
+        component FAQItem faq1 page;
+        prop faq1 question "Is the motion really native?";
+        prop faq1 answer "Yes. HiroGlifx render definitions declare semantic motion primitives, and the browser host implements them safely.";
+        component FAQItem faq2 page;
+        prop faq2 question "Can these components be extended?";
+        prop faq2 answer "Yes. Use .Subclass = (Parent) with typed fields and method overrides.";
+        component KineticCTA cta page;
+        prop cta eyebrow "START CREATING";
+        prop cta title "The only limit should be your imagination.";
+    ]
+    break;
