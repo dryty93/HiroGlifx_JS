@@ -15,6 +15,7 @@ function fakeDOM(){
  const nodes=[];const create=tag=>({
   tagName:tag.toUpperCase(),children:[],dataset:{},style:{},attributes:{},listeners:{},value:"",id:"",textContent:"",
   appendChild(node){this.children.push(node);return node;},
+  remove(){this.removed=true;},
   replaceChildren(...items){this.children=[...items];},
   setAttribute(k,v){this.attributes[k]=v;},
   addEventListener(k,v){this.listeners[k]=v;},removeEventListener(k){delete this.listeners[k];},
