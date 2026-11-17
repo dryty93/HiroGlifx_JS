@@ -61,6 +61,30 @@ To test: run `python3 -m http.server 8000 --bind 127.0.0.1`, then open [canonica
 
 This is a **restricted migration foundation** rather than full parser unification. Legacy `.Main = [ ... ]` pages, blueprint methods, packages, and creative-game scripts retain their existing runtimes. Canonical classes, events and backend/game object adapters require further work; see [canonical syntax specification](docs/canonical-syntax.md).
 
+## Native HiroGlifx gameplay scripting (Phase 19)
+
+**Pong is now genuinely written in HiroGlifx** rather than just invoking `arcade_game("pong")`. Its complete gameplay source is [`examples/arcade/pong.scroll`](examples/arcade/pong.scroll): typed state, `: tick(dt) = [ ... ]` game loop, `if condition [ ... ]` branching, arithmetic, physics, computer opponent, collision tests, scoring, winning logic, and `: draw() = [ ... ]` browser Canvas instructions. The host JavaScript interpreter supplies safe arithmetic, inputs and rendering primitives; it does **not** implement Pong's rules. The [Arcade](arcade.html) shows the entire live `.scroll` program.
+
+```scroll
+.Main = ()
+    # player = 260;
+    # ballX = 400;
+    # velocityX = 260;
+    : tick(dt) = [
+        ballX = ballX + velocityX * dt;
+        if ballX > 800 [
+            ballX = 400;
+        ]
+    ]
+    : draw() = [
+        clear("#0b1730");
+        rect(18, player - 50, 15, 100, "#85e1ff");
+    ]
+    break;
+```
+
+The excerpt above is shortened for readability; the linked file contains the **complete** executable Pong game. The new `runtime/scroll-game-runtime.js` is a bounded, no-eval interpreter for this subset. It does not currently support arbitrary JS, object reflection, classes or unbounded loops. The **other five Arcade games still use JavaScript-backed host engines**; their source panel explicitly says so rather than falsely implying the three-line launcher contains their full game rules. The eventual goal is to port them into this game-script subset and unify it with the main HiroGlifx compiler.
+
 ## Play six browser arcade games and inspect the HiroGlifx source
 
 Open **[HiroGlifx Arcade](arcade.html)** for Pong, Snake, Breakout, Star Defense (an original Galaga-style shooter), local two-player chess, and Tic-Tac-Toe. All six run from canonical `.scroll` programs via the shared `arcade_game(...)` factory. Each game's visible source viewer loads the actual `examples/arcade/*.scroll` file and links to its JavaScript host engine. Chess supports legal moves, castling, en passant, promotions and end-of-game detection; this first version has **no chess AI**.
