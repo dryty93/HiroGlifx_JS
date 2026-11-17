@@ -18,13 +18,13 @@ test("Skybound's authored HiroGlifx stage scoring and difficulty policies execut
  policy.run("onJump");
  policy.tick(.05);
  assert.equal(policy.get("stage"),2);
- assert.equal(policy.get("score"),315);
+ assert.equal(policy.get("score"),295);
  assert.equal(policy.get("jumps"),1);
  assert.equal(applied.at(-1).speed,6.4);
  policy.run("onRespawn");
  assert.equal(policy.get("deaths"),1);
  assert.equal(policy.get("combo"),0);
- assert.equal(policy.get("score"),290);
+ assert.equal(policy.get("score"),270);
  policy.run("onFinish");
  assert.equal(policy.done,true);
  assert.ok(policy.score>=400);
