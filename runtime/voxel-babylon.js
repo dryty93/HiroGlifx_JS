@@ -112,7 +112,7 @@
      this.world.setInput(dx,dz);this.world.step(dt);
      const p=this.world.player;
      this.camera.position.set(p.x,p.y,p.z);
-     if(this.onFrame)this.onFrame(this.world);
+     if(this.onFrame)this.onFrame(this.world,dt);
    }
    aim(){
      let hit=null;
