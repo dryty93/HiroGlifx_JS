@@ -1,11 +1,14 @@
-/* Babylon.js third-person rendering for a HiroGlifx ObbyWorld. */
+/* HiroGlifx Skybound third-person Babylon.js renderer.
+ * Renders canonical ObbyWorld tiles and Skybound dynamic modifiers.
+ */
 (function(root,factory){
  const api=factory();
  if(typeof module==="object"&&module.exports)module.exports=api;
  else root.HiroObbyBabylon=api;
 })(typeof globalThis!=="undefined"?globalThis:this,function(){
  "use strict";
- const COLORS={solid:"#60a5fa",checkpoint:"#22c55e",lava:"#ef4444",finish:"#facc15"};
+ const COLORS={solid:"#67b9ff",checkpoint:"#22d3a6",lava:"#ff466e",finish:"#facc15"};
+ const STAGES={1:"#60a5fa",2:"#fb7185",3:"#a78bfa",4:"#38bdf8",5:"#fbbf24"};
  class ObbyBabylonAdapter{
    constructor({BABYLON,canvas,world}){
      if(!BABYLON?.Engine||!BABYLON?.MeshBuilder||!canvas||!world)
@@ -14,55 +17,104 @@
      this.B=BABYLON;this.canvas=canvas;this.world=world;
      this.engine=null;this.scene=null;this.meshes=new Map();
      this.last=0;this.active=false;this.paused=false;
+     this.decorations=[];this.camerapos=null;this._resize=null;
    }
    start(){
      if(this.active)throw new Error("Renderer already active");
      const B=this.B;
-     const engine=new B.Engine(this.canvas,true);
-     this.engine=engine;this.scene=new B.Scene(engine);
-     this.scene.clearColor=B.Color4.FromHexString("#101827ff");
-     this.camera=new B.ArcRotateCamera("follow",-Math.PI/3,Math.PI/3.2,20,new B.Vector3(0,0,0),this.scene);
-     this.camera.attachControl(this.canvas,true);
-     new B.HemisphericLight("sun",new B.Vector3(0,1,0),this.scene);
-     const create=(name,x,y,z,w,h,d,color)=>{
-       const mesh=B.MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},this.scene);
-       mesh.position=new B.Vector3(x,y,z);
-       const material=new B.StandardMaterial(name+"-material",this.scene);
-       material.diffuseColor=B.Color3.FromHexString(color);
-       mesh.material=material;this.meshes.set(name,mesh);return mesh;
+     const engine=new B.Engine(this.canvas,true,{antialias:true,preserveDrawingBuffer:true,stencil:true});
+     this.engine=engine;
+     if(typeof engine.setHardwareScalingLevel==="function")engine.setHardwareScalingLevel(Math.min(2,Math.max(1,(typeof devicePixelRatio!=="undefined"?devicePixelRatio:1))));
+     this.scene=new B.Scene(engine);
+     this.scene.clearColor=B.Color4.FromHexString("#111b37ff");
+     if(typeof B.Scene.FOGMODE_EXP2==="number"){
+       this.scene.fogMode=B.Scene.FOGMODE_EXP2;
+       this.scene.fogDensity=.005;
+       this.scene.fogColor=B.Color3.FromHexString("#182b53");
+     }
+     this.camera=new B.ArcRotateCamera("follow",Math.PI*1.08,Math.PI/3.05,19,new B.Vector3(0,0,0),this.scene);
+     if(typeof this.camera.lowerRadiusLimit!=="undefined")this.camera.lowerRadiusLimit=11;
+     if(typeof this.camera.upperRadiusLimit!=="undefined")this.camera.upperRadiusLimit=27;
+     if(typeof this.camera.attachControl==="function")this.camera.attachControl(this.canvas,true);
+     const sun=new B.HemisphericLight("sun",new B.Vector3(-.6,1,.35),this.scene);
+     sun.intensity=1.15;
+     if(typeof B.DirectionalLight==="function"){
+       const key=new B.DirectionalLight("warm-sun",new B.Vector3(-.5,-1,.3),this.scene);
+       key.intensity=.8;
+     }
+     const material=(name,hex,{glow=false}={})=>{
+       const mat=new B.StandardMaterial(name+"-mat",this.scene);
+       mat.diffuseColor=B.Color3.FromHexString(hex);
+       if(glow&&"emissiveColor" in mat)mat.emissiveColor=B.Color3.FromHexString(hex);
+       if("specularColor" in mat)mat.specularColor=B.Color3.FromHexString("#475569");
+       return mat;
      };
-     for(const tile of this.world.tiles.values())
-       create(tile.id,tile.x,tile.y,tile.z,tile.size,tile.height,tile.size,COLORS[tile.kind]);
-     const p=this.world.player;
-     this.avatar=create("player",p.x,p.y,p.z,0.7,p.height,0.7,"#e9d5ff");
-     const head=create("head",p.x,p.y+0.9,p.z,0.65,0.65,0.65,"#fde68a");
-     this.head=head;
-     this.active=true;
-     engine.runRenderLoop(()=>{
-       if(!this.paused){
-         const now=(typeof performance!=="undefined"?performance.now():Date.now());
-         const dt=this.last?Math.min(0.05,(now-this.last)/1000):0;
-         this.last=now;
-         if(dt)this.world.step(dt);
+     const create=(name,x,y,z,w,h,d,color,{glow=false}={})=>{
+       const mesh=B.MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},this.scene);
+       mesh.position=new B.Vector3(x,y,z);mesh.material=material(name,color,{glow});
+       this.meshes.set(name,mesh);return mesh;
+     };
+     for(const tile of this.world.tiles.values()){
+       const color=tile.kind==="solid" ? (STAGES[tile.stage]||COLORS.solid) : COLORS[tile.kind];
+       const mesh=create(tile.id,tile.x,tile.y,tile.z,tile.size,tile.height,tile.size,color,{glow:tile.kind!=="solid"});
+       if(typeof mesh.enableEdgesRendering==="function"){
+         mesh.enableEdgesRendering();
+         mesh.edgesWidth=1.25;
+         if(B.Color4)mesh.edgesColor=B.Color4.FromHexString("#e0f2feaa");
        }
-       this.sync();this.scene.render();
+     }
+     const p=this.world.player;
+     this.avatar=create("player",p.x,p.y,p.z,.76,p.height,.66,"#8b5cf6");
+     this.head=create("head",p.x,p.y+.95,p.z,.65,.65,.65,"#fcd9a8");
+     if(typeof B.MeshBuilder.CreateSphere==="function"){
+       const orb=B.MeshBuilder.CreateSphere("checkpoint-aura",{diameter:.24,segments:8},this.scene);
+       orb.material=material("checkpoint-aura","#ffffff",{glow:true});
+       this.decorations.push(orb);
+     }
+     this.active=true;
+     this._resize=()=>{if(this.engine)this.engine.resize();};
+     if(typeof window!=="undefined")window.addEventListener("resize",this._resize);
+     engine.runRenderLoop(()=>{
+       const now=(typeof performance!=="undefined"?performance.now():Date.now());
+       const dt=this.last?Math.min(.05,Math.max(0,(now-this.last)/1000)):0;
+       this.last=now;
+       if(!this.paused&&dt)this.world.step(dt);
+       this.sync(dt);
+       this.scene.render();
      });
      return this;
    }
-   sync(){
+   sync(dt=.016){
      if(!this.scene)return;
      const p=this.world.player;
      this.avatar.position.set(p.x,p.y,p.z);
-     this.head.position.set(p.x,p.y+0.95,p.z);
-     const goal=new this.B.Vector3(p.x+2,p.y,p.z);
-     this.camera.setTarget(goal);
-     this.camera.radius=17;
+     this.head.position.set(p.x,p.y+.95,p.z);
+     for(const tile of this.world.tiles.values()){
+       const mesh=this.meshes.get(tile.id);
+       if(!mesh)continue;
+       mesh.position.set(tile.x,tile.y,tile.z);
+       if(typeof mesh.setEnabled==="function")mesh.setEnabled(tile.active!==false);
+       if(tile.kind==="lava"&&mesh.rotation)mesh.rotation.y=(this.world.motionTime||0)*1.25;
+     }
+     if(this.decorations.length){
+       const marker=this.decorations[0];
+       marker.position.set(p.x,p.y+1.9+Math.sin((this.world.elapsed||0)*4)*.1,p.z);
+     }
+     const B=this.B;
+     const goal=new B.Vector3(p.x+3,p.y+1.05,p.z);
+     if(this.camerapos===null)this.camerapos=goal;
+     else if(typeof B.Vector3.Lerp==="function")
+       this.camerapos=B.Vector3.Lerp(this.camerapos,goal,Math.min(1,Math.max(0,dt)*6));
+     else this.camerapos=goal;
+     this.camera.setTarget(this.camerapos);
    }
    stop(){
+     if(typeof window!=="undefined"&&this._resize)window.removeEventListener("resize",this._resize);
      if(this.engine)this.engine.stopRenderLoop();
      if(this.scene)this.scene.dispose();
      if(this.engine)this.engine.dispose();
-     this.active=false;this.scene=null;this.engine=null;this.meshes.clear();
+     this.active=false;this.scene=null;this.engine=null;this.last=0;this._resize=null;
+     this.meshes.clear();this.decorations=[];
    }
  }
  return {ObbyBabylonAdapter};
