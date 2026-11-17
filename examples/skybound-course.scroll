@@ -1,0 +1,56 @@
+// Skybound Obby — five-stage browser game built with canonical HiroGlifx.
+.Actor = ()
+    # speed = 6;
+    $ title = "Skybound Adventurer";
+    : leap = self.jump();
+    break;
+
+.Runner = (Actor)
+    # speed = 8;
+    $ title = "Skybound Runner";
+    : dash = self.move(1, 0);
+    break;
+
+.Main = ()
+    & world = obby_world();
+
+    // Stage 1 — Cloud Steps
+    & start = obby_tile(world, "start", 0, 0, 0, 5, "solid", 1);
+    & cloud1 = obby_tile(world, "cloud1", 4.3, 0, 0, 3.3, "solid", 1);
+    & cloud2 = obby_tile(world, "cloud2", 8.2, 0, 0, 2.8, "solid", 1);
+    & cloud3 = obby_tile(world, "cloud3", 12.1, 0, 0, 2.8, "solid", 1);
+
+    // Stage 2 — Lava Run
+    & gate2 = obby_tile(world, "gate2", 16, 0, 0, 4, "checkpoint", 2);
+    & lava1 = obby_tile(world, "lava1", 20.2, 0, 0, 3, "lava", 2);
+    & safe1 = obby_tile(world, "safe1", 20.4, 0, 3.8, 3.6, "solid", 2);
+    & safe2 = obby_tile(world, "safe2", 24.5, 0, 3.8, 3.3, "solid", 2);
+    & lava2 = obby_tile(world, "lava2", 24.5, 0, 0, 3.0, "lava", 2);
+    & safe3 = obby_tile(world, "safe3", 28.5, 0, 3.8, 3.3, "solid", 2);
+
+    // Stage 3 — Moving Skies
+    & gate3 = obby_tile(world, "gate3", 32.4, 0, 3, 4, "checkpoint", 3);
+    & move1 = obby_moving(world, "move1", 36.8, 0, 3, 3.6, "z", 1.25, 3.4, 3);
+    & move2 = obby_moving(world, "move2", 41.2, 0, 3, 3.6, "z", 1.25, 2.9, 3);
+    & skyledge = obby_tile(world, "skyledge", 45.4, 0, 3, 3.6, "solid", 3);
+
+    // Stage 4 — Vanishing Path
+    & gate4 = obby_tile(world, "gate4", 49.5, 0, 3, 4, "checkpoint", 4);
+    & vanish1 = obby_vanish(world, "vanish1", 53.6, 0, 3, 3.3, 1.35, 4);
+    & vanish2 = obby_vanish(world, "vanish2", 57.7, 0, 2.4, 3.3, 1.15, 4);
+    & vanish3 = obby_vanish(world, "vanish3", 61.8, 0, 1.8, 3.3, 1.10, 4);
+
+    // Stage 5 — Final Ascent
+    & gate5 = obby_tile(world, "gate5", 65.9, 0, 1.5, 4, "checkpoint", 5);
+    & hazard = obby_spinner(world, "hazard", 70, 0, 1.6, 2.1, 1.1, 3.4, 5);
+    & final1 = obby_tile(world, "final1", 70.1, 0, 4.2, 3.3, "solid", 5);
+    & final2 = obby_tile(world, "final2", 74.4, 0, 4.2, 3.1, "solid", 5);
+    & final3 = obby_tile(world, "final3", 78.7, 0, 2.7, 3.4, "solid", 5);
+    & finish = obby_tile(world, "finish", 83, 0, 2.7, 5, "finish", 5);
+
+    & player = obby_player(world, "hero", 0, 2, 0);
+    & runner = bp_create("Runner", player);
+    @ won = obby_event(world, "finish");
+    @ progressEvent = obby_event(world, "stage");
+    @ checkpointEvent = obby_event(world, "checkpoint");
+    break;

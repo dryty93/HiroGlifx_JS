@@ -13,7 +13,7 @@ button:disabled{opacity:.5}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-
 #stats{font-weight:bold;color:#facc15}.keys{margin:12px 0;padding:10px;background:#1c314a;border-radius:8px;color:#d6e6fa}
 @media(max-width:900px){.layout{grid-template-columns:1fr}}
 </style></head><body><main>
-<header><div><h1>HiroGlifx · Obby Builder</h1><p>Canonical blueprints + Babylon.js 3D tiles, hazards, checkpoints and jump controls</p></div>
+<header><div><h1>HiroGlifx · Obby Builder</h1><p><a href="./skybound.html" style="color:#a5e4ff">Play the flagship Skybound game →</a></p><p>Canonical blueprints + Babylon.js 3D tiles, hazards, checkpoints and jump controls</p></div>
 <button id="build">Build &amp; play</button></header>
 <div class="layout"><section><h2>Editable .scroll course</h2>
 <textarea id="source" spellcheck="false" aria-label="HiroGlifx obby source"></textarea>
@@ -28,6 +28,7 @@ button:disabled{opacity:.5}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-
 <script src="./runtime/scroll-runtime.js"></script>
 <script src="./runtime/canonical-runtime.js"></script>
 <script src="./runtime/obby-world.js"></script>
+<script src="./runtime/skybound-world.js"></script>
 <script src="./runtime/obby-canonical.js"></script>
 <script src="./runtime/canonical-blueprints.js"></script>
 <script src="./runtime/obby-babylon.js"></script>
@@ -67,10 +68,10 @@ button:disabled{opacity:.5}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-
  function tick(){
    if(!running||!world)return;
    let x=0,z=0;
-   if(pressed.has("ArrowRight")||pressed.has("KeyD"))x++;
-   if(pressed.has("ArrowLeft")||pressed.has("KeyA"))x--;
-   if(pressed.has("ArrowUp")||pressed.has("KeyW"))z++;
-   if(pressed.has("ArrowDown")||pressed.has("KeyS"))z--;
+   if(pressed.has("ArrowUp")||pressed.has("KeyW"))x++;
+   if(pressed.has("ArrowDown")||pressed.has("KeyS"))x--;
+   if(pressed.has("ArrowLeft")||pressed.has("KeyA"))z++;
+   if(pressed.has("ArrowRight")||pressed.has("KeyD"))z--;
    const len=Math.hypot(x,z)||1;
    world.setInput(x/len,z/len);
    el("stats").textContent="Tiles: "+world.tiles.size+" · Deaths: "+world.dead+" · Time: "+world.elapsed.toFixed(1)+"s"+
@@ -98,7 +99,7 @@ button:disabled{opacity:.5}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-
    button.addEventListener("pointercancel",()=>pressed.delete(key));
    button.addEventListener("lostpointercapture",()=>pressed.delete(key));
  });
- fetch("./examples/obby-course.scroll").then(response=>{
+ fetch("./examples/skybound-course.scroll").then(response=>{
    if(!response.ok)throw new Error("Could not load example scroll");
    return response.text();
  }).then(text=>{el("source").value=text;return build();}).catch(error=>status(error.message));

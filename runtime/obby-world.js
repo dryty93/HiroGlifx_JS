@@ -23,7 +23,7 @@
      this.listeners=new Map();this.history=[];
    }
    on(event,callback){
-     if(!["land","fall","checkpoint","finish","respawn"].includes(event)||typeof callback!=="function")
+     if(!["land","fall","checkpoint","finish","respawn","jump","stage"].includes(event)||typeof callback!=="function")
        throw new Error("Unknown obby event");
      const listeners=this.listeners.get(event)||new Set();
      listeners.add(callback);this.listeners.set(event,listeners);
@@ -74,6 +74,7 @@
      let supporting=null,highest=-Infinity;
      if(p.vy<=0){
        for(const tile of this.tiles.values()){
+         if(tile.active===false)continue;
          const top=tile.y+tile.height/2;
          const crossing=prevFeet>=top-0.08&&(p.y-p.height/2)<=top;
          if(crossing&&overlap1(p.x,p.radius*2,tile.x,tile.size)&&

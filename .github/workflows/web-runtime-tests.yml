@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio, feat/phase13-canonical-expressions, feat/phase14-canonical-obby-game]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps, feat/phase3-persistent-data, feat/phase4-auth-permissions, feat/phase5-browser-policy-cli, feat/phase6-sandboxed-playground, feat/phase7-postgres-store, feat/phase8-owned-api, feat/phase9-deployment-tests, feat/cli-extensions-visual-dsl, feat/phase11-scroll-packages, feat/phase12-game-video-studio, feat/phase13-canonical-expressions, feat/phase14-canonical-obby-game, feat/phase15-skybound-showcase]
   pull_request:
 jobs:
   node:
@@ -19,6 +19,10 @@ jobs:
           node --check runtime/canonical-runtime.js
           node --check runtime/canonical-blueprints.js
           node --check runtime/obby-world.js
+          node --check runtime/skybound-world.js
+          node --check tests/skybound.test.js
+          node --check tests/skybound-course-path.test.js
+          node --check e2e/skybound-smoke.js
           node --check runtime/obby-canonical.js
           node --check runtime/obby-babylon.js
           node --check tests/obby-canonical.test.js
@@ -78,3 +82,25 @@ jobs:
         run: npm install --no-save --ignore-scripts pg@8
       - name: Real PostgreSQL integration test
         run: node --test tests/postgres-integration.test.js
+
+  skybound-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test Skybound in real Chromium
+        run: node e2e/skybound-smoke.js
+      - name: Upload real desktop/mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skybound-browser-screenshots
+          path: artifacts/*.png
+          if-no-files-found: warn
