@@ -2200,6 +2200,7 @@ ui library
         class group "hg-rain-rating-buttons";
         attr group role "group";
         attr group aria-label "Rating selection";
+        attr group data-rating "{rating}";
         element star0 button group;
         class star0 "hg-rain-star-button";
         attr star0 type "button";
