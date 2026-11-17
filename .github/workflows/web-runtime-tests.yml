@@ -1,7 +1,7 @@
 name: Web runtime tests
 on:
   push:
-    branches: [main, feat/web-visual-browser-runtime]
+    branches: [main, feat/web-visual-browser-runtime, feat/reactive-scroll-apps]
   pull_request:
 jobs:
   node:
@@ -14,8 +14,10 @@ jobs:
       - name: Syntax checks
         run: |
           node --check runtime/scroll-runtime.js
+          node --check runtime/app-runtime.js
           node --check runtime/playwright-adapter.js
           node --check runtime/run-server.js
           node --check tests/runtime.test.js
+          node --check tests/app-runtime.test.js
       - name: Runtime tests
-        run: node --test tests/runtime.test.js
+        run: node --test tests/*.test.js
