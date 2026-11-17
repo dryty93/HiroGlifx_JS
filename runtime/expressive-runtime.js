@@ -10,9 +10,10 @@
 })(typeof globalThis!=="undefined"?globalThis:this,function(base,app){
   "use strict";
   const IDENT=/^[A-Za-z][\w-]*$/;
-  const SHORTHANDS=new Set(["bounce","spin","pulse","fade","slide"]);
+  const SHORTHANDS=new Set(["bounce","spin","pulse","fade","slide","shake","flip","float","pop","swing","zoom"]);
   const BROWSER={"web.open":"browser.open","web.click":"browser.click","web.fill":"browser.type",
-    "web.wait":"browser.wait","web.snap":"browser.screenshot"};
+    "web.wait":"browser.wait","web.snap":"browser.screenshot",
+    "web.hover":"browser.hover","web.press":"browser.press","web.scroll":"browser.scroll","web.read":"browser.read"};
   function parseExtended(source){
     const parents=new Map(),recipes=new Map(),lines=[];
     let block=false;
