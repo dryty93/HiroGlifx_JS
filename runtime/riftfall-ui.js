@@ -83,8 +83,8 @@ class RiftfallUI{
  get demo(){return this.getDemo();}
  show(title,description){
    if(!this.campaign)return;
-   this.open=true;this.modal.hidden=false;
-   this.wasPlaying=Boolean(this.demo.playing);this.demo.pause();
+   if(!this.open)this.wasPlaying=Boolean(this.demo.playing);
+   this.open=true;this.modal.hidden=false;this.demo.pause();
    this.heading.textContent=title;this.description.textContent=description;this.entries.replaceChildren();
    this.close.focus();
  }
