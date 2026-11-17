@@ -117,9 +117,9 @@ async function initialize(){
        $("health").textContent=s.health;$("stamina").textContent=s.stamina;
        $("enemies").textContent=s.enemies;$("mode").textContent=s.physics.toUpperCase();$("clip").textContent=s.animation;
        ui?.update(s);
-       if(s.done||s.health<=0){demo.pause();started=false;
-         showOverlay(s.done?"Raiders defeated!":"You were defeated",
-           s.done?"Your HiroGlifx combat logic completed the encounter. Restart to fight again.":"The raiders overwhelmed you. Restart to retry.",
+       if((s.done && (!s.campaign?.chapters || s.campaign.chapters.finished))||s.health<=0){demo.pause();started=false;
+         showOverlay(s.done?"The Riftfall campaign is complete!":"You were defeated",
+           s.done?"All chapter objectives are complete. You secured the valley! Restart to play again.":"The raiders overwhelmed you. Restart to retry.",
            "↻ Play again");}
      }});
    await demo.initialize();
@@ -138,7 +138,7 @@ async function initialize(){
 }
 $("start").onclick=async()=>{
  if(!demo?.ready)return;
- if(demo.rules.done||!demo.combat.actor("hero").alive){await initialize();if(!demo?.ready)return;}
+ if((demo.rules.done&&(!demo.campaign?.chapters||demo.campaign.chapters.finished))||!demo.combat.actor("hero").alive){await initialize();if(!demo?.ready)return;}
  demo.start();started=true;$("overlay").hidden=true;$("game").focus();status("Defeat the raiders. "+demo.assetStatus);
 };
 $("attack").onclick=()=>demo?.attack();
