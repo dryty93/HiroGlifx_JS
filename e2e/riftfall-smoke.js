@@ -56,6 +56,13 @@ async function run(){
    await page.locator("#combatSourceTab").click();
    await page.locator("#saveButton").click();
    assert.equal(await page.evaluate(()=>Boolean(localStorage.getItem("hiroglifx-riftfall-save-quick"))),true);
+   const storedChapter=await page.evaluate(()=>{
+     const data=JSON.parse(localStorage.getItem("hiroglifx-riftfall-save-quick"));
+     return {chapter:data.payload.chapters,events:data.payload.eventHistory,seen:data.payload.chapterEvents};
+   });
+   assert.equal(storedChapter.chapter.current,"approach");
+   assert.deepEqual(storedChapter.events,[]);
+   assert.deepEqual(storedChapter.seen,[]);
    await page.locator("#loadButton").click();
    await page.screenshot({path:path.join(out,"riftfall-intro-desktop.png"),fullPage:true});
    await page.getByRole("button",{name:/Enter the arena/}).click();
