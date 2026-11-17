@@ -1,0 +1,71 @@
+"use strict";
+const test=require("node:test"),assert=require("node:assert/strict");
+const fs=require("node:fs"),path=require("node:path");
+const {PolymorphicGame,compile}=require("../runtime/scroll-game-classes");
+const dir=path.resolve(__dirname,"../examples/polymorphism");
+const library=fs.readFileSync(path.resolve(__dirname,"../examples/packages/enemykit/main.scroll"),"utf8");
+const app=fs.readFileSync(path.join(dir,"arena.scroll"),"utf8");
+const gauntlet=fs.readFileSync(path.join(dir,"gauntlet.scroll"),"utf8");
+function game(source=app){return new PolymorphicGame(source,{libraries:{enemykit:library},name:"polymorphic-arena"});}
+test("genuine library import inherits typed fields and overrides virtual update",()=>{
+ const g=game();
+ assert.equal(g.get("roster").length,4);
+ assert.deepEqual(g.get("roster").map(e=>e.type),["Scout","Brute","Medic","Boss"]);
+ const [scout,brute,medic,boss]=g.get("roster");
+ assert.equal(brute.fields.health,220);
+ assert.equal(boss.fields.health,400);
+ assert.equal(g.classes.get("Boss").parent,"Brute");
+ assert.equal(g.classes.get("Boss").methods.get("update").owner,"Boss");
+ assert.equal(g.classes.get("Boss").methods.get("takeDamage").owner,"Brute");
+ const old=scout.fields.x;
+ g.tick(.1);
+ assert.ok(scout.fields.x>old+9,"Scout speed override and custom movement should apply");
+ assert.notEqual(scout.fields.y,260,"Scout sinusoidal path from imported code should apply");
+});
+test("same method name dispatches to different inherited implementations",()=>{
+ const g=game(),[scout,brute,medic,boss]=g.get("roster");
+ const budget={n:200000,loops:200000};
+ const send=(obj,method,...args)=>g.functionBuiltin("send",[obj,method,...args],budget,"input");
+ send(scout,"takeDamage",40);
+ send(brute,"takeDamage",40);
+ send(boss,"takeDamage",40);
+ assert.equal(scout.fields.health,0);
+ assert.equal(brute.fields.health,194);
+ assert.equal(boss.fields.health,374);
+ assert.equal(scout.fields.alive,false);
+ assert.equal(medic.fields.label,"Medic");
+ send(medic,"heal",brute);
+ assert.equal(brute.fields.health,200);
+ assert.throws(()=>send(medic,"notMethod"),/Undefined.*method/);
+ assert.throws(()=>g.functionBuiltin("put",[boss,"health","oops"],budget,"input"),/Typed field mismatch/);
+});
+test("arena's click and draw use polymorphic package-defined behavior",()=>{
+ const g=game();
+ const target=g.get("roster")[0];
+ g.click(target.fields.x,target.fields.y);
+ assert.equal(g.get("defeated"),1);
+ assert.equal(g.score,100);
+ const calls=[];
+ const ctx={fillRect(...v){calls.push(["rect",...v]);},fillText(...v){calls.push(["text",...v]);},fill(){},beginPath(){},arc(){}};
+ g.render(ctx);
+ assert.ok(calls.some(v=>v[0]==="rect"&&v[1]===0));
+ assert.ok(calls.some(v=>v[0]==="text"&&String(v[1]).includes("HIROGLIFX")));
+});
+test("second imported complex application needs only an overridden class and tiny main",()=>{
+ const g=game(gauntlet);
+ assert.equal(g.get("roster").length,6);
+ assert.ok(g.get("roster").every(e=>e.type==="Phantom"));
+ const first=g.get("roster")[0];
+ assert.equal(g.classes.get("Phantom").parent,"Scout");
+ const before=first.fields.x;
+ g.tick(.1);
+ assert.ok(first.fields.x>before+14);
+ g.click(first.fields.x,first.fields.y);
+ assert.equal(g.score,100);
+});
+test("import compiler rejects missing packages, parent cycles, unsafe behavior and invalid overrides",()=>{
+ assert.throws(()=>compile(app,{}),/Missing game package/);
+ assert.throws(()=>compile(".A = (B)\n break;\n.B = (A)\n break;\n.Main = ()\n: tick(dt) = [\n]\n: draw() = [\n]\nbreak;"),/Inheritance cycle/);
+ assert.throws(()=>new PolymorphicGame(app,{libraries:{enemykit:library.replace("# health = 60;","# health = 60;\n$ health = \"bad\";")}}),/Duplicate class field/);
+ assert.throws(()=>new PolymorphicGame(app,{libraries:{enemykit:library.replace("return field(self, \"health\");","return window.alert(42);")}}),/Unsupported character/);
+});

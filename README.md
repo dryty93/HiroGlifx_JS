@@ -94,6 +94,23 @@ Arrays, indexed operations, nested bounded `for`/`while` loops, custom methods, 
 **Blockhaven's source viewer** continues to show its actual `.scroll` initialization, but the voxel game logic is still in host JavaScript; it has *not* been ported to native `.scroll` game scripts.
 
 
+## Polymorphism: import a complex HiroGlifx game library
+
+The new [Polymorphism Lab](polymorphism.html) runs two complete `.scroll` games that import a reusable [enemykit](examples/packages/enemykit/main.scroll) package. The library defines `.Enemy = (Unit)`, `.Scout = (Enemy)`, `.Brute = (Enemy)`, and `.Medic = (Enemy)`, with typed fields and different behavior overrides.
+
+A short application can declare `.Boss = (Brute)` and override only `: update(self,dt)`. A single `send(enemy,"update",dt)` dynamically selects the correct inherited or overridden implementation. This is true runtime polymorphism, not a JavaScript switch over enemy types. The [Arena](examples/polymorphism/arena.scroll) and [Phantom Gauntlet](examples/polymorphism/gauntlet.scroll) both import the same complex library.
+
+```bash
+node hiro.js init my-arena
+node hiro.js package add my-arena examples/packages/enemykit
+cp examples/polymorphism/arena.scroll my-arena/app.scroll
+node hiro.js check my-arena
+python3 -m http.server 8000 --bind 127.0.0.1
+# http://127.0.0.1:8000/polymorphism.html
+```
+
+The package is SHA-256 lockfile-verified. The generic `hiro dev` page renderer does not yet host these Canvas game scripts. See [polymorphism documentation](docs/polymorphism.md) for details and limitations.
+
 ## Blockhaven — original 3D voxel sandbox (browser)
 
 **[Play Blockhaven](blockhaven.html)** to explore a finite, procedurally generated world, mine and place blocks, switch materials and save the world in your browser. It uses Babylon.js for first-person WebGL rendering and canonical HiroGlifx variables to create the world.

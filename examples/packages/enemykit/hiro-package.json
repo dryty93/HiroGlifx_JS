@@ -1,0 +1,6 @@
+{
+  "name": "enemykit",
+  "version": "1.0.0",
+  "entry": "main.scroll",
+  "description": "Polymorphic enemy AI and combat behaviors written entirely in HiroGlifx"
+}

@@ -1,0 +1,134 @@
+// enemykit: reusable, fully authored HiroGlifx behavior library.
+// Import it from another .scroll file. No JavaScript enemy rules.
+// "send" performs dynamic dispatch against each instance's real subclass.
+
+.Unit = ()
+    # x = 0;
+    # y = 0;
+    # health = 100;
+    # maxHealth = 100;
+    # speed = 24;
+    # damage = 7;
+    $ color = "#82d8ff";
+    $ label = "Unit";
+    ? alive = true;
+
+    : update(self, dt) = [
+        // Default behavior: steady patrol.
+        put(self, "x", field(self, "x") + field(self, "speed") * dt);
+        if field(self, "x") > 780 [
+            put(self, "x", 20);
+        ]
+    ]
+
+    : attack(self, target) = [
+        if !field(self, "alive") [
+            return false;
+        ]
+        return send(target, "takeDamage", field(self, "damage"));
+    ]
+
+    : takeDamage(self, amount) = [
+        put(self, "health", max(0, field(self, "health") - amount));
+        if field(self, "health") <= 0 [
+            put(self, "alive", false);
+        ]
+        return field(self, "health");
+    ]
+
+    : draw(self) = [
+        if field(self, "alive") [
+            rect(field(self, "x") - 14, field(self, "y") - 16, 28, 32, field(self, "color"));
+            rect(field(self, "x") - 18, field(self, "y") + 20, 36 * field(self, "health") / field(self, "maxHealth"), 5, "#80f7b4");
+        ]
+    ]
+    break;
+
+.Enemy = (Unit)
+    # x = 120;
+    # y = 275;
+    # health = 60;
+    # maxHealth = 60;
+    # speed = 23;
+    # damage = 8;
+    $ color = "#ec7c96";
+    $ label = "Enemy";
+
+    : update(self, dt) = [
+        put(self, "x", field(self, "x") + field(self, "speed") * dt);
+        if field(self, "x") > 785 [
+            put(self, "x", 10);
+        ]
+    ]
+    break;
+
+.Scout = (Enemy)
+    # health = 35;
+    # maxHealth = 35;
+    # speed = 115;
+    # damage = 5;
+    $ color = "#f9cb78";
+    $ label = "Scout";
+
+    : update(self, dt) = [
+        put(self, "x", field(self, "x") + field(self, "speed") * dt);
+        put(self, "y", 260 + sin(field(self, "x") / 24) * 65);
+        if field(self, "x") > 780 [
+            put(self, "x", 20);
+        ]
+    ]
+    break;
+
+.Brute = (Enemy)
+    # health = 220;
+    # maxHealth = 220;
+    # speed = 17;
+    # damage = 29;
+    $ color = "#b293f9";
+    $ label = "Brute";
+
+    : update(self, dt) = [
+        put(self, "x", field(self, "x") + field(self, "speed") * dt);
+        put(self, "y", 320);
+        if field(self, "x") > 780 [
+            put(self, "x", 20);
+        ]
+    ]
+
+    : takeDamage(self, amount) = [
+        // Polymorphic damage resistance — 35% absorbed.
+        return send(self, "armoredDamage", amount);
+    ]
+
+    : armoredDamage(self, amount) = [
+        put(self, "health", max(0, field(self, "health") - amount * 0.65));
+        if field(self, "health") <= 0 [
+            put(self, "alive", false);
+        ]
+        return field(self, "health");
+    ]
+    break;
+
+.Medic = (Enemy)
+    # health = 80;
+    # maxHealth = 80;
+    # speed = 36;
+    # damage = 0;
+    $ color = "#73e4c0";
+    $ label = "Medic";
+
+    : update(self, dt) = [
+        put(self, "x", field(self, "x") + field(self, "speed") * dt);
+        put(self, "y", 350 + sin(field(self, "x") / 42) * 16);
+        if field(self, "x") > 780 [
+            put(self, "x", 20);
+        ]
+    ]
+
+    : heal(self, target) = [
+        if field(target, "alive") [
+            put(target, "health", min(field(target, "maxHealth"), field(target, "health") + 6));
+        ]
+        return field(target, "health");
+    ]
+    break;

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HiroGlifx Polymorphism Lab</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#081426;color:#e7f5ff;font:15px system-ui}
+main{max-width:1320px;margin:auto;padding:25px}h1{font-size:clamp(32px,4vw,55px);margin:10px 0;letter-spacing:-.05em}
+p{color:#afc4dc;line-height:1.6}.eyebrow{color:#85f0d5;letter-spacing:.2em;font-size:12px;font-weight:900}
+a{color:#9beaff}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1.25fr 1fr;gap:17px;margin-top:17px}
+.panel{background:#14263e;border:1px solid #365475;border-radius:18px;padding:18px}
+canvas{display:block;width:100%;aspect-ratio:800/520;border-radius:13px;background:#0b1730}
+button{cursor:pointer;background:#254b71;color:#ecfaff;border:1px solid #6689b7;border-radius:10px;padding:11px 17px;font-weight:800}
+button[aria-pressed=true]{background:#86d9ff;color:#09213b}button:hover{filter:brightness(1.12)}
+pre{overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;max-height:540px;min-height:330px;background:#091929;color:#bcf2d6;border-radius:11px;padding:16px;font:12px/1.6 ui-monospace,monospace}
+.row{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0}
+#status{font-size:13px;color:#b7f2d8;min-height:25px}
+@media(max-width:950px){.grid{grid-template-columns:1fr}}
+</style></head><body><main>
+<div class="top"><a href="./showcase.html">← HiroGlifx Showcase</a><a href="./examples/packages/enemykit/main.scroll">Open reusable library</a></div>
+<div class="eyebrow">REAL HIROGLIFX IMPORTS AND POLYMORPHISM</div>
+<h1>One library. Many behaviors.</h1>
+<p>Click any moving enemy to deal damage. The imported <code>enemykit</code> defines inheritance, typed fields, hit handling and multiple AI behaviors. This application adds a Boss subclass and uses <code>send(enemy, "update", dt)</code> to invoke the right override automatically.</p>
+<div class="row"><button id="arena" aria-pressed="true">Arena</button><button id="gauntlet" aria-pressed="false">Phantom Gauntlet</button><button id="restart">Restart game</button><button id="pause">Pause</button></div>
+<div class="grid">
+<section class="panel"><h2>Playable imported game</h2><canvas id="game" width="800" height="520"></canvas><p id="status" role="status">Loading scripts…</p><p>Everything about enemy health, defense, movement, and attack behaviors is authored in HiroGlifx. JavaScript only hosts the interpreter and Canvas API.</p></section>
+<section class="panel"><h2>Inspect the actual source</h2><div class="row"><button id="appTab" aria-pressed="true">Short importing app</button><button id="libraryTab" aria-pressed="false">Full reusable library</button><button id="copy">Copy source</button></div><pre id="code" aria-label="HiroGlifx source code"></pre><p>Change the application code to introduce your own subclass of <code>Scout</code>, <code>Brute</code> or <code>Enemy</code> without modifying the imported package. Both source files are real, downloadable <code>.scroll</code> files.</p></section>
+</div></main>
+<script src="./runtime/scroll-game-runtime.js"></script>
+<script src="./runtime/scroll-game-classes.js"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id),ctx=$("game").getContext("2d");
+let app="",library="",game=null,raf=0,previous=0,paused=false,chosen="arena",tab="app",loadToken=0;
+window.HiroPolySnapshot=()=>game?Object.freeze({roster:game.get("roster").length,types:game.get("roster").map(e=>e.type),score:game.score,sourceMode:"polymorphic-scroll",classCount:game.classes.size}):null;
+function status(message){$("status").textContent=message;}
+function sourcePanel(){
+ $("code").textContent=tab==="app"?app:library;
+ $("appTab").setAttribute("aria-pressed",String(tab==="app"));
+ $("libraryTab").setAttribute("aria-pressed",String(tab==="library"));
+}
+async function open(mode){
+ const token=++loadToken;chosen=mode;
+ $("arena").setAttribute("aria-pressed",String(mode==="arena"));
+ $("gauntlet").setAttribute("aria-pressed",String(mode==="gauntlet"));
+ status("Loading "+mode+" source and enemykit package…");
+ try{
+   const [packageResponse,appResponse]=await Promise.all([
+     fetch("./examples/packages/enemykit/main.scroll",{cache:"no-store"}),
+     fetch("./examples/polymorphism/"+mode+".scroll",{cache:"no-store"})
+   ]);
+   if(!packageResponse.ok||!appResponse.ok)throw Error("Cannot fetch library or game source");
+   const lib=await packageResponse.text(),src=await appResponse.text();
+   if(token!==loadToken)return;
+   library=lib;app=src;
+   game=new HiroScrollClasses.PolymorphicGame(app,{name:mode,libraries:{enemykit:library}});
+   previous=0;paused=false;sourcePanel();status("Ready. Click an enemy to attack.");
+   game.render(ctx);
+ }catch(error){status(error.message);game=null;}
+}
+function drawFrame(t){
+ if(game){
+   if(!paused&&previous){
+     try{game.tick(Math.min(.05,(t-previous)/1000));}catch(error){paused=true;status(error.message);}
+   }
+   previous=t;
+   try{game.render(ctx);}catch(error){paused=true;status(error.message);}
+   if(game.done)status(game.message);
+ }
+ raf=requestAnimationFrame(drawFrame);
+}
+$("arena").onclick=()=>open("arena");$("gauntlet").onclick=()=>open("gauntlet");
+$("restart").onclick=()=>open(chosen);$("pause").onclick=()=>{paused=!paused;previous=0;$("pause").textContent=paused?"Resume":"Pause";};
+$("appTab").onclick=()=>{tab="app";sourcePanel();};$("libraryTab").onclick=()=>{tab="library";sourcePanel();};
+$("copy").onclick=()=>navigator.clipboard.writeText($("code").textContent).then(()=>status("Source copied.")).catch(()=>status("Copy manually if clipboard unavailable."));
+$("game").onclick=e=>{
+ if(!game||paused)return;
+ const box=e.currentTarget.getBoundingClientRect();
+ const x=(e.clientX-box.left)*800/box.width,y=(e.clientY-box.top)*520/box.height;
+ try{game.click(x,y);game.render(ctx);}catch(error){status(error.message);}
+};
+open("arena");requestAnimationFrame(drawFrame);
+})();
+</script></body></html>

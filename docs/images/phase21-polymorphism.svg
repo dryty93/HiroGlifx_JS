@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 740" width="1320" height="740">
+<rect width="1320" height="740" fill="#091529"/>
+<text x="48" y="57" fill="#f3f8ff" font-family="Arial" font-size="33" font-weight="bold">HiroGlifx · Real Polymorphism and Imports</text>
+<text x="48" y="88" fill="#a5bedb" font-family="Arial" font-size="16">Version-controlled, implementation-derived preview (not a browser screenshot)</text>
+<rect x="45" y="128" width="550" height="557" rx="17" fill="#152a44" stroke="#426b8f"/>
+<text x="73" y="171" fill="#89e5ca" font-family="monospace" font-size="19">import enemykit</text>
+<text x="73" y="215" fill="#e4f2ff" font-family="monospace" font-size="18">.Boss = (Brute)</text>
+<text x="95" y="253" fill="#c7eddb" font-family="monospace" font-size="17"># health = 400;</text>
+<text x="95" y="291" fill="#c7eddb" font-family="monospace" font-size="17">: update(self,dt) = [ ... ]</text>
+<text x="73" y="338" fill="#e4f2ff" font-family="monospace" font-size="18">.Main = ()</text>
+<text x="95" y="377" fill="#c7eddb" font-family="monospace" font-size="17">&amp; roster = array();</text>
+<text x="95" y="414" fill="#c7eddb" font-family="monospace" font-size="17">: tick(dt) = [</text>
+<text x="116" y="456" fill="#a7cfff" font-family="monospace" font-size="17">for i from 0 to len(roster) [</text>
+<text x="132" y="494" fill="#ffdda6" font-family="monospace" font-size="16">send(get(roster,i),"update",dt);</text>
+<text x="116" y="532" fill="#a7cfff" font-family="monospace" font-size="17">]</text>
+<text x="95" y="570" fill="#c7eddb" font-family="monospace" font-size="17">]</text>
+<text x="73" y="609" fill="#e4f2ff" font-family="monospace" font-size="18">break;</text>
+<rect x="618" y="128" width="656" height="557" rx="17" fill="#142742" stroke="#426b8f"/>
+<text x="649" y="170" fill="#9fdafc" font-family="Arial" font-size="23" font-weight="bold">One method call, four behaviors</text>
+<g font-family="Arial" font-size="17" fill="#e5f4ff">
+<rect x="655" y="207" width="274" height="165" rx="13" fill="#263950"/>
+<rect x="691" y="265" width="55" height="58" rx="9" fill="#f9cb78"/>
+<text x="797" y="276" fill="#fff" font-size="21">Scout</text><text x="799" y="309" font-size="15">Fast + sine movement</text>
+<rect x="946" y="207" width="288" height="165" rx="13" fill="#302d52"/>
+<rect x="979" y="263" width="67" height="68" rx="10" fill="#b293f9"/>
+<text x="1109" y="276" fill="#fff" font-size="21">Brute</text><text x="1110" y="309" font-size="14">Armored damage override</text>
+<rect x="655" y="390" width="274" height="166" rx="13" fill="#224d4c"/>
+<rect x="691" y="441" width="55" height="68" rx="9" fill="#73e4c0"/>
+<text x="797" y="462" fill="#fff" font-size="21">Medic</text><text x="799" y="496" font-size="15">Heals other units</text>
+<rect x="946" y="390" width="288" height="166" rx="13" fill="#4e304e"/>
+<rect x="979" y="437" width="67" height="79" rx="11" fill="#ff8fba"/>
+<text x="1109" y="462" fill="#fff" font-size="21">Boss</text><text x="1110" y="496" font-size="14">Custom movement + armor</text>
+</g>
+<text x="945" y="626" text-anchor="middle" fill="#bed9f4" font-family="Arial" font-size="17">Actual classes, fields, AI and dispatch are authored in .scroll.</text>
+</svg>

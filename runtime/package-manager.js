@@ -8,6 +8,7 @@ const crypto=require("node:crypto");
 const {parseExtended}=require("./expressive-runtime");
 const {parse:parseCanonical}=require("./canonical-runtime");
 const {parseProgram:parseScrollGame}=require("./scroll-game-runtime");
+const {compile:compileClassGame}=require("./scroll-game-classes");
 const NAME=/^[a-z][a-z0-9-]{0,39}$/;
 const VERSION=/^\d+\.\d+\.\d+$/;
 const IMPORT=/^import\s+([a-z][a-z0-9-]{0,39})\s*;?$/;
@@ -43,6 +44,14 @@ function writeAtomic(filename,value){
 }
 function validateLibrary(source,name){
  if(typeof source!=="string"||source.length>100000)throw new Error("Package exceeds 100 KB");
+ if(/^\s*\.[A-Za-z_][\w]*\s*=\s*\([A-Za-z_][\w]*\)?\s*$/m.test(source)||
+    /^\s*\.[A-Za-z_][\w]*\s*=\s*\(\)\s*$/m.test(source)){
+   if(/^\s*\.Main\s*=/m.test(source))throw new Error("Packages cannot declare .Main");
+   if(!/^\s*import\s+/m.test(source)){
+     compileClassGame("import "+name+"\n.Main = ()\n: tick(dt) = [\n]\n: draw() = [\n]\nbreak;",{[name]:source});
+   }
+   return;
+ }
  const lines=source.split(/\r?\n/);
  if(lines.some(line=>/^\s*\.Main\s*=/.test(line)))throw new Error("Packages cannot declare .Main");
  // All executable top-level statements are forbidden; only definitions and imports.
@@ -115,8 +124,8 @@ function scanImports(source){
  let block=false;
  for(const raw of source.split(/\r?\n/)){
    const line=raw.trim();
-   if(/^\.[A-Za-z][\w-]*\s*=\s*\[$/.test(line)){block=true;continue;}
-   if(block){if(/^(?:\];?|break;?|end)$/.test(line))block=false;continue;}
+   if(/^\.[A-Za-z][\w-]*\s*=\s*(?:\[|\([A-Za-z_][\w]*\)?|\(\))$/.test(line)){block=line.includes("[")?"ui":"class";continue;}
+   if(block){if(block==="ui" ? /^(?:\];?|break;?|end)$/.test(line) : /^(?:break;?|end)$/.test(line))block=false;continue;}
    if(line.startsWith("import ")){
      const matched=line.match(IMPORT);
      if(!matched)throw new Error("Malformed import: "+line);
@@ -129,8 +138,8 @@ function stripImports(source){
  let block=false;
  return source.split(/\r?\n/).map(raw=>{
    const line=raw.trim();
-   if(/^\.[A-Za-z][\w-]*\s*=\s*\[$/.test(line)){block=true;return raw;}
-   if(block){if(/^(?:\];?|break;?|end)$/.test(line))block=false;return raw;}
+   if(/^\.[A-Za-z][\w-]*\s*=\s*(?:\[|\([A-Za-z_][\w]*\)?|\(\))$/.test(line)){block=line.includes("[")?"ui":"class";return raw;}
+   if(block){if(block==="ui" ? /^(?:\];?|break;?|end)$/.test(line) : /^(?:break;?|end)$/.test(line))block=false;return raw;}
    return IMPORT.test(line)?"":raw;
  }).join("\n");
 }
@@ -155,7 +164,21 @@ function resolveSource(project,source){
  project=path.resolve(project);
  // A canonical expression page is validated directly; legacy libraries are not yet compatible.
  if(/^\.Main\s*=\s*\(\)\s*$/m.test(source)){
-   if(/^\s*import\s+/m.test(source))throw new Error("Canonical package imports are not implemented");
+   if(/^\s*import\s+/m.test(source)){
+     if(!/^\s*:\s*tick\s*\(dt\)\s*=\s*\[$/m.test(source))
+       throw new Error("Canonical page imports require the game-script class compiler");
+     const libraries={},lock=readLocked(project),visited=new Set();
+     function resolve(name,stack=[]){
+       if(stack.includes(name))throw new Error("Import cycle: "+[...stack,name].join(" -> "));
+       if(visited.has(name))return;
+       const data=readPackage(project,name,lock);
+       for(const dependency of scanImports(data))resolve(dependency,[...stack,name]);
+       libraries[name]=data;visited.add(name);
+     }
+     for(const name of scanImports(source))resolve(name);
+     compileClassGame(source,libraries);
+     return source;
+   }
    if(/^\s*:\s*tick\s*\(dt\)\s*=\s*\[$/m.test(source))parseScrollGame(source);
    else parseCanonical(source);
    return source;
