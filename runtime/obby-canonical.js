@@ -1,21 +1,34 @@
 /* Installs safe obby factories and game-event methods into CanonicalRuntime. */
 (function(root,factory){
  const obby=typeof module==="object"&&module.exports?require("./obby-world"):root.HiroObby;
- const api=factory(obby);
+ const skybound=typeof module==="object"&&module.exports?require("./skybound-world"):root.HiroSkybound;
+ const api=factory(obby,skybound);
  if(typeof module==="object"&&module.exports)module.exports=api;
  else root.HiroObbyCanonical=api;
-})(typeof globalThis!=="undefined"?globalThis:this,function(obby){
+})(typeof globalThis!=="undefined"?globalThis:this,function(obby,skybound){
  "use strict";
  const isWorld=w=>w instanceof obby.ObbyWorld;
  const requireWorld=w=>{if(!isWorld(w))throw new Error("Expected an obby world");return w;};
  function install(runtime){
    runtime.register("obby_world",({args})=>{
      if(args.length)throw new Error("obby_world takes no arguments");
-     return new obby.ObbyWorld();
+     return new skybound.SkyboundWorld();
    });
    runtime.register("obby_tile",({args})=>{
-     if(args.length!==7)throw new Error("obby_tile(world,id,x,y,z,size,type)");
+     if(args.length!==7&&args.length!==8)throw new Error("obby_tile(world,id,x,y,z,size,type[,stage])");
      const [world,...tile]=args;return requireWorld(world).tile(...tile);
+   });
+   runtime.register("obby_moving",({args})=>{
+     if(args.length!==10)throw new Error("obby_moving(world,id,x,y,z,size,axis,range,period,stage)");
+     const [world,...tile]=args;return requireWorld(world).moving(...tile);
+   });
+   runtime.register("obby_vanish",({args})=>{
+     if(args.length!==8)throw new Error("obby_vanish(world,id,x,y,z,size,delay,stage)");
+     const [world,...tile]=args;return requireWorld(world).vanishing(...tile);
+   });
+   runtime.register("obby_spinner",({args})=>{
+     if(args.length!==9)throw new Error("obby_spinner(world,id,x,y,z,size,range,period,stage)");
+     const [world,...tile]=args;return requireWorld(world).spinner(...tile);
    });
    runtime.register("obby_player",({args})=>{
      if(args.length!==5)throw new Error("obby_player(world,id,x,y,z)");
@@ -25,7 +38,7 @@
    runtime.register("obby_event",({args})=>{
      if(args.length!==2)throw new Error("obby_event(world,event)");
      const [world,name]=args;requireWorld(world);
-     if(!["land","fall","checkpoint","finish","respawn"].includes(name))throw new Error("Unknown obby event");
+     if(!["land","fall","checkpoint","finish","respawn","jump","stage"].includes(name))throw new Error("Unknown obby event");
      const event={kind:"event",world,name,occurrences:0,last:null};
      event.dispose=world.on(name,payload=>{event.occurrences++;event.last=payload;});
      return event;
