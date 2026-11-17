@@ -1,6 +1,98 @@
-// HiroGlifx Arcade — pong
-// Replace the game type or customize its engine to make your own edition.
+// Pong — complete gameplay and drawing authored in HiroGlifx.
+// The JavaScript host supplies the canvas, keyboard state and safe math primitives.
+// You can change the physics and scoring values here without editing JavaScript.
 .Main = ()
-    $ title = "Pong";
-    & game = arcade_game("pong");
+    # player = 260;
+    # opponent = 260;
+    # ballX = 400;
+    # ballY = 260;
+    # velocityX = 260;
+    # velocityY = 140;
+    # pScore = 0;
+    # oScore = 0;
+    # winningScore = 7;
+    # paddleSpeed = 420;
+    # opponentSpeed = 285;
+    ? done = false;
+    $ message = "";
+
+    : tick(dt) = [
+        // Human paddle: arrows/W/S, plus pointer or touch positioning.
+        player = clamp(player + (key("ArrowDown") + key("KeyS") - key("ArrowUp") - key("KeyW")) * paddleSpeed * dt, 45, 475);
+        if pointer("y") >= 0 [
+            player = clamp(pointer("y"), 45, 475);
+        ]
+
+        // Computer paddle follows the ball at bounded speed.
+        opponent = clamp(opponent + clamp(ballY - opponent, -opponentSpeed * dt, opponentSpeed * dt), 45, 475);
+
+        // Integrate ball movement.
+        ballX = ballX + velocityX * dt;
+        ballY = ballY + velocityY * dt;
+
+        // Top and bottom wall reflections.
+        if ballY < 12 [
+            ballY = 12;
+            velocityY = abs(velocityY);
+        ]
+        if ballY > 508 [
+            ballY = 508;
+            velocityY = -abs(velocityY);
+        ]
+
+        // Human paddle collision with angle depending on contact point.
+        if ballX <= 42 && ballX >= 24 && abs(ballY - player) <= 61 && velocityX < 0 [
+            ballX = 42;
+            velocityX = abs(velocityX) * 1.04;
+            velocityY = velocityY + (ballY - player) * 2.2;
+        ]
+
+        // Computer paddle collision.
+        if ballX >= 758 && ballX <= 782 && abs(ballY - opponent) <= 61 && velocityX > 0 [
+            ballX = 758;
+            velocityX = -abs(velocityX) * 1.04;
+            velocityY = velocityY + (ballY - opponent) * 2.2;
+        ]
+
+        // Scores are computed here, not in JavaScript.
+        if ballX < 0 [
+            oScore = oScore + 1;
+            ballX = 400;
+            ballY = 260;
+            velocityX = 260;
+            velocityY = 140;
+        ]
+        if ballX > 800 [
+            pScore = pScore + 1;
+            ballX = 400;
+            ballY = 260;
+            velocityX = -260;
+            velocityY = -140;
+        ]
+
+        if pScore >= winningScore [
+            done = true;
+            message = "You win!";
+        ]
+        if oScore >= winningScore [
+            done = true;
+            message = "CPU wins!";
+        ]
+    ]
+
+    : draw() = [
+        // Entire display list is also authored here.
+        clear("#0b1730");
+        rect(398, 0, 4, 520, "#274b73");
+        rect(18, player - 50, 15, 100, "#85e1ff");
+        rect(767, opponent - 50, 15, 100, "#c5a3ff");
+        circle(ballX, ballY, 11, "#fff3c3");
+        text("YOU " + pScore + "       CPU " + oScore, 400, 48, 32, "#f3f8ff");
+        if done [
+            rect(145, 193, 510, 136, "#122747");
+            text(message, 400, 251, 29, "#f4df9a");
+            text("Select Restart to play again", 400, 294, 16, "#d6eaff");
+        ]
+    ]
+
     break;
