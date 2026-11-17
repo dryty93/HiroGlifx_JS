@@ -9,14 +9,14 @@
  function worldOf(value){
    if(!(value instanceof voxel.VoxelWorld))throw new Error("Expected a voxel world");return value;
  }
- function install(runtime){
+ function install(runtime,{terrainProfile=null}={}){
    runtime.register("voxel_world",({args})=>{
      if(args.length>1)throw new Error("voxel_world(seed) takes at most one argument");
      return new voxel.VoxelWorld(args.length?args[0]:42);
    });
    runtime.register("voxel_generate",({args})=>{
      if(args.length!==2)throw new Error("voxel_generate(world, radius)");
-     return worldOf(args[0]).generate(args[1]);
+     return worldOf(args[0]).generate(args[1],terrainProfile);
    });
    runtime.register("voxel_block",({args})=>{
      if(args.length!==5)throw new Error("voxel_block(world, x, y, z, type)");

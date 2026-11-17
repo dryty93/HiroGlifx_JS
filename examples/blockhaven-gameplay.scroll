@@ -1,0 +1,84 @@
+// Blockhaven: real world generation formulas, materials, mining rewards
+// and placement policy in HiroGlifx. Babylon renders; JS provides voxel storage.
+.Main = ()
+    # blocksMined = 0;
+    # blocksPlaced = 0;
+    # builderScore = 0;
+    # worldAge = 0;
+    # stamina = 100;
+    ? done = false;
+    $ message = "Explore, build and earn builder points.";
+
+    : terrainHeight(x, z, seed) = [
+        let elevation = sin(x * 0.28 + seed * 0.001) * 0.9;
+        elevation = elevation + cos(z * 0.31 - seed * 0.001) * 0.9;
+        elevation = elevation + sin(x * 0.78 + z * 0.42 + seed) * 0.35;
+        let height = clamp(round(3 + elevation), 1, 5);
+        if sqrt(x * x + z * z) < 3 [
+            height = 3;
+        ]
+        return height;
+    ]
+
+    : surfaceMaterial(x, z, radius) = [
+        if sqrt(x * x + z * z) >= radius * 0.84 [
+            return "sand";
+        ]
+        return "grass";
+    ]
+
+    : shouldPlantTree(x, z, seed) = [
+        if sqrt(x * x + z * z) < 5 [
+            return false;
+        ]
+        let chance = abs(sin(x * 17.73 + z * 32.11 + seed * 0.19));
+        return chance > 0.82;
+    ]
+
+    : blockReward(type) = [
+        if type == "stone" [
+            return 5;
+        ]
+        if type == "wood" [
+            return 4;
+        ]
+        if type == "glass" [
+            return 2;
+        ]
+        if type == "dirt" [
+            return 2;
+        ]
+        return 1;
+    ]
+
+    : canMine(type) = [
+        return type != "";
+    ]
+
+    : canPlace(type) = [
+        return type != "";
+    ]
+
+    : afterMine(type) = [
+        blocksMined = blocksMined + 1;
+        builderScore = builderScore + blockReward(type);
+        message = "Mined " + type + " · Score " + builderScore;
+        return builderScore;
+    ]
+
+    : afterPlace(type) = [
+        blocksPlaced = blocksPlaced + 1;
+        builderScore = builderScore + 2;
+        message = "Placed " + type + " · Score " + builderScore;
+        return builderScore;
+    ]
+
+    : tick(dt) = [
+        worldAge = worldAge + dt;
+        stamina = min(100, stamina + dt * 3);
+    ]
+
+    : draw() = [
+        // The voxel engine renders meshes in Babylon.js.
+    ]
+    break;

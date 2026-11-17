@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="720" viewBox="0 0 1320 720">
+<rect width="1320" height="720" fill="#081327"/>
+<text x="46" y="59" fill="#f0f8ff" font-family="Arial" font-size="32" font-weight="bold">Skybound + Blockhaven — Gameplay Authored in HiroGlifx</text>
+<text x="46" y="90" fill="#b3c9e3" font-family="Arial" font-size="16">Implementation-derived diagram, not a browser screenshot · scripts on left, reusable engines on right</text>
+<rect x="40" y="131" width="600" height="516" rx="17" fill="#152a44" stroke="#4b7198"/>
+<rect x="661" y="131" width="616" height="516" rx="17" fill="#13263f" stroke="#4b7198"/>
+<text x="66" y="172" fill="#91d6ff" font-family="Arial" font-size="24" font-weight="bold">SKYBOUND · HiroGlifx game rules</text>
+<g font-family="monospace" font-size="17" fill="#bcf2d9">
+<text x="70" y="215">: tick(dt) = [</text>
+<text x="87" y="247">world_configure(runSpeed,jumpForce);</text>
+<text x="70" y="280">]</text>
+<text x="70" y="329">: movingOffset(time,range,period)</text>
+<text x="88" y="361">return sin(time*6.28/period)*range;</text>
+<text x="70" y="409">: onCheckpoint() = [</text>
+<text x="87" y="441">score = score + 75 + combo*20;</text>
+<text x="70" y="474">]</text>
+</g>
+<text x="70" y="540" fill="#9ed5f6" font-family="Arial" font-size="17">Stage scoring · Difficulty · Moving tiles</text>
+<text x="70" y="575" fill="#9ed5f6" font-family="Arial" font-size="17">Vanishing platforms · Victory rules</text>
+<text x="687" y="172" fill="#9ce7c7" font-family="Arial" font-size="24" font-weight="bold">BLOCKHAVEN · HiroGlifx world rules</text>
+<g font-family="monospace" font-size="18" fill="#bcf2d9">
+<text x="690" y="215">: terrainHeight(x,z,seed) = [</text>
+<text x="705" y="251">let h = sin(x*0.28+seed*0.001);</text>
+<text x="705" y="284">return clamp(round(3+h),1,5);</text>
+<text x="690" y="318">]</text>
+<text x="690" y="366">: afterMine(type) = [</text>
+<text x="706" y="397">blocksMined = blocksMined + 1;</text>
+<text x="706" y="429">builderScore = builderScore + blockReward(type);</text>
+<text x="690" y="464">]</text>
+</g>
+<text x="692" y="540" fill="#a5d8ea" font-family="Arial" font-size="17">Terrain · Biomes · Trees · Mining</text>
+<text x="692" y="575" fill="#a5d8ea" font-family="Arial" font-size="17">Placement permissions · Builder score</text>
+<rect x="40" y="672" width="1237" height="31" rx="8" fill="#25435b"/>
+<text x="661" y="693" text-anchor="middle" font-family="Arial" font-size="15" fill="#d9efff">JavaScript still provides reusable physics, voxel storage and Babylon.js rendering services.</text>
+</svg>

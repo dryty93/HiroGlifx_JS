@@ -10,11 +10,12 @@
  const COLORS={solid:"#67b9ff",checkpoint:"#22d3a6",lava:"#ff466e",finish:"#facc15"};
  const STAGES={1:"#60a5fa",2:"#fb7185",3:"#a78bfa",4:"#38bdf8",5:"#fbbf24"};
  class ObbyBabylonAdapter{
-   constructor({BABYLON,canvas,world}){
+   constructor({BABYLON,canvas,world,onBeforeStep=null}){
      if(!BABYLON?.Engine||!BABYLON?.MeshBuilder||!canvas||!world)
        throw new Error("Babylon engine, canvas and ObbyWorld required");
      if(!world.player)throw new Error("Create player before rendering");
      this.B=BABYLON;this.canvas=canvas;this.world=world;
+     this.onBeforeStep=onBeforeStep;
      this.engine=null;this.scene=null;this.meshes=new Map();
      this.last=0;this.active=false;this.paused=false;
      this.decorations=[];this.limbs=[];this.camerapos=null;this._resize=null;
@@ -110,7 +111,10 @@
        const now=(typeof performance!=="undefined"?performance.now():Date.now());
        const dt=this.last?Math.min(.05,Math.max(0,(now-this.last)/1000)):0;
        this.last=now;
-       if(!this.paused&&dt)this.world.step(dt);
+       if(!this.paused&&dt){
+         if(this.onBeforeStep)this.onBeforeStep(dt);
+         this.world.step(dt);
+       }
        this.sync(dt);
        this.scene.render();
      });
