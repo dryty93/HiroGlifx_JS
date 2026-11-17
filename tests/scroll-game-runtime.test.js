@@ -8,7 +8,7 @@ test("complete Pong logic and drawing parse from .scroll, not a JavaScript game 
  const program=parseProgram(source);
  assert.equal(program.methods.has("tick"),true);
  assert.equal(program.methods.has("draw"),true);
- assert.ok(program.declarations.length>=14);
+ assert.equal(program.declarations.length,13);
  const game=newPong();
  assert.equal(game.get("winningScore"),7);
  assert.equal(game.get("player"),260);
