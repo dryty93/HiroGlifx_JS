@@ -79,14 +79,14 @@ class RPGDemo{
    this.heroMesh=body;
    const sword=B.MeshBuilder.CreateBox("sword",{width:.12,height:.8,depth:.13},this.scene);
    sword.material=material("sword","#f5d2a4");sword.isPickable=false;this.sword=sword;
-   this.assets=new root.HiroAssets.AssetRegistry({BABYLON:B,scene:this.scene,manifest:{hero:"./assets/hero.gltf"}});
+   this.assets=new root.HiroAssets.AssetRegistry({BABYLON:B,scene:this.scene,manifest:{hero:"./assets/hero-rig.gltf"}});
    try{
      const asset=await this.assets.load("hero");
      this.heroAsset=asset;
-     if(asset.root){asset.root.parent=this.heroMesh;asset.root.position.y=-.2;body.visibility=0.03;}
+     if(asset.root){asset.root.parent=this.heroMesh;asset.root.position.y=-.92;body.visibility=.01;}
      if(asset.animations.has("idle")){
        this.animations=new root.HiroAssets.AnimationGraph({clips:asset.animations,defaultState:"idle"});
-       this.assetStatus="glTF avatar + animations loaded";
+       this.assetStatus="glTF avatar + animations loaded (skinned rig)";
      }else this.assetStatus="glTF loaded without clips";
    }catch(error){this.assetStatus="Procedural character: "+error.message;}
    this.combat.create("hero",{team:"heroes",health:145,stamina:110,x:0,z:8,armor:8});
