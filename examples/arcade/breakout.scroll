@@ -1,0 +1,6 @@
+// HiroGlifx Arcade — breakout
+// Replace the game type or customize its engine to make your own edition.
+.Main = ()
+    $ title = "Breakout";
+    & game = arcade_game("breakout");
+    break;

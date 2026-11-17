@@ -28,7 +28,7 @@ async function main(){
    const errors=[];
    page.on("pageerror",e=>errors.push(e.message));
    await page.goto(base+"/showcase.html",{waitUntil:"domcontentloaded"});
-   assert.equal(await page.locator(".card").count(),6);
+   assert.equal(await page.locator(".card").count(),7);
    await page.screenshot({path:path.join(captures,"hiroglifx-showcase-desktop.png"),fullPage:true});
    await page.goto(base+"/skybound.html",{waitUntil:"domcontentloaded"});
    await page.waitForFunction(()=>{

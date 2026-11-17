@@ -45,7 +45,7 @@ button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 kbd{display:inline-block;border:1px solid #577d87;background:#274451;border-bottom-width:3px;padding:4px 8px;border-radius:6px;font-weight:900;color:#e8fafa}
 .mobile{display:none;justify-content:center;flex-wrap:wrap;gap:8px;margin:10px 0}
 .mobile button{height:57px;min-width:60px;background:#255b62;color:white;border:1px solid #69bca7}
-footer{color:#84a9b1;text-align:center;margin-top:34px;font-size:12px}
+.code-panel{margin-top:20px;background:#101f2d;border:1px solid #40737b;border-radius:17px;padding:18px}.code-panel summary{cursor:pointer;font-weight:900;color:#a6f5db;display:flex;justify-content:space-between;gap:12px}.code-panel pre{overflow:auto;white-space:pre;text-align:left;font:13px/1.65 ui-monospace,monospace;background:#071621;padding:17px;border-radius:11px;color:#d8f5e7;max-height:380px}.code-panel a{color:#91d8ff}.code-panel button{background:#254c58;color:#e6ffff;padding:9px 12px;margin-left:10px}footer{color:#84a9b1;text-align:center;margin-top:34px;font-size:12px}
 @media(max-width:760px){.wrap{padding:15px 13px 25px}.headline{margin-top:30px}#viewport{aspect-ratio:1/1.13}.hotbar{bottom:10px;gap:3px;padding:5px}.slot{min-width:43px;min-height:50px;padding:4px}.slot small{font-size:8px}.slot .swatch{width:18px;height:18px}
 .hud{inset:9px 9px auto}.chip{font-size:10px;padding:7px 8px}.bottom{grid-template-columns:1fr}.mobile{display:flex}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -73,6 +73,7 @@ footer{color:#84a9b1;text-align:center;margin-top:34px;font-size:12px}
 <div class="bottom"><section class="panel"><div class="kicker">CREATE &amp; EXPLORE</div><h3>A world built from HiroGlifx objects</h3><p>Blockhaven generates a reproducible world and lets you mine and place colored voxel blocks. Your edits can be saved to your browser and restored later.</p>
 <p><kbd>W A S D</kbd> Walk · <kbd>SPACE</kbd> Jump · <kbd>1–7</kbd> Select material · Mouse to look · <kbd>ESC</kbd> Release mouse</p></section>
 <section class="panel"><div class="kicker">OPEN SOURCE CREATIVE ENGINE</div><h3>Explore the code</h3><p>The world begins with a canonical <code>.Main = ()</code> program using <code>voxel_world()</code>, <code>voxel_generate()</code> and <code>voxel_player()</code>.</p><p>This original prototype is not affiliated with Minecraft or Mojang and is intended to grow into a richer HiroGlifx game engine.</p></section></div>
+<details class="code-panel" id="sourcePanel"><summary>View Blockhaven's real HiroGlifx source <span>⌄</span></summary><p>The source below is the actual <code>.scroll</code> program loaded by this game, not pseudocode. Open the game engine implementation for the behavior behind its commands.</p><div><a href="./examples/blockhaven.scroll" target="_blank" rel="noopener">Open .scroll file</a><button id="copySource" type="button">Copy source</button><a href="https://github.com/dryty93/HiroGlifx_JS/blob/main/runtime/voxel-world.js" target="_blank" rel="noopener">World engine</a> · <a href="https://github.com/dryty93/HiroGlifx_JS/blob/main/runtime/voxel-babylon.js" target="_blank" rel="noopener">3D renderer</a></div><pre><code id="sourceCode">Loading actual source…</code></pre></details>
 <footer>Blockhaven · Powered by HiroGlifx + Babylon.js · Your world data stays in your browser</footer>
 </div>
 <script src="./runtime/scroll-runtime.js"></script>
@@ -194,6 +195,8 @@ document.querySelectorAll("[data-key]").forEach(button=>{
 $("mobileJump").onclick=()=>view?.jump();
 $("mobileMine").onclick=()=>notify(view?.mine()?"Block mined.":"Aim at a nearby block.");
 $("mobilePlace").onclick=()=>notify(view?.place(selected)?"Block placed.":"Aim at a nearby block.");
+fetch("./examples/blockhaven.scroll",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("Source unavailable");return r.text();}).then(source=>{$("sourceCode").textContent=source;}).catch(e=>{$("sourceCode").textContent=e.message;});
+$("copySource").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("sourceCode").textContent);notify("HiroGlifx source copied.");}catch{notify("Clipboard unavailable; select and copy the code manually.");}});
 newWorld().catch(e=>notify(e.message));
 })();
 </script></body></html>
