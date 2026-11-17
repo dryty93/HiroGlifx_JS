@@ -3,7 +3,7 @@
 const fs=require("node:fs"),path=require("node:path"),http=require("node:http");
 const rootRuntime=path.resolve(__dirname);
 const {resolveSource}=require("./package-manager");
-const allowedRuntime=new Set(["scroll-runtime.js","app-runtime.js","expressive-runtime.js"]);
+const allowedRuntime=new Set(["scroll-runtime.js","app-runtime.js","expressive-runtime.js","canonical-runtime.js"]);
 const html=[
 '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
 '<title>HiroGlifx App</title><style>*{box-sizing:border-box}body{font:16px system-ui;margin:0;background:#0b1220;color:#edf4ff}',
@@ -13,11 +13,12 @@ const html=[
 '<script src="/__hiro/runtime/scroll-runtime.js"></script>',
 '<script src="/__hiro/runtime/app-runtime.js"></script>',
 '<script src="/__hiro/runtime/expressive-runtime.js"></script>',
+'<script src="/__hiro/runtime/canonical-runtime.js"></script>',
 '<script>(function(){"use strict";const mount=document.querySelector("#app"),notice=document.querySelector("#notice");let instance=null;',
 'async function render(){try{const response=await fetch("/__hiro/page?path="+encodeURIComponent(location.pathname),{cache:"no-store"});',
 'if(!response.ok)throw new Error(response.status===404?"No page defined for "+location.pathname:"Cannot load page");',
 'const source=await response.text();if(instance)instance.dispose();mount.replaceChildren();',
-'instance=new HiroGlifxExpressive.ExpressiveRuntime({document,mount});await instance.execute(source);notice.textContent="";',
+'instance=/^\\.Main\\s*=\\s*\\(\\)\\s*$/m.test(source) ? new HiroCanonical.CanonicalRuntime({document,mount}) : new HiroGlifxExpressive.ExpressiveRuntime({document,mount});await instance.execute(source);notice.textContent="";',
 '}catch(error){notice.textContent=error.message;}}',
 'const events=new EventSource("/__hiro/events");events.addEventListener("reload",render);render();})();</script></body></html>'
 ].join("\n");
