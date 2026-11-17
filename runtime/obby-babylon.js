@@ -18,6 +18,7 @@
      this.engine=null;this.scene=null;this.meshes=new Map();
      this.last=0;this.active=false;this.paused=false;
      this.decorations=[];this.limbs=[];this.camerapos=null;this._resize=null;
+     this.animationClock=0;this.followDistance=18;this.followTilt=0;
    }
    start(){
      if(this.active)throw new Error("Renderer already active");
@@ -32,7 +33,7 @@
        this.scene.fogDensity=.007;
        this.scene.fogColor=B.Color3.FromHexString("#5175b5");
      }
-     this.camera=new B.ArcRotateCamera("follow",Math.PI*1.08,Math.PI/3.05,19,new B.Vector3(0,0,0),this.scene);
+     this.camera=new B.ArcRotateCamera("follow",Math.PI*1.08,Math.PI/3.05,18,new B.Vector3(0,0,0),this.scene);
      if(typeof this.camera.lowerRadiusLimit!=="undefined")this.camera.lowerRadiusLimit=11;
      if(typeof this.camera.upperRadiusLimit!=="undefined")this.camera.upperRadiusLimit=27;
      if(typeof this.camera.attachControl==="function")this.camera.attachControl(this.canvas,true);
@@ -118,8 +119,18 @@
    sync(dt=.016){
      if(!this.scene)return;
      const p=this.world.player;
-     this.avatar.position.set(p.x,p.y,p.z);
-     this.head.position.set(p.x,p.y+.95,p.z);
+     const speed=Math.hypot(p.motionX||0,p.motionZ||0);
+     const running=p.grounded&&speed>.4;
+     const airborne=!p.grounded;
+     this.animationClock+=Math.max(0,Math.min(dt,.05))*Math.max(.2,speed);
+     const stride=running?Math.sin(this.animationClock*2.5)*Math.min(.48,speed*.09):0;
+     this.avatar.position.set(p.x,p.y+(running?Math.abs(stride)*.06:0),p.z);
+     this.head.position.set(p.x,p.y+.95+(running?Math.abs(stride)*.05:0),p.z);
+     const desiredAngle=speed>.2?Math.atan2(-(p.motionZ||0),p.motionX||0):null;
+     if(desiredAngle!==null){
+       if(this.avatar.rotation)this.avatar.rotation.y=desiredAngle;
+       if(this.head.rotation)this.head.rotation.y=desiredAngle;
+     }
      for(const tile of this.world.tiles.values()){
        const mesh=this.meshes.get(tile.id);
        if(!mesh)continue;
@@ -128,17 +139,23 @@
        if(tile.kind==="lava"&&mesh.rotation)mesh.rotation.y=(this.world.motionTime||0)*1.25;
      }
      for(const {mesh,dx,dy,dz} of this.limbs){
-       // Small jump lift/swing makes the simple avatar feel less rigid.
-       const jumping=!p.grounded;
-       mesh.position.set(p.x+dx,p.y+dy+(jumping ? .09 : 0),p.z+dz);
-       if(mesh.rotation)mesh.rotation.z=jumping?(dx<0 ? .13 : -.13):0;
+       mesh.position.set(p.x+dx,p.y+dy+(airborne?.11:0),p.z+dz);
+       if(mesh.rotation){
+         const isArm=Math.abs(dx)>.4,legSide=dx<0?-1:1;
+         mesh.rotation.z=airborne?(isArm?legSide*.52:legSide*.17):
+           (isArm?-legSide*stride*.8:legSide*stride);
+       }
      }
      const B=this.B;
-     const goal=new B.Vector3(p.x+3,p.y+1.05,p.z);
+     // Camera looks ahead along +X and applies smoothing independent of frame rate.
+     const goal=new B.Vector3(p.x+Math.min(5,3.1+speed*.16),p.y+1.1,p.z);
+     const blend=1-Math.exp(-5.5*Math.max(0,Math.min(.05,dt)));
      if(this.camerapos===null)this.camerapos=goal;
-     else if(typeof B.Vector3.Lerp==="function")
-       this.camerapos=B.Vector3.Lerp(this.camerapos,goal,Math.min(1,Math.max(0,dt)*6));
+     else if(typeof B.Vector3.Lerp==="function")this.camerapos=B.Vector3.Lerp(this.camerapos,goal,blend);
      else this.camerapos=goal;
+     const desiredRadius=airborne?19.2:(running?18.4:17.8);
+     this.followDistance+=(desiredRadius-this.followDistance)*blend;
+     this.camera.radius=this.followDistance;
      this.camera.setTarget(this.camerapos);
    }
    stop(){
