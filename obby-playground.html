@@ -68,10 +68,10 @@ button:disabled{opacity:.5}.controls{display:flex;gap:8px;flex-wrap:wrap;margin-
  function tick(){
    if(!running||!world)return;
    let x=0,z=0;
-   if(pressed.has("ArrowRight")||pressed.has("KeyD"))x++;
-   if(pressed.has("ArrowLeft")||pressed.has("KeyA"))x--;
-   if(pressed.has("ArrowUp")||pressed.has("KeyW"))z++;
-   if(pressed.has("ArrowDown")||pressed.has("KeyS"))z--;
+   if(pressed.has("ArrowUp")||pressed.has("KeyW"))x++;
+   if(pressed.has("ArrowDown")||pressed.has("KeyS"))x--;
+   if(pressed.has("ArrowLeft")||pressed.has("KeyA"))z++;
+   if(pressed.has("ArrowRight")||pressed.has("KeyD"))z--;
    const len=Math.hypot(x,z)||1;
    world.setInput(x/len,z/len);
    el("stats").textContent="Tiles: "+world.tiles.size+" · Deaths: "+world.dead+" · Time: "+world.elapsed.toFixed(1)+"s"+
