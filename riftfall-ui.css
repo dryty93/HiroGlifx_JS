@@ -1,0 +1,18 @@
+/* Riftfall RPG interface: inventory, crafting, dialogue and quest journal */
+.rpg-modal[hidden]{display:none}
+.rpg-modal{position:absolute;inset:0;z-index:9;display:grid;place-items:center;background:#06131feb;backdrop-filter:blur(9px);padding:16px}
+.rpg-dialog{width:min(670px,98%);max-height:87%;overflow:auto;background:linear-gradient(150deg,#172f4c,#10223b);border:1px solid #729bbd;border-radius:18px;padding:24px;box-shadow:0 22px 70px #000b}
+.rpg-dialog h2{margin:0;font-size:26px;letter-spacing:-.025em}
+.rpg-dialog p{font-size:14px;color:#bcd2e8;margin:10px 0 14px}
+.rpg-dialog header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.rpg-entry{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #365678}
+.rpg-entry strong{display:block;font-size:14px}
+.rpg-entry small{display:block;color:#b7cde8;font-size:12px;line-height:1.45;margin-top:5px}
+.rpg-entry button{flex-shrink:0;padding:9px 12px;font-size:13px}
+.rpg-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.rpg-toolbar button{padding:9px 12px;background:#28496b;border-color:#608fb6;font-size:13px}
+.rpg-source-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 7px}
+.rpg-source-tabs button{background:#254c72;color:#e8faff;padding:8px 13px;border:1px solid #648ab6}
+.rpg-source-tabs button[aria-pressed=true]{background:#b5dcff;color:#102644}
+.rpg-stats{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:650px){.rpg-dialog{padding:15px}.rpg-toolbar button{font-size:12px;padding:8px 10px}.rpg-entry{align-items:start}.rpg-entry button{padding:7px 9px}}
