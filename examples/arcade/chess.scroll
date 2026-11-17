@@ -4,6 +4,7 @@
 .Main = ()
     & board = chars("rnbqkbnrpppppppp................................PPPPPPPPRNBQKBNR");
     & history = array();
+    & validTargets = array();
     # turn = 1;
     # rights = 15;
     # ep = -1;
@@ -421,12 +422,19 @@
         if selected >= 0 [
             if legalMove(selected, to, promotion, true) [
                 selected = -1;
+                validTargets = array();
                 return true;
             ]
         ]
         selected = -1;
+        validTargets = array();
         if side(get(board, to)) == turn [
             selected = to;
+            for destination from 0 to 64 [
+                if legalMove(selected, destination, promotion, false) [
+                    push(validTargets, destination);
+                ]
+            ]
         ]
         return false;
     ]
@@ -461,6 +469,7 @@
         full = get(old, 5);
         moves = get(old, 6);
         selected = -1;
+        validTargets = array();
         done = false;
         message = "White to move";
         if turn == -1 [
@@ -487,6 +496,9 @@
             rect(x, y, 52, 52, color);
             if selected == i [
                 rect(x, y, 52, 52, "#e7cb77");
+            ]
+            if indexOf(validTargets, i) >= 0 [
+                rect(x + 17, y + 17, 18, 18, "#359e62");
             ]
             let piece = get(board, i);
             if piece != "." [
