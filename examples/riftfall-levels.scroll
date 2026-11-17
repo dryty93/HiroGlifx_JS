@@ -1,0 +1,71 @@
+// Riftfall — expanded three-chapter game world and enemy waves.
+// Edit regions and enemy definitions here. Babylon/Havok provide geometry and physics.
+.Main = ()
+    & regions = array();
+    & obstacles = array();
+    & encounters = array();
+    # wave = 1;
+    # totalEnemies = 7;
+    ? done = false;
+    $ message = "Ashen Clearing: defeat the first raiders.";
+
+    : init() = [
+        // Region(id,title,x,z,width,depth,groundColor)
+        push(regions,array("ashen-clearing","Ashen Clearing",0,0,28,28,"#3b766d"));
+        push(regions,array("fallen-forge","The Fallen Forge",0,-23,26,25,"#467f78"));
+        push(regions,array("obsidian-gate","Obsidian Gate",0,-48,26,26,"#455a73"));
+
+        // Static obstacle(x,y,z,width,height,depth,color)
+        push(obstacles,array(-4,0.65,0.1,2,1.3,2,"#70859b"));
+        push(obstacles,array(4,0.65,-1,2,1.3,2,"#75869d"));
+        push(obstacles,array(0,0.65,-3,2.3,1.3,1.5,"#70809b"));
+        push(obstacles,array(-5,0.8,-24,2.6,1.6,3.2,"#927b6d"));
+        push(obstacles,array(6,1.1,-28,2.8,2.2,2.6,"#897b79"));
+        push(obstacles,array(0,0.55,-32,2.2,1.1,1.5,"#9d8979"));
+        push(obstacles,array(-5,1.1,-47,2.5,2.2,2.5,"#596981"));
+        push(obstacles,array(5,1.1,-51,2.6,2.2,2.6,"#5b7088"));
+
+        // Enemy(wave,x,z,health,armor,speed,color)
+        push(encounters,array(1,-6,-5,75,7,2.6,"#df7187"));
+        push(encounters,array(1,5,-7,75,7,2.6,"#df7187"));
+        push(encounters,array(1,0,-10,130,35,1.8,"#ecb35c"));
+        push(encounters,array(2,-6,-27,110,18,2.9,"#dd88bf"));
+        push(encounters,array(2,4,-30,120,24,2.6,"#d48eb8"));
+        push(encounters,array(2,0,-33,170,30,2.1,"#d9b97f"));
+        push(encounters,array(3,0,-50,320,55,2.35,"#bf71d6"));
+    ]
+
+    : waveThreshold(stage) = [
+        if stage == 1 [
+            return 3;
+        ]
+        if stage == 2 [
+            return 6;
+        ]
+        return 7;
+    ]
+
+    : chapterTitle(stage) = [
+        if stage == 1 [
+            return "Ashen Clearing";
+        ]
+        if stage == 2 [
+            return "The Fallen Forge";
+        ]
+        return "Obsidian Gate";
+    ]
+
+    : waveStart(stage) = [
+        wave = stage;
+        message = chapterTitle(stage) + ": defeat the guardians.";
+        return stage;
+    ]
+
+    : tick(dt) = [
+        // The reusable engine integrates physics and navigation.
+    ]
+
+    : draw() = [
+        // Scene rendering is provided by Babylon.
+    ]
+    break;
