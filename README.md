@@ -94,6 +94,14 @@ Arrays, indexed operations, nested bounded `for`/`while` loops, custom methods, 
 **Blockhaven's source viewer** continues to show its actual `.scroll` initialization, but the voxel game logic is still in host JavaScript; it has *not* been ported to native `.scroll` game scripts.
 
 
+## Riftfall Phase 28 — Three chapters, rigged hero and navmesh support
+
+Riftfall now draws three connected Havok-colliding environments, runs **seven** enemy encounters across Ashen Clearing, Fallen Forge and Obsidian Gate, and displays current chapter progression in its HUD. Every region, enemy stat and spawn point is authored in [HiroGlifx `.scroll`](examples/riftfall-levels.scroll); the [quest catalog](examples/riftfall-content.scroll) and [combat victory rules](examples/steam-rpg-combat.scroll) have been updated to match.
+
+The demo now loads an **original skinned low-poly humanoid** from [hero-rig.gltf](assets/hero-rig.gltf), with seven joints and six animation clips. The level can optionally create a live Recast-Detour navmesh, showing its active navigation mode in the HUD; if the Recast dependency fails, enemies continue using A* rather than silently pretending to use navmeshes.
+
+[Implementation notes, QA and caveats](docs/riftfall-phase28.md) — the original rig is a significant technical improvement, but still prototype art rather than a professional commercial character.
+
 ## Riftfall Phase 27 — RPG content and persistence
 
 The [Riftfall RPG](riftfall.html) now includes a real inventory/equipment screen, atomic crafting, four objectives with XP and rewards, Keeper Nara's branching dialogue, healing potions, local versioned save/load, synthesized original sounds and combat-hit effects. All game-specific item, recipe, dialogue and quest definitions are authored in the complete [HiroGlifx content source](examples/riftfall-content.scroll), separately from [combat rules](examples/steam-rpg-combat.scroll).

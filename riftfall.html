@@ -40,16 +40,18 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 <nav><a class="logo" href="./showcase.html"><b>✦</b> HIROGLIFX <span style="font-size:11px;color:#a6c7ff;letter-spacing:.12em">RIFTFALL</span></a>
 <div><a href="./showcase.html">Project showcase</a><a href="./polymorphism.html">Polymorphism</a><a href="https://github.com/dryty93/HiroGlifx_JS">Source</a></div></nav>
 <header><div class="eyebrow">PHASES 23–26 · ACTION RPG VERTICAL SLICE</div><h1>RIFT<span>FALL</span></h1>
-<p class="lede">A small third-person combat arena showing four reusable game-engine capabilities working together: Havok rigid-body physics, a glTF animated avatar, combat with equipment and stamina, and enemies navigating around obstacles.</p></header>
+<p class="lede">A three-chapter third-person combat journey showing reusable game-engine capabilities working together: Havok rigid-body physics, a glTF animated avatar, combat with equipment and stamina, and enemies navigating around obstacles.</p></header>
 <section class="stage" aria-label="Playable 3D action RPG encounter">
 <canvas id="game" width="1280" height="690" tabindex="0" aria-label="Riftfall third-person game"></canvas>
 <div class="hud"><div class="chip">⚔ <strong id="health">145</strong> HP</div>
 <div class="chip">✦ <strong id="stamina">110</strong> STAMINA</div>
 <div class="chip">☠ <strong id="enemies">3</strong> RAIDERS LEFT</div>
+<div class="chip"><strong id="chapter">01 ASHEN CLEARING</strong></div>
+<div class="chip"><strong id="navmode">A*</strong></div>
 <div class="chip"><strong id="mode">HAVOK</strong> · <span id="clip">idle</span></div></div>
 <div class="overlay" id="overlay"><div class="intro"><div class="eyebrow">A HIROGLIFX GAME</div>
 <h2 id="overlayTitle">Enter the Riftfall arena</h2>
-<p id="overlayText">Defeat three raiders using a training sword. Move with WASD, jump with Space, and attack with J or the Attack button. Their navigation and combat decisions are powered by reusable engine modules and HiroGlifx encounter rules.</p>
+<p id="overlayText">Fight through three connected regions and seven raiders, ending with the Rift Guardian. Move with WASD, jump with Space, and attack with J or the Attack button. Their navigation and combat decisions are powered by reusable engine modules and HiroGlifx encounter rules.</p>
 <button id="start" class="primary" disabled>Initializing Havok...</button></div></div></section>
 <div class="toolbar"><button id="attack">⚔ Attack</button><button id="jump">↑ Jump</button><button id="restart">↻ Restart</button>
 <div id="status" role="status">Loading physics, the original glTF avatar and gameplay source…</div></div>
@@ -65,7 +67,9 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 <a href="./runtime/game-physics.js" target="_blank" rel="noopener">Physics engine</a>
 <a href="./runtime/game-assets.js" target="_blank" rel="noopener">Asset loader</a>
 <a href="./runtime/game-combat.js" target="_blank" rel="noopener">Combat engine</a>
-<a href="./runtime/game-ai.js" target="_blank" rel="noopener">NPC engine</a></div></section></div>
+<a href="./runtime/game-ai.js" target="_blank" rel="noopener">NPC engine</a>
+<a href="./examples/riftfall-levels.scroll" target="_blank" rel="noopener">Three world chapters</a>
+<a href="./assets/hero-rig.gltf" target="_blank" rel="noopener">Skinned hero glTF</a></div></section></div>
 <footer>Riftfall · Original HiroGlifx prototype · Local browser and Havok WASM required · No account or multiplayer</footer></div>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
@@ -76,6 +80,9 @@ footer{text-align:center;font-size:12px;color:#7b9ab9;margin-top:30px}
 <script src="./runtime/game-assets.js"></script>
 <script src="./runtime/game-combat.js"></script>
 <script src="./runtime/game-ai.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/recast-detour@1.6.4/recast.js"></script>
+<script src="./runtime/game-navmesh.js"></script>
+<script src="./runtime/riftfall-world.js"></script>
 <script src="./runtime/steam-rpg-demo.js"></script>
 <script src="./runtime/game-progression.js"></script>
 <script src="./runtime/game-content.js"></script>
@@ -99,20 +106,25 @@ function showOverlay(title,description,button){
 async function initialize(){
  $("start").disabled=true;status("Loading Havok and local glTF...");
  try{
-   const [response,contentResponse]=await Promise.all([
+   const [response,contentResponse,levelResponse]=await Promise.all([
      fetch("./examples/steam-rpg-combat.scroll",{cache:"no-store"}),
-     fetch("./examples/riftfall-content.scroll",{cache:"no-store"})
+     fetch("./examples/riftfall-content.scroll",{cache:"no-store"}),
+     fetch("./examples/riftfall-levels.scroll",{cache:"no-store"})
    ]);
-   if(!response.ok||!contentResponse.ok)throw Error("HiroGlifx combat/content source unavailable");
-   const source=await response.text(),contentSource=await contentResponse.text();
+   if(!response.ok||!contentResponse.ok||!levelResponse.ok)throw Error("HiroGlifx combat/content/level source unavailable");
+   const source=await response.text(),contentSource=await contentResponse.text(),levelSource=await levelResponse.text();
    $("source").textContent=source;
    if(ui){ui.dispose();ui=null;}
    if(demo)demo.dispose();
-   demo=new HiroRPGDemo.RPGDemo({canvas:$("game"),BABYLON:window.BABYLON,HavokPhysics:window.HavokPhysics,source,
+   demo=new HiroRPGDemo.RPGDemo({canvas:$("game"),BABYLON:window.BABYLON,HavokPhysics:window.HavokPhysics,
+     source,levelSource,recastFactory:window.Recast||null,
      onEvent:message=>status(message),
      onUpdate:s=>{
        $("health").textContent=s.health;$("stamina").textContent=s.stamina;
-       $("enemies").textContent=s.enemies;$("mode").textContent=s.physics.toUpperCase();$("clip").textContent=s.animation;
+       $("enemies").textContent=s.enemies;
+       $("chapter").textContent=String(s.wave).padStart(2,"0")+" "+s.chapter.toUpperCase();
+       $("navmode").textContent=s.navMode==="recast"?"RECAST NAVMESH":"A* GRID";
+       $("mode").textContent=s.physics.toUpperCase();$("clip").textContent=s.animation;
        ui?.update(s);
        if(s.done||s.health<=0){demo.pause();started=false;
          showOverlay(s.done?"Raiders defeated!":"You were defeated",

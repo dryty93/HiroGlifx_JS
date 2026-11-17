@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="730" viewBox="0 0 1320 730">
+<rect width="1320" height="730" fill="#091328"/>
+<text x="48" y="54" fill="#f4f7ff" font-family="Arial" font-size="34" font-weight="bold">Riftfall Phase 28 · Three Chapters + Skinned Hero</text>
+<text x="48" y="85" fill="#a8c4e5" font-family="Arial" font-size="16">Diagram derived from committed .scroll regions and glTF rig — not a captured browser screenshot</text>
+<rect x="44" y="118" width="787" height="560" rx="18" fill="#162b49" stroke="#48729b"/>
+<text x="68" y="160" fill="#93dcff" font-family="Arial" font-size="22" font-weight="bold">World and encounter progression</text>
+<g font-family="Arial" font-size="19" text-anchor="middle">
+<path d="M207 245H692" stroke="#a6dcff" stroke-width="5" stroke-dasharray="14 10"/>
+<rect x="85" y="199" width="204" height="114" rx="14" fill="#247668"/><text x="187" y="242" fill="#e6f9ff">01</text><text x="187" y="278" fill="#e9fcff">Ashen Clearing</text>
+<rect x="308" y="199" width="231" height="114" rx="14" fill="#517b79"/><text x="423" y="242" fill="#e6f9ff">02</text><text x="423" y="278" fill="#e9fcff">Fallen Forge</text>
+<rect x="560" y="199" width="230" height="114" rx="14" fill="#455577"/><text x="675" y="242" fill="#e6f9ff">03</text><text x="675" y="278" fill="#e9fcff">Obsidian Gate</text>
+<text x="187" y="352" font-size="16" fill="#cce5ff">3 raiders</text><text x="423" y="352" font-size="16" fill="#cce5ff">3 guards</text><text x="675" y="352" font-size="16" fill="#cce5ff">1 guardian</text>
+</g>
+<rect x="79" y="390" width="724" height="220" rx="12" fill="#0f2038"/>
+<g font-family="monospace" font-size="17" fill="#b7ecd2"><text x="105" y="427">.Main = ()</text><text x="127" y="462">&amp; regions = array();</text><text x="127" y="499">&amp; encounters = array();</text><text x="127" y="536">: waveThreshold(stage) = [ ... ]</text><text x="127" y="572">: chapterTitle(stage) = [ ... ]</text></g>
+<rect x="851" y="118" width="426" height="560" rx="18" fill="#182c48" stroke="#48729b"/>
+<text x="876" y="160" fill="#93dcff" font-family="Arial" font-size="22" font-weight="bold">Original skinned avatar</text>
+<g transform="translate(1064 315)">
+<path d="M-52 -79L-14 -95L20 -78L49 15L30 56L-34 54Z" fill="#5a92a0"/>
+<rect x="-42" y="-74" width="83" height="116" rx="7" fill="#9073da"/>
+<rect x="-33" y="-155" width="66" height="76" rx="10" fill="#f0bc8f"/>
+<path d="M-35 -149L0 -171L34 -149L33 -133L-32 -132Z" fill="#273c66"/>
+<rect x="-71" y="-63" width="23" height="101" rx="7" fill="#ab8ee8"/>
+<rect x="49" y="-63" width="23" height="101" rx="7" fill="#ab8ee8"/>
+<rect x="-33" y="41" width="27" height="124" rx="7" fill="#41659c"/>
+<rect x="8" y="41" width="27" height="124" rx="7" fill="#41659c"/>
+<g fill="#a6e9ff"><circle cx="-53" cy="-71" r="8"/><circle cx="53" cy="-71" r="8"/><circle cx="-17" cy="43" r="8"/><circle cx="20" cy="43" r="8"/><circle cy="-79" r="8"/></g>
+</g>
+<text x="1063" y="549" fill="#dceeff" font-family="Arial" text-anchor="middle" font-size="18">7 joints · 6 animations</text>
+<text x="1063" y="582" fill="#b5cfe3" font-family="Arial" text-anchor="middle" font-size="15">Recast path queries + A* fallback</text>
+<rect x="45" y="695" width="1231" height="23" rx="8" fill="#274765"/>
+<text x="661" y="712" text-anchor="middle" fill="#d7e8f8" font-family="Arial" font-size="14">Procedural character and level design are prototype assets; live Recast depends on browser support.</text>
+</svg>

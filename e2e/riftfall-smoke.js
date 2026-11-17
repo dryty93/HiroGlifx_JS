@@ -51,17 +51,27 @@ async function run(){
    await page.locator("#loadButton").click();
    await page.screenshot({path:path.join(out,"riftfall-intro-desktop.png"),fullPage:true});
    await page.getByRole("button",{name:/Enter the arena/}).click();
+   await page.screenshot({path:path.join(out,"riftfall-rigged-game.png"),fullPage:true});
    const raidersBefore=await page.evaluate(()=>window.HiroRiftfallSnapshot()?.raiders);
    await page.waitForFunction(previous=>{
      const now=window.HiroRiftfallSnapshot?.()?.raiders;
      return Array.isArray(now)&&now.some((a,i)=>a.repaths>0&&
        Math.hypot(a.x-previous[i].x,a.z-previous[i].z)>.08);
    },raidersBefore,{timeout:8500});
+   const beforeMove=await page.evaluate(()=>window.HiroRiftfallSnapshot?.());
    await page.keyboard.down("KeyW");
-   await page.waitForTimeout(550);
-   await page.keyboard.up("KeyW");
+   try{
+     await page.waitForFunction(previous=>{
+       const now=window.HiroRiftfallSnapshot?.();
+       return now&&now.z<previous-.05;
+     },beforeMove.z,{timeout:6000,polling:75});
+   }catch(error){
+     const debug=await page.evaluate(()=>window.HiroRiftfallSnapshot?.());
+     console.log("Riftfall movement diagnostic",JSON.stringify({beforeMove,debug}));
+     throw error;
+   }finally{await page.keyboard.up("KeyW");}
    const after=await page.evaluate(()=>window.HiroRiftfallSnapshot?.());
-   assert.ok(after.z<snapshot.z-.05,"Physics-backed controller should move toward enemies");
+   assert.ok(after.z<beforeMove.z-.05,"Physics-backed controller should move toward enemies");
    await page.keyboard.press("Space");await page.keyboard.press("KeyJ");
    await page.waitForTimeout(350);
    await page.screenshot({path:path.join(out,"riftfall-game-desktop.png"),fullPage:true});
