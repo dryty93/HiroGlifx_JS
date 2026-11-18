@@ -96,3 +96,19 @@ test("OpenAI adapter uses HTTPS and validates provider response",async()=>{
   assert.equal(request.options.method,"POST");
   assert.throws(()=>createOpenAIAdapter({apiKey:"x",baseUrl:"http://example.com"}),/HTTPS/);
 });
+
+test("native class compiler accepts agentkit imports and subclass declarations",()=>{
+  const {compile}=require("../runtime/scroll-game-classes");
+  const input=team+"\n.Main = ()\n : tick(dt) = [\n ]\n : draw() = [\n ]\n break;\n";
+  const compiled=compile(input,{agentkit:base});
+  assert.ok(compiled);
+});
+test("agentkit is a valid installable HiroGlifx package",()=>{
+  const os=require("node:os");
+  const {installLocal}=require("../runtime/package-manager");
+  const folder=fs.mkdtempSync(path.join(os.tmpdir(),"hiro-agentkit-"));
+  try {
+    const installed=installLocal(folder,path.join(__dirname,"../examples/packages/agentkit"));
+    assert.equal(installed.name,"agentkit");
+  }finally{fs.rmSync(folder,{recursive:true,force:true});}
+});
