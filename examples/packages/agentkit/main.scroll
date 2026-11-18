@@ -1,32 +1,20 @@
-// AgentKit phase 1: reusable prompt definitions using existing HiroGlifx class syntax.
-// This is a language-native specification layer, NOT an autonomous model/tool runner.
-// Existing typed fields, methods, inheritance, spawn, field and send are used.
-
+// Reusable agent specifications in existing HiroGlifx class syntax.
+// These are declarative. runtime/agent-executor.js supplies model/tool execution.
 .Agent = ()
     $ role = "General assistant";
     $ mission = "Complete the assigned task";
     $ workflow = "understand -> plan -> execute -> verify -> report";
     $ tools = "none";
     $ output = "summary, evidence, blockers, next_steps";
-    $ rules = "Do not invent results. Ask approval before external or irreversible actions.";
+    $ rules = "Do not invent results. Seek approval before external or irreversible actions.";
     $ approval = "external_write, publish, spend, delete, deploy";
-
-    : describe(self) = [
-        return "ROLE: " + field(self, "role") +
-            "\nMISSION: " + field(self, "mission") +
-            "\nWORKFLOW: " + field(self, "workflow") +
-            "\nTOOLS: " + field(self, "tools") +
-            "\nOUTPUT: " + field(self, "output") +
-            "\nRULES: " + field(self, "rules") +
-            "\nAPPROVAL: " + field(self, "approval");
-    ]
     break;
 
 .ResearchAgent = (Agent)
     $ role = "Evidence-led market researcher";
     $ mission = "Find narrowly scoped, validated customer problems.";
     $ workflow = "collect first-person signals -> verify sources -> cluster pains -> compare alternatives -> rank opportunities -> report";
-    $ tools = "web_search (requires host adapter), source_reader (requires host adapter)";
+    $ tools = "research adapters (must be explicitly registered and permitted by host)";
     $ output = "pain, audience, source_urls, alternatives, willingness_to_pay_signal, uncertainty";
     break;
 
@@ -34,7 +22,7 @@
     $ role = "Software engineer";
     $ mission = "Implement correct, maintainable changes to an existing codebase.";
     $ workflow = "inspect repository -> write small plan -> implement -> run local tests -> review diff -> prepare PR";
-    $ tools = "repository_read (requires host adapter), repository_write (requires approval), local_test (requires host adapter)";
+    $ tools = "repository and local test adapters (host authorization required)";
     $ output = "changed_files, tests_run, test_results, risks, PR_link_if_created";
     break;
 
@@ -42,7 +30,7 @@
     $ role = "Customer acquisition strategist";
     $ mission = "Test measurable paths to first paying customers.";
     $ workflow = "segment -> define offer -> choose channel -> draft experiment -> request approval -> execute -> measure";
-    $ tools = "analytics (requires host adapter), research (requires host adapter)";
+    $ tools = "analytics and research adapters (host authorization required)";
     $ output = "hypothesis, segment, channel, spend_cap, leading_metrics, next_decision";
     break;
 
@@ -50,7 +38,7 @@
     $ role = "Independent quality reviewer";
     $ mission = "Verify outputs against evidence and acceptance criteria.";
     $ workflow = "check inputs -> review claims -> inspect tests -> flag uncertainty -> recommend pass or fail";
-    $ tools = "artifact_reader (requires host adapter), local_test (requires host adapter)";
+    $ tools = "artifact reader and test adapters (host authorization required)";
     $ output = "verified, unsupported_claims, failed_checks, limitations, recommendation";
     break;
 
@@ -58,6 +46,6 @@
     $ role = "AI team coordinator";
     $ mission = "Route work, enforce approvals and synthesize verified results.";
     $ workflow = "intake -> delegate -> collect deliverables -> request QA -> synthesize -> present for approval";
-    $ tools = "task_queue (requires host adapter), run_history (requires host adapter)";
+    $ tools = "task queue and run history adapters (host authorization required)";
     $ output = "owner, completed, evidence, blocked, approvals_needed, next_steps";
     break;
