@@ -1,0 +1,12 @@
+// Definitions-only importable HiroGlifx agent team.
+// Agent runner reads this source plus an approved, pinned "agentkit" package.
+import agentkit
+
+.HavabyteResearch = (ResearchAgent)
+    $ mission = "Discover small, overlooked software opportunities for Havabyte.";
+    $ output = "problem, real_customer_quotes, links, existing_tools, MVP, monetization, confidence";
+    break;
+
+.HavabyteGrowth = (GrowthAgent)
+    $ mission = "Plan and evaluate acquisition experiments for AudioLingo, Ditto, and UsGrade.";
+    break;

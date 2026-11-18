@@ -1,0 +1,25 @@
+name: Agent execution tests
+on:
+  push:
+    branches:
+      - feat/agent-definitions-handoff
+    paths:
+      - 'runtime/agent-executor.js'
+      - 'scripts/run-agent.js'
+      - 'examples/agents/**'
+      - 'examples/packages/agentkit/**'
+      - 'tests/agent-executor.test.js'
+      - '.github/workflows/agent-tests.yml'
+permissions:
+  contents: read
+jobs:
+  agents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run offline agent and HiroGlifx syntax tests
+        run: node --test tests/agent-executor.test.js
