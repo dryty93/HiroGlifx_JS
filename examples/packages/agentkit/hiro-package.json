@@ -1,0 +1,6 @@
+{
+  "name": "agentkit",
+  "version": "0.1.0",
+  "entry": "main.scroll",
+  "description": "HiroGlifx agent definition classes"
+}
