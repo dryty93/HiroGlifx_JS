@@ -2,6 +2,21 @@
 // Agent runner reads this source plus an approved, pinned "agentkit" package.
 import agentkit
 
+// Preparation can succeed while private Drive delivery still needs its bridge.
+.JobPreparation = (Agent)
+    $ role = "Private job preparation and queue operator";
+    $ mission = "Prepare factual application packets and verify the owner review queue.";
+    $ workflow = "discover -> qualify -> deduplicate -> prepare actual packets -> verify review queue";
+    $ tools = "prepare_job_queue";
+    $ rules = "Preserve supported facts. Meeting load is advisory only. Report pending file delivery separately. Never claim employer submission from preparation.";
+    $ output = "prepared_count, queue_delivered, artifact_delivered, delivery_verified, submitted";
+    $ requiredTool = "prepare_job_queue";
+    $ schedule = "daily";
+    # maxSteps = 2;
+    # maxToolCalls = 1;
+    ? requireToolEvidence = true;
+    break;
+
 .HavabyteResearch = (ResearchAgent)
     $ mission = "Discover small, overlooked software opportunities for Havabyte.";
     $ output = "problem, real_customer_quotes, links, existing_tools, MVP, monetization, confidence";

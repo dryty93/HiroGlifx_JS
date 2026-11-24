@@ -109,7 +109,7 @@ Python applications, configure credentials, or turn on a schedule.
 | Workflow | Accepted state | Required verified fields |
 | --- | --- | --- |
 | JobApplications | `prepared` or `succeeded` | `delivery_verified: true`, `submitted: 0` |
-| CrealytesReview | `draft_ready` | `approval: "pending"`, `published: false` |
+| CrealytesReview | `draft_ready` | Known approval state (`pending`, `accepted`, `rejected`, `revise`), `published: false` |
 
 The job preparation command can persist private resume packets and a queue before
 an authenticated Drive bridge delivers the actual files. That intermediate receipt
@@ -121,6 +121,86 @@ The host wraps the application's verified receipt in `hiro-workflow-receipt-v1`
 with the run ID, agent, Eastern day, and final state. Live receipts must come from
 real application commands; test fixtures demonstrate the contract, not production
 deployment or business outcomes.
+
+## Agent Studio and ephemeral cron hosts
+
+`JobPreparation` is the native preparation-only workflow. It verifies the stored
+packet count and queue count, while preserving `delivery_verified:false` until the
+actual private file bridge runs. The existing `JobApplications` workflow still
+requires verified file delivery. Neither is an employer-submission capability.
+
+An ephemeral Render cron can use `processStore` instead of `stateDirectory`:
+
+```json
+{
+  "processStore": {
+    "executable": "/opt/job-agent/.venv/bin/python",
+    "args": ["-m", "job_agent.hiro_store"],
+    "cwd": "/opt/job-agent",
+    "envNames": ["PATH", "DATABASE_URL"],
+    "namespace": "jobs-private-owner-key"
+  },
+  "studio": {
+    "baseUrl": "https://studio.example",
+    "producer": "job-worker",
+    "tokenEnv": "AGENT_STUDIO_TOKEN"
+  },
+  "workflows": {
+    "JobPreparation": {
+      "executable": "/opt/job-agent/.venv/bin/python",
+      "args": ["-m", "job_agent.preparation_worker"],
+      "cwd": "/opt/job-agent",
+      "envNames": ["PATH", "DATABASE_URL", "GOOGLE_SERVICE_ACCOUNT_JSON", "JOB_TRACKER_SHEET_ID"],
+      "timeoutMs": 180000,
+      "providerSpendMode": "none",
+      "reservationMicrousd": 0
+    }
+  }
+}
+```
+
+The process store accepts only an installed, fixed executable and arguments. It
+passes JSON over stdin and a strict environment allowlist. The PostgreSQL helper
+in the job application agent stores snapshots with revision compare-and-swap,
+unique daily claims and durable token-owned locks. A process crash cannot erase
+its claim or unlock its run. Inspect and reconcile the native and application
+ledgers before explicitly recovering a stale lock; there is no automatic retry
+of an uncertain external effect. This avoids requiring a persistent disk on cron.
+
+Studio integration reserves the host-declared maximum provider cost **before**
+the command can execute. Zero requires the explicit `providerSpendMode:"none"`
+binding used for deterministic preparation/import. A nonzero reservation is kept
+as uncertain until actual accounting is available; missing cost is not zero.
+Hosting allowances are configured separately in Studio. This controls only
+integrated calls, not provider-wide bills or unrelated ChatGPT activity.
+
+Receipt ingestion uses `studio-run-event-v1`, a bearer credential scoped to one
+producer/owner, and a stable event identity per observed execution state. Both
+job preparation and later file-delivery snapshots use the underlying job run ID
+in the `job_preparation` workflow, so a five-packet replay is still five packets.
+The native execution UUID remains in the receipt. Actual employer submissions
+are separate `job_applications` events and require confirmation URLs.
+
+If telemetry is unconfirmed, a later invocation may resend the same immutable
+event, while the native daily claim returns its existing record. It must not
+rerun the worker merely to repair telemetry. Nonterminal concurrent observations
+do not settle the cost reservation. No producer token, applicant answers or
+resume bytes are placed in stdout or committed configuration.
+
+`scripts/import-studio-review.js --package /private/completed-package.json` is a
+fixed command for the `CrealytesReview` workflow. It posts an existing finished
+HTTPS creative package to Studio's owner-scoped `review-packages` endpoint. The
+input file must be private and at most 30KB. Inputs cannot set acceptance,
+feedback, sales outcomes or publication. Exact imports preserve the application's
+existing package and real owner decision; a previously reviewed import is not
+silently reset to pending. Configure producer scopes for both `crealytes_content`
+(the import endpoint) and `crealytes_review` (native run telemetry), and use the
+explicit zero-provider-spend reservation. This command does not generate media.
+
+The client rejects HTTP (except explicitly enabled loopback test fixtures),
+credential-bearing URLs, redirects and mismatched receipts. The host needs Node
+20 or newer and only built-in Node modules. All commands and credentials remain
+host configuration; none are chosen by a model.
 
 ## Manual research CLI
 
