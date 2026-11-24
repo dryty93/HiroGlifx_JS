@@ -77,7 +77,8 @@ test("explicit per-run approval permits sensitive tool",async()=>{
   assert.equal(r.state,"succeeded");assert.equal(n,1);
 });
 test("step and tool-call budgets prevent runaway agents",async()=>{
-  const step=createAgentRunner({model:async()=>call("noop"),tools:[{name:"noop",execute:async()=>null}],allowedTools:["noop"],maxSteps:2});
+  let next=0;
+  const step=createAgentRunner({model:async()=>call("noop","noop"+(++next)),tools:[{name:"noop",execute:async()=>null}],allowedTools:["noop"],maxSteps:2});
   assert.match((await step.run({agent:spec(),task:"Loop"})).error,/Step budget exceeded/);
   const budget=createAgentRunner({model:async()=>call("noop"),tools:[{name:"noop",execute:async()=>null}],allowedTools:["noop"],maxToolCalls:0});
   assert.match((await budget.run({agent:spec(),task:"Loop"})).error,/Tool call budget exceeded/);
@@ -114,19 +115,19 @@ test("agentkit is a valid installable HiroGlifx package",()=>{
 });
 
 test("typed agent constraints inherit, cap host limits, and compile with native classes",async()=>{
-  const operator=loadDefinition({source:team,imports:{agentkit:base},name:"CrealytesCampaign"});
+  const operator=loadDefinition({source:team,imports:{agentkit:base},name:"CrealytesReview"});
   assert.equal(operator.maxSteps,5);assert.equal(operator.maxToolCalls,3);
   assert.equal(operator.requireToolEvidence,true);assert.equal(operator.schedule,"daily");
-  const runner=createAgentRunner({model:async()=>({content:"I published it"}),tools:[{name:"publish_approved_post",execute:async()=>({id:"1"})}],allowedTools:["publish_approved_post"]});
+  const runner=createAgentRunner({model:async()=>({content:"I published it"}),tools:[{name:"prepare_crealytes_review",execute:async()=>({id:"1"})}],allowedTools:["prepare_crealytes_review"]});
   assert.equal((await runner.run({agent:operator,task:"Post"})).state,"failed");
   const {compile}=require("../runtime/scroll-game-classes");
   assert.ok(compile(team+"\n.Main = ()\n : tick(dt) = [\n ]\n : draw() = [\n ]\n break;\n",{agentkit:base}));
 });
 test("host verified required action succeeds only after tool receipt",async()=>{
   let i=0;
-  const operator=loadDefinition({source:team,imports:{agentkit:base},name:"CrealytesCampaign"});
-  const runner=createAgentRunner({model:async()=>++i===1?call("publish_approved_post","x",'{"id":"a"}'):{content:"Done"},
-    tools:[{name:"publish_approved_post",parameters:{type:"object",properties:{id:{type:"string",enum:["a"]}},required:["id"],additionalProperties:false},execute:async()=>({mediaId:"123"}),verifyResult:r=>/^\d+$/.test(r.mediaId)}],allowedTools:["publish_approved_post"]});
+  const operator=loadDefinition({source:team,imports:{agentkit:base},name:"CrealytesReview"});
+  const runner=createAgentRunner({model:async()=>++i===1?call("prepare_crealytes_review","x",'{"id":"a"}'):{content:"Done"},
+    tools:[{name:"prepare_crealytes_review",parameters:{type:"object",properties:{id:{type:"string",enum:["a"]}},required:["id"],additionalProperties:false},execute:async()=>({mediaId:"123"}),verifyResult:r=>/^\d+$/.test(r.mediaId)}],allowedTools:["prepare_crealytes_review"]});
   assert.equal((await runner.run({agent:operator,task:"Post"})).state,"succeeded");
 });
 test("tool schema rejects missing, extra, and invalid arguments before action",async()=>{

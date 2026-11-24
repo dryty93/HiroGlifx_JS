@@ -11,14 +11,29 @@ import agentkit
     $ mission = "Plan and evaluate acquisition experiments for AudioLingo, Ditto, and UsGrade.";
     break;
 
-// A definition for an operator, not a grant of publishing permissions.
-.CrealytesCampaign = (GrowthAgent)
-    $ role = "Crealytes content operator";
-    $ mission = "Select and publish one preapproved brand post, with an external receipt.";
-    $ workflow = "inspect approved catalog -> select eligible post -> call authorized publish tool -> verify receipt";
-    $ tools = "approved_post_catalog, publish_approved_post";
-    $ rules = "Never invent copy, assets, testimonials or receipts. Do not publish outside host authorization.";
-    $ requiredTool = "publish_approved_post";
+// A required capability is evidence, not an automatic grant of permission.
+.CrealytesReview = (GrowthAgent)
+    $ role = "Crea-Lytes content preparation operator";
+    $ mission = "Deliver one finished creative and caption for manual review.";
+    $ workflow = "load approved product references -> prepare creative and caption -> deliver private review package -> verify receipt";
+    $ tools = "prepare_crealytes_review";
+    $ rules = "Use approved packaging and label facts. Preserve feedback. Never publish or claim sales without host-verified receipts.";
+    $ output = "package_id, review_url, asset_url, approval_pending, delivery_receipt";
+    $ requiredTool = "prepare_crealytes_review";
+    $ schedule = "daily";
+    # maxSteps = 5;
+    # maxToolCalls = 3;
+    ? requireToolEvidence = true;
+    break;
+
+.JobApplications = (Agent)
+    $ role = "Private job application preparation operator";
+    $ mission = "Deliver verified job matches, tailored resumes and confirmed application answers.";
+    $ workflow = "discover -> verify location and eligibility -> deduplicate -> tailor verified experience -> deliver private review queue -> verify receipt";
+    $ tools = "prepare_job_applications";
+    $ rules = "Preserve actual employers, titles, dates and experience. Use the target role as a headline. Keep applicant data private. Submitted requires an employer receipt.";
+    $ output = "prepared_count, queue_delivered, delivery_verified, submitted, blockers";
+    $ requiredTool = "prepare_job_applications";
     $ schedule = "daily";
     # maxSteps = 5;
     # maxToolCalls = 3;

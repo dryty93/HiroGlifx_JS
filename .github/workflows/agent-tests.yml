@@ -4,11 +4,11 @@ on:
     branches:
       - feat/agent-definitions-handoff
     paths:
-      - 'runtime/agent-executor.js'
-      - 'scripts/run-agent.js'
+      - 'runtime/agent-*.js'
+      - 'scripts/run-agent*.js'
       - 'examples/agents/**'
       - 'examples/packages/agentkit/**'
-      - 'tests/agent-executor.test.js'
+      - 'tests/agent-*.test.js'
       - '.github/workflows/agent-tests.yml'
 permissions:
   contents: read
@@ -22,4 +22,4 @@ jobs:
         with:
           node-version: '20'
       - name: Run offline agent and HiroGlifx syntax tests
-        run: node --test tests/agent-executor.test.js
+        run: node --test tests/agent-*.test.js
