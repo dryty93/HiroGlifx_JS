@@ -112,3 +112,35 @@ test("agentkit is a valid installable HiroGlifx package",()=>{
     assert.equal(installed.name,"agentkit");
   }finally{fs.rmSync(folder,{recursive:true,force:true});}
 });
+
+test("typed agent constraints inherit, cap host limits, and compile with native classes",async()=>{
+  const operator=loadDefinition({source:team,imports:{agentkit:base},name:"CrealytesCampaign"});
+  assert.equal(operator.maxSteps,5);assert.equal(operator.maxToolCalls,3);
+  assert.equal(operator.requireToolEvidence,true);assert.equal(operator.schedule,"daily");
+  const runner=createAgentRunner({model:async()=>({content:"I published it"}),tools:[{name:"publish_approved_post",execute:async()=>({id:"1"})}],allowedTools:["publish_approved_post"]});
+  assert.equal((await runner.run({agent:operator,task:"Post"})).state,"failed");
+  const {compile}=require("../runtime/scroll-game-classes");
+  assert.ok(compile(team+"\n.Main = ()\n : tick(dt) = [\n ]\n : draw() = [\n ]\n break;\n",{agentkit:base}));
+});
+test("host verified required action succeeds only after tool receipt",async()=>{
+  let i=0;
+  const operator=loadDefinition({source:team,imports:{agentkit:base},name:"CrealytesCampaign"});
+  const runner=createAgentRunner({model:async()=>++i===1?call("publish_approved_post","x",'{"id":"a"}'):{content:"Done"},
+    tools:[{name:"publish_approved_post",parameters:{type:"object",properties:{id:{type:"string",enum:["a"]}},required:["id"],additionalProperties:false},execute:async()=>({mediaId:"123"}),verifyResult:r=>/^\d+$/.test(r.mediaId)}],allowedTools:["publish_approved_post"]});
+  assert.equal((await runner.run({agent:operator,task:"Post"})).state,"succeeded");
+});
+test("tool schema rejects missing, extra, and invalid arguments before action",async()=>{
+  for(const args of ['{}','{"id":"b"}','{"id":"a","extra":true}']){
+    let executed=false;
+    const runner=createAgentRunner({model:async()=>call("publish","x",args),tools:[{name:"publish",parameters:{type:"object",properties:{id:{type:"string",enum:["a"]}},required:["id"],additionalProperties:false},execute:async()=>{executed=true;}}],allowedTools:["publish"]});
+    assert.equal((await runner.run({agent:spec(),task:"Post"})).state,"failed");assert.equal(executed,false);
+  }
+});
+test("host result verifier rejects false receipts",async()=>{
+  const runner=createAgentRunner({model:async()=>call("publish"),tools:[{name:"publish",execute:async()=>({ok:false}),verifyResult:r=>r.ok===true}],allowedTools:["publish"]});
+  assert.match((await runner.run({agent:spec(),task:"Post"})).error,/verification/);
+});
+test("scroll limits cannot raise host step limits",async()=>{
+  const runner=createAgentRunner({model:async()=>call("noop"),tools:[{name:"noop",execute:async()=>null}],allowedTools:["noop"],maxSteps:1});
+  assert.match((await runner.run({agent:{...spec(),maxSteps:5},task:"Loop"})).error,/Step budget/);
+});

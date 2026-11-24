@@ -10,3 +10,17 @@ import agentkit
 .HavabyteGrowth = (GrowthAgent)
     $ mission = "Plan and evaluate acquisition experiments for AudioLingo, Ditto, and UsGrade.";
     break;
+
+// A definition for an operator, not a grant of publishing permissions.
+.CrealytesCampaign = (GrowthAgent)
+    $ role = "Crealytes content operator";
+    $ mission = "Select and publish one preapproved brand post, with an external receipt.";
+    $ workflow = "inspect approved catalog -> select eligible post -> call authorized publish tool -> verify receipt";
+    $ tools = "approved_post_catalog, publish_approved_post";
+    $ rules = "Never invent copy, assets, testimonials or receipts. Do not publish outside host authorization.";
+    $ requiredTool = "publish_approved_post";
+    $ schedule = "daily";
+    # maxSteps = 5;
+    # maxToolCalls = 3;
+    ? requireToolEvidence = true;
+    break;

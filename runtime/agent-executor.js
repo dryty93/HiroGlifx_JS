@@ -11,7 +11,9 @@ const IDENT = /^[A-Za-z_][A-Za-z_0-9]*$/;
 const FIELD = /^\$\s+([A-Za-z_][A-Za-z_0-9]*)\s*=\s*("(?:[^"\\]|\\[nt"\\])*")\s*;$/;
 const HEADER = /^\.([A-Za-z_][A-Za-z_0-9]*)\s*=\s*\(([A-Za-z_][A-Za-z_0-9]*)?\)$/;
 const IMPORT = /^import\s+([a-z][a-z0-9-]{0,39})\s*;?$/;
-const ALLOWED = new Set(["role","mission","workflow","tools","output","rules","approval"]);
+const ALLOWED = new Set(["role","mission","workflow","tools","output","rules","approval","requiredTool","schedule"]);
+const INTEGER_FIELD = /^#\s+(maxSteps|maxToolCalls)\s*=\s*(\d{1,3})\s*;$/;
+const BOOL_FIELD = /^\?\s+(requireToolEvidence)\s*=\s*(true|false)\s*;$/;
 function parseClasses(source) {
   if (typeof source !== "string" || source.length > 100000) throw Error("Invalid agent source size");
   const classes = new Map();
@@ -34,6 +36,11 @@ function parseClasses(source) {
     }
     if (line==="break;") {classes.set(current.name,current);current=null;continue;}
     if (/^:\s*[A-Za-z_]\w*\s*\([^)]*\)\s*=\s*\[$/.test(line)) {method=true;continue;}
+    const typed=line.match(INTEGER_FIELD)||line.match(BOOL_FIELD);
+    if(typed){
+      if(Object.hasOwn(current.fields,typed[1]))throw Error("Duplicate field "+typed[1]);
+      current.fields[typed[1]]=JSON.parse(typed[2]);continue;
+    }
     const match=line.match(FIELD);
     if (!match || !ALLOWED.has(match[1])) throw Error("Unsupported agent field at line "+(i+1)+": "+line);
     if (Object.hasOwn(current.fields,match[1])) throw Error("Duplicate field "+match[1]);
@@ -64,6 +71,10 @@ function resolveAgent(classes,name) {
   const result=visit(name);
   for(const required of ["role","mission","workflow","rules","output"])
     if(typeof result[required]!=="string" || !result[required].trim())throw Error("Missing agent field "+required);
+  if(result.maxSteps!==undefined && (!Number.isInteger(result.maxSteps)||result.maxSteps<1||result.maxSteps>30))throw Error("Invalid agent step limit");
+  if(result.maxToolCalls!==undefined && (!Number.isInteger(result.maxToolCalls)||result.maxToolCalls<0||result.maxToolCalls>100))throw Error("Invalid agent tool limit");
+  if(result.requiredTool!==undefined && !IDENT.test(result.requiredTool))throw Error("Invalid required tool name");
+  if(result.schedule!==undefined && !["manual","daily","weekly"].includes(result.schedule))throw Error("Invalid schedule hint");
   return Object.freeze({name,...result});
 }
 /** Only pinned, known package names; no filesystem paths controlled by the agent. */
@@ -96,6 +107,37 @@ function createOpenAIAdapter({apiKey=process.env.OPENAI_API_KEY,model="gpt-4.1-m
     return msg;
   };
 }
+/** Restricted schema subset for host-declared tool parameters. Unknown keywords fail closed. */
+function validateToolArguments(value,schema,depth=0){
+  if(depth>12||!schema||typeof schema!=="object"||Array.isArray(schema))throw Error("Invalid tool schema");
+  const keywords=new Set(["type","properties","required","additionalProperties","items","enum","description","minLength","maxLength","minimum","maximum","maxItems"]);
+  for(const k of Object.keys(schema))if(!keywords.has(k))throw Error("Unsupported tool schema keyword "+k);
+  const type=schema.type;
+  if(!["object","array","string","boolean","number","integer","null"].includes(type))throw Error("Unsupported tool schema type");
+  const valid=type==="object"?value!==null&&typeof value==="object"&&!Array.isArray(value):
+    type==="array"?Array.isArray(value):type==="null"?value===null:
+    type==="integer"?Number.isSafeInteger(value):type==="number"?typeof value==="number"&&Number.isFinite(value):typeof value===type;
+  if(!valid)throw Error("Tool argument schema type mismatch");
+  if(schema.enum && (!Array.isArray(schema.enum)||!schema.enum.some(x=>Object.is(x,value))))throw Error("Tool argument not in enum");
+  if(type==="object"){
+    const properties=schema.properties??{};
+    if(!properties||typeof properties!=="object"||Array.isArray(properties))throw Error("Invalid schema properties");
+    if(schema.required!==undefined&&!Array.isArray(schema.required))throw Error("Invalid schema required");
+    for(const key of schema.required??[])if(!Object.hasOwn(value,key))throw Error("Required tool argument missing: "+key);
+    for(const [key,item] of Object.entries(value)){
+      if(["__proto__","constructor","prototype"].includes(key))throw Error("Unsafe tool argument key");
+      if(Object.hasOwn(properties,key))validateToolArguments(item,properties[key],depth+1);
+      else if(schema.additionalProperties!==true)throw Error("Unknown tool argument: "+key);
+    }
+  }
+  if(type==="array"){
+    if(!schema.items||value.length>(schema.maxItems??100))throw Error("Invalid tool array");
+    for(const item of value)validateToolArguments(item,schema.items,depth+1);
+  }
+  if(type==="string"&&(value.length<(schema.minLength??0)||value.length>(schema.maxLength??20000)))throw Error("Tool argument string length");
+  if((type==="number"||type==="integer")&&(value<(schema.minimum??-Infinity)||value>(schema.maximum??Infinity)))throw Error("Tool argument range");
+}
+
 /** Each tool: {name,description,parameters,execute,requiresApproval?}. Explicit allowlist governs access. */
 function createAgentRunner({model,tools=[],allowedTools=[],maxSteps=8,maxToolCalls=12}) {
   if(typeof model!=="function")throw Error("Model adapter required");
@@ -120,8 +162,12 @@ function createAgentRunner({model,tools=[],allowedTools=[],maxSteps=8,maxToolCal
       type:"function",function:{name:t.name,description:t.description||"",parameters:t.parameters||{type:"object",properties:{},additionalProperties:false}}
     }));
     let calls=0;
+    const stepLimit=Math.min(maxSteps,agent.maxSteps??maxSteps);
+    const callLimit=Math.min(maxToolCalls,agent.maxToolCalls??maxToolCalls);
+    const executed=new Set();
     try{
-      for(let step=0;step<maxSteps;step++){
+      if(agent.requiredTool && !allow.has(agent.requiredTool))throw Error("Required tool is not authorized");
+      for(let step=0;step<stepLimit;step++){
         if(signal?.aborted)throw Error("Run aborted");
         const message=await model({messages:messages.map(m=>({...m})),tools:advertised,signal});
         if(!message||typeof message!=="object")throw Error("Invalid model message");
@@ -129,9 +175,11 @@ function createAgentRunner({model,tools=[],allowedTools=[],maxSteps=8,maxToolCal
         if(!Array.isArray(pending))throw Error("Invalid model tool calls");
         if(!pending.length) {
           if(typeof message.content!=="string")throw Error("Missing final model response");
+          if(agent.requireToolEvidence && executed.size===0)throw Error("No successful tool execution evidence");
+          if(agent.requiredTool && !executed.has(agent.requiredTool))throw Error("Required tool execution evidence missing");
           record.state="succeeded";record.result=message.content;return record;
         }
-        if(calls+pending.length>maxToolCalls)throw Error("Tool call budget exceeded");
+        if(calls+pending.length>callLimit)throw Error("Tool call budget exceeded");
         messages.push({role:"assistant",content:message.content||null,tool_calls:pending});
         for(const call of pending){
           const name=call.function?.name,tool=registry.get(name);
@@ -145,10 +193,14 @@ function createAgentRunner({model,tools=[],allowedTools=[],maxSteps=8,maxToolCal
             record.events.push({kind:"approval_required",tool:name});
             return record;
           }
+          if(tool.parameters)validateToolArguments(args,tool.parameters);
+          if(signal?.aborted)throw Error("Run aborted");
           const output=await tool.execute(args,{runId:id,signal});
+          if(tool.verifyResult && !await tool.verifyResult(output))throw Error("Tool result failed host verification");
           const serialized=JSON.stringify(output===undefined?null:output);
           if(serialized.length>40000)throw Error("Tool output exceeds limit");
           record.events.push({kind:"tool",tool:name,success:true});
+          executed.add(name);
           messages.push({role:"tool",tool_call_id:call.id,content:serialized});
           calls++;
         }
@@ -158,4 +210,4 @@ function createAgentRunner({model,tools=[],allowedTools=[],maxSteps=8,maxToolCal
   }
   return {run,getRun(id){return history.get(id)||null;}};
 }
-module.exports={parseClasses,mergeClasses,resolveAgent,loadDefinition,promptFor,createOpenAIAdapter,createAgentRunner};
+module.exports={validateToolArguments,parseClasses,mergeClasses,resolveAgent,loadDefinition,promptFor,createOpenAIAdapter,createAgentRunner};
